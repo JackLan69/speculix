@@ -6,22 +6,18 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v3</title>
+<title>SPECULIX v4</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
-:root{
-  --cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;
-  --red:#ff3d3d;--purple:#cc00ff;--glass:rgba(0,245,255,0.08);
-  --border:rgba(0,245,255,0.25);--bg:#000507;
-}
+:root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
+  --purple:#cc00ff;--glass:rgba(0,245,255,0.08);
+  --border:rgba(0,245,255,0.25);--bg:#000507}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
   height:100dvh;overflow:hidden;user-select:none}
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;transition:opacity .35s;z-index:10}
 .screen.hidden{opacity:0;pointer-events:none}
-
-/* SPLASH */
 #splash{background:radial-gradient(ellipse at center,#001a2e 0%,#000507 70%)}
 .logo{font-size:clamp(3rem,15vw,6rem);font-weight:700;letter-spacing:.3em;
   background:linear-gradient(135deg,var(--cyan),#fff,var(--cyan));
@@ -46,13 +42,9 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
 .corner-br{bottom:18px;right:18px;border-width:0 2px 2px 0}
 .version-badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;
   color:rgba(0,245,255,.3);letter-spacing:.15em;margin-top:.5rem}
-
-/* SCANNER */
 #scanner{padding:0;background:#000}
 #video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-
-/* HUD TOP */
 .hud-top{position:absolute;top:0;left:0;right:0;
   padding:env(safe-area-inset-top,10px) 14px 10px;
   background:linear-gradient(to bottom,rgba(0,0,0,.85),transparent);
@@ -65,8 +57,6 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
 .dot{width:7px;height:7px;border-radius:50%;background:var(--green);
   animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
-
-/* TARGET BADGE */
 #target-badge{position:absolute;top:58px;left:50%;transform:translateX(-50%);
   background:rgba(0,0,0,.8);border:1.5px solid var(--cyan);border-radius:2px;
   padding:5px 14px;font-family:'Share Tech Mono',monospace;font-size:.75rem;
@@ -74,19 +64,21 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
   opacity:0;white-space:nowrap;
   clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)}
 #target-badge.show{opacity:1}
-
-/* VISION RESULT PANEL */
+#scene-info{position:absolute;top:58px;right:10px;
+  background:rgba(0,0,0,.75);border:1px solid rgba(0,245,255,.2);
+  padding:4px 8px;font-family:'Share Tech Mono',monospace;font-size:.58rem;
+  color:rgba(0,245,255,.6);letter-spacing:.08em;z-index:20;line-height:1.5}
 #vision-panel{position:absolute;top:100px;left:10px;right:10px;z-index:25;
-  background:rgba(0,0,0,.88);border:1.5px solid var(--purple);
+  background:rgba(0,0,0,.92);border:1.5px solid var(--purple);
   backdrop-filter:blur(8px);display:none;
-  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)}
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  max-height:50vh;overflow-y:auto}
 #vision-panel.show{display:block}
 .vision-header{display:flex;align-items:center;justify-content:space-between;
   padding:8px 12px;border-bottom:1px solid rgba(204,0,255,.3)}
 .vision-title{font-family:'Share Tech Mono',monospace;font-size:.7rem;
   color:var(--purple);letter-spacing:.15em}
-.vision-close{color:rgba(204,0,255,.6);font-size:1rem;cursor:pointer;
-  padding:0 4px}
+.vision-close{color:rgba(204,0,255,.6);font-size:1rem;cursor:pointer;padding:0 4px}
 .vision-body{padding:10px 12px}
 .vision-name{font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:.05em}
 .vision-detail{font-family:'Share Tech Mono',monospace;font-size:.68rem;
@@ -99,26 +91,21 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
   animation:pulse 1s ease-in-out infinite}
 .vision-error{font-family:'Share Tech Mono',monospace;font-size:.68rem;
   color:var(--red);padding:8px}
-
-/* TAP HINT */
 #tap-hint{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);
   font-family:'Share Tech Mono',monospace;font-size:.65rem;
   color:rgba(0,245,255,.4);letter-spacing:.1em;z-index:20;
-  animation:pulse 2s ease-in-out infinite;pointer-events:none;
-  white-space:nowrap}
-
-/* HUD BOTTOM */
+  animation:pulse 2s ease-in-out infinite;pointer-events:none;white-space:nowrap}
 .hud-bottom{position:absolute;bottom:0;left:0;right:0;
   padding:10px 14px env(safe-area-inset-bottom,14px);
   background:linear-gradient(to top,rgba(0,0,0,.92),transparent);z-index:20}
 .controls-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .ctrl-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;
-  letter-spacing:.08em;color:rgba(0,245,255,.6);white-space:nowrap;min-width:60px}
-input[type=range]{flex:1;height:3px;-webkit-appearance:none;
-  background:linear-gradient(to right,var(--cyan) var(--pct,33%),rgba(255,255,255,.15) var(--pct,33%));
+  letter-spacing:.08em;color:rgba(0,245,255,.6);white-space:nowrap;min-width:70px}
+input[type=range]{flex:1;height:4px;-webkit-appearance:none;
+  background:linear-gradient(to right,var(--cyan) var(--pct,40%),rgba(255,255,255,.15) var(--pct,40%));
   border-radius:2px;outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;
-  border-radius:50%;background:var(--cyan);border:2px solid #000;box-shadow:0 0 7px var(--cyan)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;
+  border-radius:50%;background:var(--cyan);border:2px solid #000;box-shadow:0 0 8px var(--cyan)}
 .btn-row{display:flex;gap:6px;justify-content:center}
 .hud-btn{flex:1;max-width:110px;padding:.52rem .3rem;border:1.5px solid var(--border);
   background:var(--glass);color:var(--cyan);font-family:'Rajdhani',sans-serif;
@@ -137,24 +124,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 .chip.glass-chip{border-color:rgba(255,61,61,.5);color:var(--red)}
 .chip.gem-chip{border-color:rgba(0,245,255,.5);color:var(--cyan)}
 .chip.vision-chip{border-color:rgba(204,0,255,.6);color:var(--purple)}
-
-/* FREEZE */
 #freeze-overlay{position:absolute;inset:0;z-index:30;display:none;
   align-items:center;justify-content:center;flex-direction:column;gap:.8rem;
-  background:rgba(0,0,0,.65)}
+  background:rgba(0,0,0,.7)}
 #freeze-overlay.show{display:flex}
 #freeze-canvas{max-width:90vw;max-height:40vh;border:1.5px solid var(--cyan)}
 .freeze-info{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--cyan);
   text-align:center;line-height:1.7;background:rgba(0,0,0,.8);padding:10px 14px;
   border:1px solid var(--border);max-width:90vw;white-space:pre-line}
-.freeze-btn-row{display:flex;gap:10px}
-.close-btn{padding:.42rem 1.5rem;border:1.5px solid;background:transparent;
-  font-family:'Rajdhani',sans-serif;font-size:.9rem;font-weight:600;
+.freeze-btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.close-btn{padding:.42rem 1.3rem;border:1.5px solid;background:transparent;
+  font-family:'Rajdhani',sans-serif;font-size:.88rem;font-weight:600;
   letter-spacing:.12em;cursor:pointer}
 .close-btn.red{border-color:var(--red);color:var(--red)}
 .close-btn.purple{border-color:var(--purple);color:var(--purple)}
-
-/* CLEAR ALERT */
 #clear-alert{position:absolute;inset:0;z-index:35;display:none;
   align-items:center;justify-content:center;background:rgba(0,0,0,.75)}
 #clear-alert.show{display:flex}
@@ -165,8 +148,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 .alert-title{font-size:1.5rem;font-weight:700;letter-spacing:.18em;color:var(--green)}
 .alert-sub{font-family:'Share Tech Mono',monospace;font-size:.7rem;
   color:rgba(0,255,136,.7);margin-top:.4rem}
-
-/* DATABASE PANEL */
 #db-panel{position:fixed;inset:0;z-index:50;background:rgba(0,5,7,.97);
   backdrop-filter:blur(10px);display:none;flex-direction:column}
 #db-panel.show{display:flex}
@@ -207,8 +188,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 .db-name{font-family:'Share Tech Mono',monospace;font-size:.7rem;
   color:rgba(255,255,255,.82);flex:1;padding-right:8px}
 .db-ri-val{font-family:'Share Tech Mono',monospace;font-size:.7rem;min-width:82px;text-align:right}
-.ri-low{color:var(--red)}.ri-med{color:var(--amber)}
-.ri-high{color:var(--green)}.ri-vhigh{color:var(--purple)}
+.ri-low{color:var(--red)}.ri-med{color:var(--amber)}.ri-high{color:var(--green)}.ri-vhigh{color:var(--purple)}
 .db-sel-btn{font-size:.72rem;margin-left:8px;opacity:.45}
 .db-row.selected-row .db-sel-btn{opacity:1;color:var(--purple)}
 .db-footer{padding:10px 14px env(safe-area-inset-bottom,10px);
@@ -222,29 +202,25 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 </head>
 <body>
 
-<!-- SPLASH -->
 <div class="screen" id="splash">
   <div class="corner-tl"></div><div class="corner-br"></div>
   <div class="hex-ring"><div style="font-size:2.2rem">💎</div></div>
   <div class="logo">SPECULIX</div>
-  <div class="tagline">REFLECTIVE OBJECT DETECTION v3.0<br>POWERED BY GOOGLE VISION AI</div>
+  <div class="tagline">REFLECTIVE OBJECT DETECTION v4.0<br>POWERED BY GOOGLE VISION AI</div>
   <button class="start-btn" onclick="goToDB()">SELECT MATERIALS & START</button>
-  <div class="version-badge">v3.0 · GOOGLE VISION · 200+ MATERIALS · AI IDENTIFICATION</div>
+  <div class="version-badge">v4.0 · ADAPTIVE DETECTION · GOOGLE VISION · 200+ MATERIALS</div>
 </div>
 
-<!-- SCANNER -->
 <div class="screen hidden" id="scanner">
   <video id="video" autoplay playsinline muted></video>
   <canvas id="canvas"></canvas>
-
   <div class="hud-top">
     <div class="hud-title">SPECULIX</div>
     <div class="hud-status"><div class="dot"></div><span id="status-text">SCANNING</span></div>
   </div>
-
   <div id="target-badge">—</div>
+  <div id="scene-info">SCENE: <span id="scene-brightness">—</span><br>THRESHOLD: <span id="scene-threshold">—</span></div>
 
-  <!-- Google Vision Result Panel -->
   <div id="vision-panel">
     <div class="vision-header">
       <span class="vision-title">🔬 GOOGLE VISION AI ANALYSIS</span>
@@ -255,7 +231,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
     </div>
   </div>
 
-  <div id="tap-hint">TAP ANY DETECTED OBJECT TO IDENTIFY WITH AI</div>
+  <div id="tap-hint">TAP DETECTED OBJECT TO IDENTIFY WITH AI</div>
 
   <div class="hud-bottom">
     <div class="chip-row">
@@ -264,7 +240,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
       <div class="chip vision-chip">AI IDs: <span id="cnt-vision">0</span></div>
     </div>
     <div class="controls-row">
-      <span class="ctrl-label">CONTRAST</span>
+      <span class="ctrl-label">SENSITIVITY</span>
       <input type="range" id="sensitivity" min="1" max="10" value="4"
         oninput="updateSensitivity(this)">
       <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;min-width:18px"
@@ -279,7 +255,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
     </div>
   </div>
 
-  <!-- Freeze overlay -->
   <div id="freeze-overlay">
     <canvas id="freeze-canvas"></canvas>
     <div class="freeze-info" id="freeze-info"></div>
@@ -289,7 +264,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
     </div>
   </div>
 
-  <!-- Clear alert -->
   <div id="clear-alert">
     <div class="alert-box" id="alert-box">
       <div class="alert-icon" id="alert-icon">✅</div>
@@ -300,11 +274,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
   </div>
 </div>
 
-<!-- DATABASE PANEL -->
 <div id="db-panel">
   <div class="db-header">
     <div class="db-title">MATERIAL DATABASE</div>
-    <div class="db-sub">200+ MATERIALS · SELECT UP TO 5 TARGETS · <span id="sel-count-hdr">0/5</span></div>
+    <div class="db-sub">200+ MATERIALS · SELECT UP TO 5 · <span id="sel-count-hdr">0/5</span></div>
   </div>
   <div class="db-search-wrap">
     <input type="text" id="db-search" placeholder="Search any material..."
@@ -325,53 +298,56 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;heigh
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-// GOOGLE VISION API KEY
-// ═══════════════════════════════════════════════
-const VISION_API_KEY = 'AIzaSyAKJmOVHpJ8y1pNlOaY-Y0BLdZlDNuD5tM';
-const VISION_API_URL = `https://vision.googleapis.com/v1/images:annotate?key=${VISION_API_KEY}`;
+// ═══════════════════════════════════════════════════════════════════════
+// CONFIGURATION
+// ═══════════════════════════════════════════════════════════════════════
+const VISION_API_KEY='AIzaSyAKJmOVHpJ8y1pNlOaY-Y0BLdZlDNuD5tM';
+const VISION_API_URL=`https://vision.googleapis.com/v1/images:annotate?key=${VISION_API_KEY}`;
 
-// RI lookup table for Google Vision results
-const RI_LOOKUP = {
-  'diamond':    {ri:'2.417', info:'Highest brilliance gemstone'},
-  'moissanite': {ri:'2.65–2.69', info:'Diamond simulant with rainbow fire'},
-  'cubic zirconia': {ri:'2.15–2.18', info:'Common diamond simulant'},
-  'ruby':       {ri:'1.762–1.770', info:'Precious corundum gemstone'},
-  'sapphire':   {ri:'1.762–1.770', info:'Precious corundum gemstone'},
-  'emerald':    {ri:'1.560–1.605', info:'Precious beryl gemstone'},
-  'amethyst':   {ri:'1.532–1.554', info:'Purple quartz gemstone'},
-  'topaz':      {ri:'1.619–1.627', info:'Semi-precious gemstone'},
-  'garnet':     {ri:'1.730–1.830', info:'Semi-precious gemstone'},
-  'opal':       {ri:'1.37–1.47', info:'Play-of-color gemstone'},
-  'pearl':      {ri:'1.530–1.685', info:'Organic gem'},
-  'aquamarine': {ri:'1.567–1.590', info:'Blue beryl gemstone'},
-  'tourmaline': {ri:'1.624–1.644', info:'Multi-color gemstone'},
-  'tanzanite':  {ri:'1.691–1.700', info:'Blue/violet gemstone'},
-  'spinel':     {ri:'1.712–1.726', info:'Precious spinel'},
-  'alexandrite':{ri:'1.746–1.755', info:'Color-change chrysoberyl'},
-  'zircon':     {ri:'1.925–1.984', info:'High-RI natural gemstone'},
-  'peridot':    {ri:'1.654–1.690', info:'Olive-green gemstone'},
-  'glass':      {ri:'1.47–1.70', info:'Silica-based material — HAZARD'},
-  'crystal':    {ri:'1.458–1.553', info:'Crystalline silica'},
-  'quartz':     {ri:'1.544–1.553', info:'Common crystal mineral'},
-  'gold':       {ri:'0.27 (metal)', info:'Precious metal — highly reflective'},
-  'silver':     {ri:'0.18 (metal)', info:'Precious metal — mirror-like'},
-  'platinum':   {ri:'2.63 (metal)', info:'Precious metal'},
-  'jewelry':    {ri:'varies', info:'Mixed material — use Vision details'},
-  'gemstone':   {ri:'1.43–2.90', info:'Check specific gem type'},
+const RI_LOOKUP={
+  'diamond':{ri:'2.417',info:'Highest brilliance gemstone'},
+  'moissanite':{ri:'2.65–2.69',info:'Rainbow fire diamond simulant'},
+  'cubic zirconia':{ri:'2.15–2.18',info:'Common diamond simulant'},
+  'ruby':{ri:'1.762–1.770',info:'Precious corundum gem'},
+  'sapphire':{ri:'1.762–1.770',info:'Precious corundum gem'},
+  'emerald':{ri:'1.560–1.605',info:'Precious beryl gem'},
+  'amethyst':{ri:'1.532–1.554',info:'Purple quartz'},
+  'topaz':{ri:'1.619–1.627',info:'Semi-precious gem'},
+  'garnet':{ri:'1.730–1.830',info:'Semi-precious gem'},
+  'opal':{ri:'1.37–1.47',info:'Play-of-color gem'},
+  'pearl':{ri:'1.530–1.685',info:'Organic gem'},
+  'aquamarine':{ri:'1.567–1.590',info:'Blue beryl'},
+  'tourmaline':{ri:'1.624–1.644',info:'Multi-color gem'},
+  'tanzanite':{ri:'1.691–1.700',info:'Blue/violet gem'},
+  'spinel':{ri:'1.712–1.726',info:'Precious spinel'},
+  'alexandrite':{ri:'1.746–1.755',info:'Color-change gem'},
+  'zircon':{ri:'1.925–1.984',info:'High-RI natural gem'},
+  'peridot':{ri:'1.654–1.690',info:'Olive-green gem'},
+  'glass':{ri:'1.47–1.70',info:'⚠ HAZARD — silica material'},
+  'crystal':{ri:'1.458–1.553',info:'Crystalline silica'},
+  'quartz':{ri:'1.544–1.553',info:'Common crystal mineral'},
+  'gold':{ri:'0.27',info:'Precious metal — highly reflective'},
+  'silver':{ri:'0.18',info:'Mirror-like precious metal'},
+  'platinum':{ri:'2.63',info:'Precious metal'},
+  'jewelry':{ri:'varies',info:'Mixed material piece'},
+  'gemstone':{ri:'1.43–2.90',info:'General gemstone'},
+  'ring':{ri:'varies',info:'Jewelry piece'},
+  'earring':{ri:'varies',info:'Jewelry piece'},
+  'necklace':{ri:'varies',info:'Jewelry piece'},
+  'bracelet':{ri:'varies',info:'Jewelry piece'},
 };
 
-function getRIForLabel(label) {
-  const lower = label.toLowerCase();
-  for (const [key, val] of Object.entries(RI_LOOKUP)) {
-    if (lower.includes(key)) return val;
+function getRIForLabel(label){
+  const lower=label.toLowerCase();
+  for(const[key,val]of Object.entries(RI_LOOKUP)){
+    if(lower.includes(key)) return val;
   }
   return null;
 }
 
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 // MATERIALS DATABASE
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 const MATERIALS=[
   {cat:"Glass",name:"Window Glass",ri:"1.52",riN:1.52},
   {cat:"Glass",name:"Bottle Glass",ri:"1.51–1.52",riN:1.515},
@@ -388,14 +364,11 @@ const MATERIALS=[
   {cat:"Diamond & Simulants",name:"Moissanite",ri:"2.65–2.69",riN:2.67},
   {cat:"Diamond & Simulants",name:"Cubic Zirconia (CZ)",ri:"2.15–2.18",riN:2.165},
   {cat:"Diamond & Simulants",name:"Strontium Titanate",ri:"2.409",riN:2.409},
-  {cat:"Diamond & Simulants",name:"Rutile (synthetic)",ri:"2.62–2.90",riN:2.76},
   {cat:"Diamond & Simulants",name:"YAG",ri:"1.833",riN:1.833},
-  {cat:"Diamond & Simulants",name:"GGG",ri:"1.970",riN:1.97},
   {cat:"Diamond & Simulants",name:"White Sapphire",ri:"1.762–1.770",riN:1.766},
   {cat:"Diamond & Simulants",name:"Colorless Zircon",ri:"1.925–1.984",riN:1.955},
   {cat:"Precious Gems",name:"Ruby",ri:"1.762–1.770",riN:1.766},
   {cat:"Precious Gems",name:"Blue Sapphire",ri:"1.762–1.770",riN:1.766},
-  {cat:"Precious Gems",name:"Pink Sapphire",ri:"1.762–1.770",riN:1.766},
   {cat:"Precious Gems",name:"Emerald",ri:"1.560–1.605",riN:1.582},
   {cat:"Precious Gems",name:"Alexandrite",ri:"1.746–1.755",riN:1.750},
   {cat:"Precious Gems",name:"Tanzanite",ri:"1.691–1.700",riN:1.695},
@@ -404,13 +377,11 @@ const MATERIALS=[
   {cat:"Precious Gems",name:"Red Spinel",ri:"1.712–1.726",riN:1.718},
   {cat:"Semi-Precious",name:"Amethyst",ri:"1.532–1.554",riN:1.543},
   {cat:"Semi-Precious",name:"Citrine",ri:"1.532–1.554",riN:1.543},
-  {cat:"Semi-Precious",name:"Smoky Quartz",ri:"1.544–1.553",riN:1.548},
   {cat:"Semi-Precious",name:"Rose Quartz",ri:"1.544–1.553",riN:1.548},
   {cat:"Semi-Precious",name:"Peridot",ri:"1.654–1.690",riN:1.672},
   {cat:"Semi-Precious",name:"Blue Topaz",ri:"1.619–1.627",riN:1.623},
   {cat:"Semi-Precious",name:"Garnet (Pyrope)",ri:"1.730–1.760",riN:1.745},
   {cat:"Semi-Precious",name:"Garnet (Demantoid)",ri:"1.880–1.940",riN:1.910},
-  {cat:"Semi-Precious",name:"Zircon (High)",ri:"1.925–1.984",riN:1.955},
   {cat:"Semi-Precious",name:"Moonstone",ri:"1.518–1.526",riN:1.522},
   {cat:"Semi-Precious",name:"Opal (Precious)",ri:"1.37–1.47",riN:1.42},
   {cat:"Semi-Precious",name:"Jade (Jadeite)",ri:"1.640–1.667",riN:1.653},
@@ -419,15 +390,12 @@ const MATERIALS=[
   {cat:"Semi-Precious",name:"Amber",ri:"1.539–1.545",riN:1.542},
   {cat:"Semi-Precious",name:"Pearl",ri:"1.530–1.685",riN:1.607},
   {cat:"Semi-Precious",name:"Hematite",ri:"2.940–3.220",riN:3.08},
-  {cat:"Semi-Precious",name:"Sphene (Titanite)",ri:"1.843–2.110",riN:1.976},
   {cat:"Minerals",name:"Calcite",ri:"1.486–1.658",riN:1.572},
   {cat:"Minerals",name:"Quartz",ri:"1.544–1.553",riN:1.548},
   {cat:"Minerals",name:"Halite (Salt)",ri:"1.544",riN:1.544},
   {cat:"Minerals",name:"Rutile",ri:"2.616–2.903",riN:2.759},
   {cat:"Minerals",name:"Magnetite",ri:"2.420",riN:2.420},
   {cat:"Minerals",name:"Sulfur",ri:"1.960–2.245",riN:2.102},
-  {cat:"Minerals",name:"Cinnabar",ri:"2.905–3.256",riN:3.080},
-  {cat:"Minerals",name:"Cassiterite",ri:"1.997–2.093",riN:2.045},
   {cat:"Plastics",name:"Acrylic (PMMA)",ri:"1.49",riN:1.49},
   {cat:"Plastics",name:"Polycarbonate",ri:"1.586",riN:1.586},
   {cat:"Plastics",name:"Polystyrene",ri:"1.590",riN:1.590},
@@ -436,209 +404,404 @@ const MATERIALS=[
   {cat:"Plastics",name:"Silicone",ri:"1.40–1.50",riN:1.45},
   {cat:"Crystals",name:"Silicon",ri:"3.420",riN:3.420},
   {cat:"Crystals",name:"Sapphire (Al2O3)",ri:"1.762–1.770",riN:1.766},
-  {cat:"Crystals",name:"Optical Quartz",ri:"1.544–1.553",riN:1.548},
   {cat:"Crystals",name:"Ice",ri:"1.310",riN:1.310},
   {cat:"Ceramics",name:"Alumina",ri:"1.768",riN:1.768},
   {cat:"Ceramics",name:"Zirconia",ri:"2.200",riN:2.200},
-  {cat:"Ceramics",name:"Titanium Dioxide",ri:"2.496–2.908",riN:2.700},
   {cat:"Ceramics",name:"Porcelain",ri:"1.500–1.540",riN:1.520},
   {cat:"Metals",name:"Gold",ri:"0.27 (reflective)",riN:0.27},
   {cat:"Metals",name:"Silver",ri:"0.18 (reflective)",riN:0.18},
   {cat:"Metals",name:"Platinum",ri:"2.63 (reflective)",riN:2.63},
-  {cat:"Metals",name:"Aluminum",ri:"1.44 (reflective)",riN:1.44},
   {cat:"Liquids",name:"Water",ri:"1.333",riN:1.333},
   {cat:"Liquids",name:"Olive Oil",ri:"1.468",riN:1.468},
-  {cat:"Liquids",name:"Glycerol",ri:"1.473",riN:1.473},
-  {cat:"Organic & Bio",name:"Human Skin",ri:"1.34–1.44",riN:1.39},
-  {cat:"Organic & Bio",name:"Fingernail",ri:"1.540",riN:1.540},
-  {cat:"Organic & Bio",name:"Hair",ri:"1.539",riN:1.539},
 ];
 
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 let selectedMaterials=[];
 let currentCat="All";
 let stream=null,track=null;
-let torchOn=false,soundOn=false,frozen=false;
-let autoID=false;
+let torchOn=false,frozen=false,autoID=false;
 let sensitivity=4;
 let detections=[];
 let cntGlass=0,cntGem=0,cntVision=0;
-let lastBeep=0,audioCtx=null;
 let lastAutoIDTime=0;
-let frozenImageData=null;
 
 const video=document.getElementById('video');
 const canvas=document.getElementById('canvas');
 const ctx=canvas.getContext('2d',{willReadFrequently:true});
 
-// ═══════════════════════════════════════════════
-// GOOGLE VISION API
-// ═══════════════════════════════════════════════
-async function callGoogleVision(base64Image) {
-  const body = {
-    requests: [{
-      image: { content: base64Image },
-      features: [
-        { type: 'LABEL_DETECTION', maxResults: 8 },
-        { type: 'OBJECT_LOCALIZATION', maxResults: 5 },
-        { type: 'IMAGE_PROPERTIES', maxResults: 3 },
-      ]
-    }]
-  };
+// ═══════════════════════════════════════════════════════════════════════
+// NEW OPTIMIZED DETECTION ALGORITHM v4
+// ═══════════════════════════════════════════════════════════════════════
+//
+// CORE PRINCIPLE: A specular reflection (glass/gem flash) is:
+//   1. VERY bright (near-white, top 1-3% of scene brightness)
+//   2. SMALL (tiny pinpoint, not large area)
+//   3. ISOLATED (surrounded by darker pixels)
+//   4. HIGH CONTRAST against immediate surroundings
+//
+// The sensitivity slider now controls ALL these parameters together.
+//
+// ═══════════════════════════════════════════════════════════════════════
 
-  const response = await fetch(VISION_API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+function detectSpecular(imageData){
+  const data=imageData.data;
+  const W=imageData.width;
+  const H=imageData.height;
+  const totalPixels=W*H;
 
-  if (!response.ok) throw new Error(`Vision API error: ${response.status}`);
-  const data = await response.json();
-  return data.responses[0];
-}
-
-function captureCanvasBase64() {
-  const tempCanvas = document.createElement('canvas');
-  // Resize to max 640px for API efficiency
-  const maxSize = 640;
-  const scale = Math.min(maxSize / canvas.width, maxSize / canvas.height, 1);
-  tempCanvas.width = Math.floor(canvas.width * scale);
-  tempCanvas.height = Math.floor(canvas.height * scale);
-  const tctx = tempCanvas.getContext('2d');
-  tctx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
-  // Return base64 without the data:image/jpeg;base64, prefix
-  return tempCanvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-}
-
-function displayVisionResult(result) {
-  const panel = document.getElementById('vision-panel');
-  const body = document.getElementById('vision-body');
-  panel.classList.add('show');
-
-  if (!result || (!result.labelAnnotations && !result.localizedObjectAnnotations)) {
-    body.innerHTML = '<div class="vision-error">No objects identified. Try better lighting or move closer.</div>';
-    return;
+  // ──── STEP 1: Analyze scene brightness to build histogram ────
+  // Sample every 8th pixel for speed
+  let hist=new Uint32Array(256);
+  let brightSum=0, brightCount=0;
+  for(let y=0;y<H;y+=8){
+    for(let x=0;x<W;x+=8){
+      const i=(y*W+x)*4;
+      const br=Math.round(data[i]*0.299+data[i+1]*0.587+data[i+2]*0.114);
+      hist[br]++;
+      brightSum+=br;
+      brightCount++;
+    }
   }
+  const sceneAvg=brightSum/brightCount;
 
-  // Combine labels and objects
-  const labels = (result.labelAnnotations || []).map(l => ({
-    name: l.description,
-    score: Math.round(l.score * 100)
-  }));
-
-  const objects = (result.localizedObjectAnnotations || []).map(o => ({
-    name: o.name,
-    score: Math.round(o.score * 100)
-  }));
-
-  // Find best gem/glass match
-  const allItems = [...objects, ...labels];
-  let bestMatch = null;
-  let bestRI = null;
-
-  for (const item of allItems) {
-    const riData = getRIForLabel(item.name);
-    if (riData && !bestMatch) {
-      bestMatch = item;
-      bestRI = riData;
+  // ──── STEP 2: Find the brightness threshold for top X% ────
+  // Sensitivity 1 = only top 0.3% (extreme flashes only)
+  // Sensitivity 10 = top 5% (more sensitive)
+  const topPct=0.003+(sensitivity-1)*0.0052;
+  const targetCount=Math.floor(brightCount*topPct);
+  let runningCount=0;
+  let dynamicThreshold=255;
+  for(let b=255;b>=0;b--){
+    runningCount+=hist[b];
+    if(runningCount>=targetCount){
+      dynamicThreshold=b;
       break;
     }
   }
 
-  // Build HTML
-  let html = '';
+  // Safety minimum — never go below 190 (absolute bright)
+  // Also never below sceneAvg + 50 (always significantly brighter than scene)
+  const hardMin=Math.max(190, sceneAvg+50);
+  dynamicThreshold=Math.max(dynamicThreshold, hardMin);
 
-  if (bestMatch && bestRI) {
-    const isHazard = bestRI.info.includes('HAZARD');
-    const color = isHazard ? 'var(--red)' : 'var(--purple)';
-    html += `
+  // Display scene info for debugging
+  document.getElementById('scene-brightness').textContent=Math.round(sceneAvg);
+  document.getElementById('scene-threshold').textContent=Math.round(dynamicThreshold);
+
+  // ──── STEP 3: Find candidate pixels above threshold ────
+  const scanStep=5;
+  let candidates=[];
+  for(let y=30;y<H-30;y+=scanStep){
+    for(let x=30;x<W-30;x+=scanStep){
+      const i=(y*W+x)*4;
+      const r=data[i],g=data[i+1],b=data[i+2];
+      const br=r*0.299+g*0.587+b*0.114;
+
+      if(br<dynamicThreshold) continue;
+
+      // Specular highlights are near-white — all channels bright
+      // Reject colored areas (low saturation only)
+      const maxCh=Math.max(r,g,b);
+      const minCh=Math.min(r,g,b);
+      const sat=maxCh>0?(maxCh-minCh)/maxCh:0;
+
+      // For strict specular detection, require low-ish saturation
+      // OR very high brightness (for colored gems like ruby reflections)
+      if(sat>0.5 && br<230) continue;
+
+      candidates.push({x,y,br,r,g,b,sat});
+    }
+  }
+
+  // ──── STEP 4: For each candidate, verify it's ISOLATED ────
+  // Check that surrounding area is significantly darker
+  const verified=[];
+  const ringInner=12;
+  const ringOuter=28;
+
+  // Contrast multiplier based on sensitivity
+  // sens 1 = 4.0x (strict, only real glass/gems)
+  // sens 10 = 2.0x (permissive)
+  const contrastReq=4.0-(sensitivity-1)*0.22;
+
+  // Surrounding darkness requirement
+  // sens 1 = surround must be < 100 (very dark)
+  // sens 10 = surround must be < 170 (more permissive)
+  const maxSurround=100+(sensitivity-1)*7.8;
+
+  for(const c of candidates){
+    let surroundSum=0, surroundCount=0, surroundMax=0;
+    for(let dy=-ringOuter;dy<=ringOuter;dy+=4){
+      for(let dx=-ringOuter;dx<=ringOuter;dx+=4){
+        const dist2=dx*dx+dy*dy;
+        if(dist2<ringInner*ringInner||dist2>ringOuter*ringOuter) continue;
+        const nx=c.x+dx, ny=c.y+dy;
+        if(nx<0||nx>=W||ny<0||ny>=H) continue;
+        const ni=(ny*W+nx)*4;
+        const nbr=data[ni]*0.299+data[ni+1]*0.587+data[ni+2]*0.114;
+        surroundSum+=nbr;
+        if(nbr>surroundMax) surroundMax=nbr;
+        surroundCount++;
+      }
+    }
+    if(surroundCount===0) continue;
+    const surroundAvg=surroundSum/surroundCount;
+
+    // ★ CRITICAL CHECK 1: Surrounding area must be DARK
+    // This eliminates walls, large bright objects, keyboards, clothing
+    if(surroundAvg>maxSurround) continue;
+
+    // ★ CRITICAL CHECK 2: Local contrast ratio
+    const contrast=c.br/(surroundAvg+1);
+    if(contrast<contrastReq) continue;
+
+    // ★ CRITICAL CHECK 3: Not too many other bright pixels nearby
+    // Real specular is ISOLATED — if the area around is also bright, it's not a flash
+    if(surroundMax>c.br*0.85) continue;
+
+    verified.push({...c,contrast,surroundAvg});
+  }
+
+  // ──── STEP 5: Cluster nearby verified points ────
+  const clusters=clusterPoints(verified,35);
+
+  // ──── STEP 6: Classify and finalize ────
+  const finalDetections=clusters
+    .filter(c=>c.count>=2)  // Need at least 2 verified pixels to be real
+    .map(c=>({...c,classification:classifySpot(c.br,c.sat,c.contrast)}));
+
+  detections=finalDetections;
+
+  // ──── STEP 7: Draw ────
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(video,0,0,W,H);
+
+  let topClass=null, topScore=0;
+  cntGlass=0; cntGem=0;
+
+  finalDetections.forEach(c=>{
+    drawDetection(c);
+    if(c.br>topScore){topScore=c.br;topClass=c.classification;}
+    if(c.classification.type==='glass') cntGlass++;
+    else cntGem++;
+  });
+
+  document.getElementById('cnt-glass').textContent=cntGlass;
+  document.getElementById('cnt-gem').textContent=cntGem;
+
+  const badge=document.getElementById('target-badge');
+  const hint=document.getElementById('tap-hint');
+  if(topClass&&finalDetections.length>0){
+    badge.textContent=`${topClass.label}  RI≈${topClass.ri}`;
+    badge.style.borderColor=topClass.color;
+    badge.style.color=topClass.color;
+    badge.classList.add('show');
+    hint.style.opacity='1';
+  } else {
+    badge.classList.remove('show');
+    hint.style.opacity='0';
+  }
+}
+
+function classifySpot(br,sat,contrast){
+  const hasRainbow=sat>0.28&&br>210;
+  const isPureWhite=sat<0.15&&br>220;
+  const isColorful=sat>0.25&&br>200;
+
+  if(selectedMaterials.length>0){
+    const highRI=selectedMaterials.filter(m=>m.riN>2.0);
+    const medRI=selectedMaterials.filter(m=>m.riN>=1.6&&m.riN<=2.0);
+    const lowRI=selectedMaterials.filter(m=>m.riN<1.6&&m.riN>1.0);
+    if(highRI.length>0&&(isPureWhite||hasRainbow)&&br>215)
+      return{type:'match',label:'MATCH: '+highRI[0].name.slice(0,18),ri:highRI[0].ri,color:'#cc00ff'};
+    if(medRI.length>0&&(isColorful||isPureWhite)&&br>200)
+      return{type:'match',label:'MATCH: '+medRI[0].name.slice(0,18),ri:medRI[0].ri,color:'#cc00ff'};
+    if(lowRI.length>0&&br>195)
+      return{type:'match',label:'MATCH: '+lowRI[0].name.slice(0,18),ri:lowRI[0].ri,color:'#cc00ff'};
+  }
+  if(hasRainbow&&br>225)
+    return{type:'gem',label:'DIAMOND/MOISSANITE',ri:'2.42–2.69',color:'#ff00ff'};
+  if(isPureWhite&&contrast>4)
+    return{type:'gem',label:'HIGH-RI GEM/SIMULANT',ri:'2.1–2.4',color:'#00f5ff'};
+  if(isColorful&&br>200)
+    return{type:'gem',label:'GEMSTONE',ri:'1.7–2.0',color:'#00ff88'};
+  return{type:'glass',label:'GLASS/CERAMIC',ri:'1.47–1.55',color:'#ff3d3d'};
+}
+
+function clusterPoints(points,radius){
+  if(!points.length) return[];
+  const used=new Uint8Array(points.length);
+  const clusters=[];
+  const r2=radius*radius;
+  for(let i=0;i<points.length;i++){
+    if(used[i]) continue;
+    used[i]=1;
+    let cx=points[i].x,cy=points[i].y;
+    let maxBr=points[i].br, maxContrast=points[i].contrast;
+    let sumR=points[i].r,sumG=points[i].g,sumB=points[i].b;
+    let sumSat=points[i].sat;
+    let count=1;
+    for(let j=i+1;j<points.length;j++){
+      if(used[j]) continue;
+      const dx=points[j].x-points[i].x,dy=points[j].y-points[i].y;
+      if(dx*dx+dy*dy<r2){
+        used[j]=1;
+        cx+=points[j].x;cy+=points[j].y;
+        sumR+=points[j].r;sumG+=points[j].g;sumB+=points[j].b;
+        sumSat+=points[j].sat;
+        if(points[j].br>maxBr) maxBr=points[j].br;
+        if(points[j].contrast>maxContrast) maxContrast=points[j].contrast;
+        count++;
+      }
+    }
+    clusters.push({
+      x:cx/count,y:cy/count,
+      br:maxBr,contrast:maxContrast,count,
+      r:sumR/count,g:sumG/count,b:sumB/count,
+      sat:sumSat/count
+    });
+  }
+  return clusters;
+}
+
+function drawDetection(c){
+  const sx=(c.x/canvas.width)*canvas.width;
+  const sy=(c.y/canvas.height)*canvas.height;
+  const col=c.classification.color;
+  const r=Math.min(18+c.count*2,55);
+  const t=Date.now()/700;
+  const pr=r+Math.sin(t)*3;
+  ctx.save();
+  ctx.shadowColor=col;ctx.shadowBlur=14;
+  ctx.beginPath();ctx.arc(sx,sy,pr,0,Math.PI*2);
+  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();
+  [0,Math.PI/2,Math.PI,3*Math.PI/2].forEach(a=>{
+    ctx.beginPath();ctx.arc(sx,sy,pr+5,a,a+Math.PI/5);
+    ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.stroke();
+  });
+  ctx.beginPath();ctx.arc(sx,sy,3,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.font='600 11px "Share Tech Mono"';ctx.fillStyle=col;ctx.textAlign='center';
+  ctx.fillText(c.classification.type.toUpperCase(),sx,sy-pr-6);
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// GOOGLE VISION API
+// ═══════════════════════════════════════════════════════════════════════
+async function callGoogleVision(base64){
+  const body={requests:[{image:{content:base64},features:[
+    {type:'LABEL_DETECTION',maxResults:8},
+    {type:'OBJECT_LOCALIZATION',maxResults:5},
+    {type:'IMAGE_PROPERTIES',maxResults:3},
+  ]}]};
+  const response=await fetch(VISION_API_URL,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  if(!response.ok) throw new Error(`API error: ${response.status}`);
+  const data=await response.json();
+  return data.responses[0];
+}
+
+function captureCanvasBase64(){
+  const tc=document.createElement('canvas');
+  const maxSize=640;
+  const scale=Math.min(maxSize/canvas.width,maxSize/canvas.height,1);
+  tc.width=Math.floor(canvas.width*scale);
+  tc.height=Math.floor(canvas.height*scale);
+  tc.getContext('2d').drawImage(canvas,0,0,tc.width,tc.height);
+  return tc.toDataURL('image/jpeg',0.85).split(',')[1];
+}
+
+function displayVisionResult(result){
+  const panel=document.getElementById('vision-panel');
+  const body=document.getElementById('vision-body');
+  panel.classList.add('show');
+
+  if(!result||(!result.labelAnnotations&&!result.localizedObjectAnnotations)){
+    body.innerHTML='<div class="vision-error">No objects identified. Try better lighting.</div>';
+    return;
+  }
+
+  const labels=(result.labelAnnotations||[]).map(l=>({name:l.description,score:Math.round(l.score*100)}));
+  const objects=(result.localizedObjectAnnotations||[]).map(o=>({name:o.name,score:Math.round(o.score*100)}));
+  const allItems=[...objects,...labels];
+
+  let bestMatch=null, bestRI=null;
+  for(const item of allItems){
+    const riData=getRIForLabel(item.name);
+    if(riData&&!bestMatch){bestMatch=item;bestRI=riData;break;}
+  }
+
+  let html='';
+  if(bestMatch&&bestRI){
+    const isHazard=bestRI.info.includes('HAZARD');
+    const color=isHazard?'var(--red)':'var(--purple)';
+    html+=`
       <div class="vision-name" style="color:${color}">${bestMatch.name.toUpperCase()}</div>
       <div class="vision-detail">${bestRI.info}<br>Confidence: ${bestMatch.score}%</div>
-      <div class="vision-ri">RI ≈ ${bestRI.ri}</div>
-    `;
+      <div class="vision-ri">RI ≈ ${bestRI.ri}</div>`;
     cntVision++;
-    document.getElementById('cnt-vision').textContent = cntVision;
+    document.getElementById('cnt-vision').textContent=cntVision;
   }
-
-  // Show top labels
-  const topLabels = labels.slice(0, 5);
-  html += `<div style="margin-top:8px;font-family:'Share Tech Mono',monospace;
-    font-size:.62rem;color:rgba(0,245,255,.45);letter-spacing:.08em">
-    GOOGLE VISION DETECTED:
-  </div>`;
-  html += topLabels.map(l =>
-    `<div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;
-      color:rgba(255,255,255,.7);padding:2px 0">
-      ${l.name} <span style="color:rgba(0,245,255,.4)">${l.score}%</span>
-    </div>`
-  ).join('');
-
-  body.innerHTML = html;
+  const topLabels=labels.slice(0,5);
+  html+=`<div style="margin-top:8px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:rgba(0,245,255,.45);letter-spacing:.08em">GOOGLE VISION DETECTED:</div>`;
+  html+=topLabels.map(l=>`<div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.7);padding:2px 0">${l.name} <span style="color:rgba(0,245,255,.4)">${l.score}%</span></div>`).join('');
+  body.innerHTML=html;
 }
 
-async function analyzeWithVision() {
-  const panel = document.getElementById('vision-panel');
-  const body = document.getElementById('vision-body');
+async function analyzeWithVision(){
+  const panel=document.getElementById('vision-panel');
+  const body=document.getElementById('vision-body');
   panel.classList.add('show');
-  body.innerHTML = '<div class="vision-loading">ANALYZING WITH GOOGLE VISION AI...</div>';
-
-  try {
-    const base64 = captureCanvasBase64();
-    const result = await callGoogleVision(base64);
+  body.innerHTML='<div class="vision-loading">ANALYZING WITH GOOGLE VISION AI...</div>';
+  try{
+    const base64=captureCanvasBase64();
+    const result=await callGoogleVision(base64);
     displayVisionResult(result);
     unfreeze();
-  } catch (err) {
-    body.innerHTML = `<div class="vision-error">Error: ${err.message}<br>Check internet connection.</div>`;
+  }catch(err){
+    body.innerHTML=`<div class="vision-error">Error: ${err.message}<br>Check internet connection.</div>`;
     unfreeze();
   }
 }
 
-async function autoAnalyze() {
-  if (!autoID || detections.length === 0) return;
-  const now = Date.now();
-  if (now - lastAutoIDTime < 4000) return; // max every 4 seconds
-  lastAutoIDTime = now;
-
-  const panel = document.getElementById('vision-panel');
-  const body = document.getElementById('vision-body');
+async function autoAnalyze(){
+  if(!autoID||detections.length===0) return;
+  const now=Date.now();
+  if(now-lastAutoIDTime<4000) return;
+  lastAutoIDTime=now;
+  const panel=document.getElementById('vision-panel');
+  const body=document.getElementById('vision-body');
   panel.classList.add('show');
-  body.innerHTML = '<div class="vision-loading">AUTO-ANALYZING...</div>';
-
-  try {
-    const base64 = captureCanvasBase64();
-    const result = await callGoogleVision(base64);
+  body.innerHTML='<div class="vision-loading">AUTO-ANALYZING...</div>';
+  try{
+    const base64=captureCanvasBase64();
+    const result=await callGoogleVision(base64);
     displayVisionResult(result);
-  } catch (err) {
-    panel.classList.remove('show');
-  }
+  }catch(err){panel.classList.remove('show');}
 }
 
-function closeVisionPanel() {
-  document.getElementById('vision-panel').classList.remove('show');
+function closeVisionPanel(){document.getElementById('vision-panel').classList.remove('show');}
+function toggleAutoID(){
+  autoID=!autoID;
+  document.getElementById('btn-autoid').classList.toggle('active',autoID);
+  if(!autoID) closeVisionPanel();
 }
 
-function toggleAutoID() {
-  autoID = !autoID;
-  document.getElementById('btn-autoid').classList.toggle('active', autoID);
-  if (!autoID) closeVisionPanel();
-}
-
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 // DATABASE UI
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 function goToDB(){showDB(false);}
-function showDB(){
-  document.getElementById('db-panel').classList.add('show');
-  buildCats();renderDB();
-}
+function showDB(){document.getElementById('db-panel').classList.add('show');buildCats();renderDB();}
 function hideDB(){document.getElementById('db-panel').classList.remove('show');}
 function buildCats(){
   const cats=["All",...new Set(MATERIALS.map(m=>m.cat))];
   document.getElementById('cat-scroll').innerHTML=cats.map(c=>
-    `<button class="cat-btn${c===currentCat?' active':''}" onclick="setCat('${c}')">${c}</button>`
-  ).join('');
+    `<button class="cat-btn${c===currentCat?' active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
 }
 function setCat(c){currentCat=c;document.getElementById('db-search').value='';buildCats();renderDB();}
 function filterDB(){currentCat='All';buildCats();renderDB();}
@@ -655,8 +818,7 @@ function renderDB(){
     groups[cat].forEach(m=>{
       const isSel=selectedMaterials.some(s=>s.name===m.name);
       const rc=m.riN<1.4?'ri-low':m.riN<1.7?'ri-med':m.riN<2.1?'ri-high':'ri-vhigh';
-      html+=`<div class="${isSel?'db-row selected-row':'db-row'}"
-        onclick="toggleSelect(${JSON.stringify(m.name)})">
+      html+=`<div class="${isSel?'db-row selected-row':'db-row'}" onclick="toggleSelect(${JSON.stringify(m.name)})">
         <span class="db-name">${m.name}</span>
         <span class="db-ri-val ${rc}">${m.ri}</span>
         <span class="db-sel-btn">${isSel?'✓':'+'}</span>
@@ -686,22 +848,19 @@ function updateSelectionUI(){
   document.getElementById('sel-count').textContent=n;
   document.getElementById('sel-count-hdr').textContent=`${n}/5 SELECTED`;
   const el=document.getElementById('selected-chips');
-  if(n===0){
-    el.innerHTML='<span class="no-sel-hint">None — tap materials below</span>';
-  } else {
+  if(n===0){el.innerHTML='<span class="no-sel-hint">None — tap materials below</span>';}
+  else{
     el.innerHTML=selectedMaterials.map(m=>
       `<div class="sel-chip" onclick="toggleSelect(${JSON.stringify(m.name)})">
         <span>${m.name.length>16?m.name.slice(0,16)+'…':m.name}</span>
-        <span class="x">✕</span>
-      </div>`
-    ).join('');
+        <span class="x">✕</span></div>`).join('');
   }
 }
 function clearSelection(){selectedMaterials=[];updateSelectionUI();renderDB();}
 
-// ═══════════════════════════════════════════════
-// SCANNER
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
+// SCANNER LIFECYCLE
+// ═══════════════════════════════════════════════════════════════════════
 async function startScanner(){
   hideDB();
   document.getElementById('splash').classList.add('hidden');
@@ -719,9 +878,7 @@ async function startScanner(){
       document.getElementById('btn-torch').classList.add('active');
     }catch(e){}
     video.addEventListener('loadedmetadata',()=>{resizeCanvas();requestAnimationFrame(scanLoop);});
-  }catch(err){
-    document.getElementById('status-text').textContent='CAM ERROR';
-  }
+  }catch(err){document.getElementById('status-text').textContent='CAM ERROR';}
 }
 
 function resizeCanvas(){
@@ -730,159 +887,17 @@ function resizeCanvas(){
 }
 window.addEventListener('resize',resizeCanvas);
 
-// ═══════════════════════════════════════════════
-// CONTRAST-BASED SCAN LOOP
-// ═══════════════════════════════════════════════
 function scanLoop(){
   requestAnimationFrame(scanLoop);
   if(frozen||video.readyState<2) return;
   ctx.drawImage(video,0,0,canvas.width,canvas.height);
-  detectContrast(ctx.getImageData(0,0,canvas.width,canvas.height));
+  detectSpecular(ctx.getImageData(0,0,canvas.width,canvas.height));
   if(autoID&&detections.length>0) autoAnalyze();
 }
 
-function detectContrast(imageData){
-  const data=imageData.data,W=imageData.width,H=imageData.height;
-  const contrastThreshold=3+(sensitivity*0.5);
-  const minAbsolute=175;
-  let hotspots=[];
-  const scanStep=8;
-
-  for(let y=25;y<H-25;y+=scanStep){
-    for(let x=25;x<W-25;x+=scanStep){
-      const i=(y*W+x)*4;
-      const r=data[i],g=data[i+1],b=data[i+2];
-      const brightness=r*0.299+g*0.587+b*0.114;
-      if(brightness<minAbsolute) continue;
-      let surroundSum=0,surroundCount=0;
-      const ringR=18;
-      for(let dy=-ringR;dy<=ringR;dy+=6){
-        for(let dx=-ringR;dx<=ringR;dx+=6){
-          const dist=Math.sqrt(dx*dx+dy*dy);
-          if(dist<9||dist>ringR) continue;
-          const nx=x+dx,ny=y+dy;
-          if(nx<0||nx>=W||ny<0||ny>=H) continue;
-          const ni=(ny*W+nx)*4;
-          surroundSum+=(data[ni]*0.299+data[ni+1]*0.587+data[ni+2]*0.114);
-          surroundCount++;
-        }
-      }
-      if(surroundCount===0) continue;
-      const surroundAvg=surroundSum/surroundCount;
-      const localContrast=brightness/(surroundAvg+1);
-      if(localContrast<contrastThreshold) continue;
-      const maxCh=Math.max(r,g,b),minCh=Math.min(r,g,b);
-      const saturation=maxCh>0?(maxCh-minCh)/maxCh:0;
-      const classification=classifySpot(brightness,saturation,localContrast);
-      hotspots.push({x,y,score:brightness,contrast:localContrast,saturation,classification});
-    }
-  }
-
-  const clusters=clusterHotspots(hotspots,40);
-  detections=clusters;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(video,0,0,canvas.width,canvas.height);
-
-  let topClass=null,topScore=0;
-  cntGlass=0;cntGem=0;
-
-  clusters.forEach(c=>{
-    drawDetection(c);
-    if(c.score>topScore){topScore=c.score;topClass=c.classification;}
-    if(c.classification.type==='glass') cntGlass++;
-    else cntGem++;
-  });
-
-  document.getElementById('cnt-glass').textContent=cntGlass;
-  document.getElementById('cnt-gem').textContent=cntGem;
-
-  const badge=document.getElementById('target-badge');
-  const hint=document.getElementById('tap-hint');
-
-  if(topClass&&clusters.length>0){
-    badge.textContent=`${topClass.label}  RI≈${topClass.ri}`;
-    badge.style.borderColor=topClass.color;
-    badge.style.color=topClass.color;
-    badge.classList.add('show');
-    hint.style.opacity='1';
-  } else {
-    badge.classList.remove('show');
-    hint.style.opacity='0';
-  }
-}
-
-function classifySpot(brightness,saturation,contrast){
-  const hasRainbow=saturation>0.28&&brightness>185;
-  const isPureWhite=saturation<0.12&&brightness>205;
-  const isColorful=saturation>0.18&&brightness>170;
-
-  if(selectedMaterials.length>0){
-    const highRI=selectedMaterials.filter(m=>m.riN>2.0);
-    const medRI=selectedMaterials.filter(m=>m.riN>=1.6&&m.riN<=2.0);
-    const lowRI=selectedMaterials.filter(m=>m.riN<1.6&&m.riN>1.0);
-    if(highRI.length>0&&(isPureWhite||hasRainbow)&&brightness>195)
-      return{type:'match',label:'MATCH: '+highRI[0].name.slice(0,18),ri:highRI[0].ri,color:'#cc00ff',freq:880};
-    if(medRI.length>0&&(isColorful||isPureWhite)&&brightness>175)
-      return{type:'match',label:'MATCH: '+medRI[0].name.slice(0,18),ri:medRI[0].ri,color:'#cc00ff',freq:780};
-    if(lowRI.length>0&&brightness>170)
-      return{type:'match',label:'MATCH: '+lowRI[0].name.slice(0,18),ri:lowRI[0].ri,color:'#cc00ff',freq:660};
-  }
-  if(hasRainbow&&brightness>205)
-    return{type:'gem',label:'DIAMOND/MOISSANITE',ri:'2.42–2.69',color:'#ff00ff',freq:860};
-  if(isPureWhite&&contrast>5)
-    return{type:'gem',label:'HIGH-RI GEM/SIMULANT',ri:'2.1–2.4',color:'#00f5ff',freq:740};
-  if(isColorful&&brightness>175)
-    return{type:'gem',label:'GEMSTONE',ri:'1.7–2.0',color:'#00ff88',freq:660};
-  return{type:'glass',label:'GLASS/CERAMIC',ri:'1.47–1.55',color:'#ff3d3d',freq:440};
-}
-
-function clusterHotspots(points,radius){
-  if(!points.length) return[];
-  const used=new Uint8Array(points.length);
-  const clusters=[];
-  for(let i=0;i<points.length;i++){
-    if(used[i]) continue;
-    used[i]=1;
-    let cx=points[i].x,cy=points[i].y,maxScore=points[i].score,count=1;
-    let topClass=points[i].classification;
-    for(let j=i+1;j<points.length;j++){
-      if(used[j]) continue;
-      const dx=points[j].x-points[i].x,dy=points[j].y-points[i].y;
-      if(dx*dx+dy*dy<radius*radius){
-        used[j]=1;cx+=points[j].x;cy+=points[j].y;count++;
-        if(points[j].score>maxScore){maxScore=points[j].score;topClass=points[j].classification;}
-      }
-    }
-    clusters.push({x:cx/count,y:cy/count,score:maxScore,count,classification:topClass});
-  }
-  return clusters.filter(c=>c.count>=2);
-}
-
-function drawDetection(c){
-  const sx=(c.x/video.videoWidth)*canvas.width;
-  const sy=(c.y/video.videoHeight)*canvas.height;
-  const col=c.classification.color;
-  const r=Math.min(16+c.count*1.8,50);
-  const t=Date.now()/700;
-  const pr=r+Math.sin(t)*3;
-  ctx.save();
-  ctx.shadowColor=col;ctx.shadowBlur=12;
-  ctx.beginPath();ctx.arc(sx,sy,pr,0,Math.PI*2);
-  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();
-  [0,Math.PI/2,Math.PI,3*Math.PI/2].forEach(a=>{
-    ctx.beginPath();ctx.arc(sx,sy,pr+5,a,a+Math.PI/5);
-    ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.stroke();
-  });
-  ctx.beginPath();ctx.arc(sx,sy,2.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.font='600 10px "Share Tech Mono"';ctx.fillStyle=col;ctx.textAlign='center';
-  ctx.fillText(c.classification.type.toUpperCase(),sx,sy-pr-5);
-  ctx.restore();
-}
-
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 // CONTROLS
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 async function toggleTorch(){
   if(!track) return;
   torchOn=!torchOn;
@@ -909,11 +924,10 @@ function freezeFrame(){
     fc.getContext('2d').drawImage(canvas,0,0);
     document.getElementById('freeze-info').textContent=
       detections.length>0
-        ?`${detections.length} object(s) detected\nTap "IDENTIFY WITH AI" for Google Vision analysis`
-        :'No specular objects in frame\nTap "IDENTIFY WITH AI" to analyze anyway';
+        ?`${detections.length} reflective object(s) detected\nTap "IDENTIFY WITH AI" for analysis`
+        :'No specular reflections detected\nTap "IDENTIFY WITH AI" anyway to see what\'s in frame';
   } else unfreeze();
 }
-
 function unfreeze(){
   frozen=false;
   document.getElementById('freeze-overlay').classList.remove('show');
@@ -940,13 +954,7 @@ function checkClear(){
 }
 function dismissAlert(){document.getElementById('clear-alert').classList.remove('show');}
 
-// Tap canvas to freeze and identify
-canvas.addEventListener('click', async ()=>{
-  if(!frozen && detections.length>0){
-    freezeFrame();
-  }
-});
-
+canvas.addEventListener('click',()=>{if(!frozen&&detections.length>0) freezeFrame();});
 document.getElementById('sensitivity').style.setProperty('--pct','33%');
 updateSelectionUI();
 </script>
