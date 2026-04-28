@@ -1058,13 +1058,15 @@ function renderDB(){
       const isFull=selectedMaterials.length>=5&&!isSel;
       const rc=m.riN<1.4?'ri-low':m.riN<1.7?'ri-med':m.riN<2.1?'ri-high':'ri-vhigh';
 
+      // Escape name for safe attribute usage
+      const safeName=m.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
       let btnHTML='';
       if(isSel){
-        btnHTML=`<button class="db-action-btn remove-btn" onclick="event.stopPropagation();removeMaterial(${JSON.stringify(m.name)})">REMOVE</button>`;
+        btnHTML=`<button class="db-action-btn remove-btn" data-mat="${safeName}" onclick="event.stopPropagation();removeMaterial(this.dataset.mat)">REMOVE</button>`;
       } else if(isFull){
         btnHTML=`<button class="db-action-btn full-btn" disabled>FULL</button>`;
       } else {
-        btnHTML=`<button class="db-action-btn add-btn" onclick="event.stopPropagation();addMaterial(${JSON.stringify(m.name)})">+ ADD</button>`;
+        btnHTML=`<button class="db-action-btn add-btn" data-mat="${safeName}" onclick="event.stopPropagation();addMaterial(this.dataset.mat)">+ ADD</button>`;
       }
 
       html+=`<div class="db-row${isSel?' selected-row':''}" style="${isSel?`border-left-color:${sel.color}`:''}">
