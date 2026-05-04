@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v6</title>
+<title>SPECULIX v7</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
@@ -17,8 +17,6 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;transition:opacity .35s;z-index:10}
 .screen.hidden{opacity:0;pointer-events:none}
-
-/* SPLASH */
 #splash{background:radial-gradient(ellipse at center,#001a2e 0%,#000507 70%)}
 .logo{font-size:clamp(3rem,15vw,6rem);font-weight:700;letter-spacing:.3em;
   background:linear-gradient(135deg,var(--cyan),#fff,var(--cyan));
@@ -35,23 +33,19 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
 .start-btn{margin-top:2rem;padding:.9rem 2.5rem;border:2px solid var(--cyan);
   background:var(--glass);color:var(--cyan);font-family:'Rajdhani',sans-serif;
   font-size:1.15rem;font-weight:700;letter-spacing:.2em;cursor:pointer;
-  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
-  transition:all .2s;backdrop-filter:blur(4px)}
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:all .2s}
 .start-btn:active{background:rgba(0,245,255,.2);transform:scale(.97)}
 .corner-tl,.corner-br{position:absolute;width:28px;height:28px;border-color:var(--cyan);border-style:solid}
 .corner-tl{top:18px;left:18px;border-width:2px 0 0 2px}
 .corner-br{bottom:18px;right:18px;border-width:0 2px 2px 0}
 .version-badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;
-  color:rgba(0,245,255,.3);letter-spacing:.15em;margin-top:.5rem}
-
-/* SCANNER */
+  color:rgba(0,245,255,.3);letter-spacing:.15em;margin-top:.5rem;text-align:center}
 #scanner{padding:0;background:#000}
 #video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #highlight-canvas{position:absolute;inset:0;width:100%;height:100%;
   pointer-events:none;z-index:15;mix-blend-mode:screen;opacity:0;transition:opacity .3s}
 #highlight-canvas.show{opacity:.5}
-
 .hud-top{position:absolute;top:0;left:0;right:0;
   padding:env(safe-area-inset-top,10px) 14px 10px;
   background:linear-gradient(to bottom,rgba(0,0,0,.85),transparent);
@@ -65,27 +59,21 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
 #status-text.analyzing{color:var(--purple)}
 .dot.analyzing{background:var(--purple)}
 @keyframes blink{50%{opacity:0}}
-
-/* PRIORITY LEGEND - shows selected materials with their colors */
 #priority-legend{position:absolute;top:55px;right:10px;z-index:20;
   background:rgba(0,0,0,.85);border:1px solid rgba(0,245,255,.25);
-  padding:5px 8px;backdrop-filter:blur(4px);max-width:50%;
-  display:none}
+  padding:5px 8px;backdrop-filter:blur(4px);max-width:55%;display:none}
 #priority-legend.show{display:block}
 .legend-title{font-family:'Share Tech Mono',monospace;font-size:.55rem;
   color:rgba(0,245,255,.5);letter-spacing:.12em;margin-bottom:3px}
 .legend-row{display:flex;align-items:center;gap:6px;padding:1px 0}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;
-  border:1.5px solid #fff}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1.5px solid #fff}
 .legend-name{font-family:'Share Tech Mono',monospace;font-size:.6rem;
   color:rgba(255,255,255,.85);letter-spacing:.04em}
-
-/* VISION RESULT PANEL */
 #vision-panel{position:absolute;top:55px;left:10px;right:10px;z-index:25;
   background:rgba(0,0,0,.92);border:1.5px solid var(--purple);
   backdrop-filter:blur(8px);
   clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
-  max-height:60vh;overflow-y:auto;transition:all .3s}
+  max-height:62vh;overflow-y:auto}
 .vision-header{display:flex;align-items:center;justify-content:space-between;
   padding:6px 12px;border-bottom:1px solid rgba(204,0,255,.3)}
 .vision-title{font-family:'Share Tech Mono',monospace;font-size:.65rem;
@@ -96,6 +84,8 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
 .vision-name.gem{color:var(--gold)}
 .vision-name.jewelry{color:var(--purple)}
 .vision-name.target{color:var(--purple)}
+.vision-name.currency{color:var(--green)}
+.vision-name.medication{color:var(--amber)}
 .vision-detail{font-family:'Share Tech Mono',monospace;font-size:.65rem;
   color:rgba(0,245,255,.75);line-height:1.5;margin-top:3px}
 .vision-ri{font-family:'Share Tech Mono',monospace;font-size:.68rem;
@@ -103,21 +93,16 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
   border:1px solid rgba(0,255,136,.3);display:inline-block}
 .vision-ri.red{color:var(--red);border-color:rgba(255,61,61,.3)}
 .vision-loading{font-family:'Share Tech Mono',monospace;font-size:.7rem;
-  color:rgba(204,0,255,.8);text-align:center;padding:10px;
-  animation:pulse 1s ease-in-out infinite}
-.vision-error{font-family:'Share Tech Mono',monospace;font-size:.65rem;
-  color:var(--red);padding:6px}
+  color:rgba(204,0,255,.8);text-align:center;padding:10px;animation:pulse 1s ease-in-out infinite}
+.vision-error{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--red);padding:6px}
 .vision-labels{margin-top:6px;font-family:'Share Tech Mono',monospace;
   font-size:.6rem;color:rgba(0,245,255,.4);letter-spacing:.08em}
 .label-item{display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;
   border:1px solid rgba(0,245,255,.2);color:rgba(255,255,255,.7);border-radius:1px}
 .vision-idle{font-family:'Share Tech Mono',monospace;font-size:.7rem;
   color:rgba(0,245,255,.4);text-align:center;padding:12px;line-height:1.6}
-
-/* COMPOSITION DROPDOWN */
-.detail-dropdown{margin-top:8px;border:1px solid rgba(0,245,255,.2);
-  border-radius:2px;overflow:hidden}
-.detail-toggle{padding:5px 10px;background:rgba(0,245,255,.06);
+.detail-dropdown{margin-top:8px;border:1px solid rgba(0,245,255,.2);border-radius:2px;overflow:hidden}
+.detail-toggle{padding:6px 10px;background:rgba(0,245,255,.06);
   font-family:'Share Tech Mono',monospace;font-size:.65rem;
   color:var(--cyan);letter-spacing:.1em;cursor:pointer;
   display:flex;justify-content:space-between;align-items:center}
@@ -125,11 +110,18 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
 .detail-content{padding:8px 10px;background:rgba(0,0,0,.5);display:none;
   font-family:'Share Tech Mono',monospace;font-size:.62rem;line-height:1.7}
 .detail-content.open{display:block}
-.detail-row{display:flex;justify-content:space-between;padding:1px 0}
-.detail-key{color:rgba(0,245,255,.6);min-width:100px}
-.detail-val{color:#fff;text-align:right;flex:1;padding-left:8px}
-
-/* HUD BOTTOM */
+.detail-row{display:flex;justify-content:space-between;padding:1px 0;gap:8px}
+.detail-key{color:rgba(0,245,255,.6);min-width:90px;flex-shrink:0}
+.detail-val{color:#fff;text-align:right;flex:1}
+.security-list{list-style:none;padding:0;margin-top:4px}
+.security-list li{font-family:'Share Tech Mono',monospace;font-size:.6rem;
+  padding:3px 0;color:rgba(255,255,255,.85);
+  display:flex;align-items:flex-start;gap:6px}
+.check-box{display:inline-block;width:12px;height:12px;border:1px solid var(--green);
+  flex-shrink:0;margin-top:1px}
+.warning-box{margin-top:6px;padding:6px 8px;border:1px solid var(--amber);
+  background:rgba(255,179,0,.08);font-family:'Share Tech Mono',monospace;
+  font-size:.6rem;color:var(--amber);line-height:1.5}
 .hud-bottom{position:absolute;bottom:0;left:0;right:0;
   padding:8px 14px env(safe-area-inset-bottom,12px);
   background:linear-gradient(to top,rgba(0,0,0,.92),transparent);z-index:20}
@@ -141,11 +133,11 @@ input[type=range]{flex:1;height:4px;-webkit-appearance:none;
   border-radius:2px;outline:none}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;
   border-radius:50%;background:var(--cyan);border:2px solid #000;box-shadow:0 0 8px var(--cyan)}
-.btn-row{display:flex;gap:6px;justify-content:center}
-.hud-btn{flex:1;max-width:110px;padding:.55rem .3rem;border:1.5px solid var(--border);
-  background:var(--glass);color:var(--cyan);font-family:'Rajdhani',sans-serif;
-  font-size:.76rem;font-weight:600;letter-spacing:.07em;cursor:pointer;
-  backdrop-filter:blur(4px);
+.btn-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.hud-btn{flex:1;min-width:60px;max-width:110px;padding:.55rem .3rem;
+  border:1.5px solid var(--border);background:var(--glass);color:var(--cyan);
+  font-family:'Rajdhani',sans-serif;font-size:.74rem;font-weight:600;
+  letter-spacing:.06em;cursor:pointer;backdrop-filter:blur(4px);
   clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);
   transition:all .15s;text-align:center}
 .hud-btn:active{background:rgba(0,245,255,.2);transform:scale(.97)}
@@ -154,6 +146,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .hud-btn.big-btn{flex:2;max-width:none;border-color:var(--purple);
   color:var(--purple);font-weight:700;font-size:.85rem;padding:.65rem .3rem}
 .hud-btn.big-btn:active{background:rgba(204,0,255,.25)}
+
+/* MODE SELECTOR */
+.mode-row{display:flex;gap:4px;justify-content:center;margin-bottom:6px}
+.mode-btn{flex:1;font-family:'Share Tech Mono',monospace;font-size:.58rem;
+  padding:3px 4px;border:1px solid var(--border);color:rgba(0,245,255,.55);
+  background:transparent;cursor:pointer;letter-spacing:.06em;
+  border-radius:1px;text-align:center}
+.mode-btn.active{border-color:var(--cyan);color:var(--cyan);
+  background:rgba(0,245,255,.1);font-weight:700}
 
 /* DATABASE PANEL */
 #db-panel{position:fixed;inset:0;z-index:50;background:rgba(0,5,7,.97);
@@ -170,25 +171,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 #db-search::placeholder{color:rgba(0,245,255,.3)}
 .db-cat-scroll{display:flex;gap:5px;padding:0 14px 7px;overflow-x:auto;flex-shrink:0}
 .db-cat-scroll::-webkit-scrollbar{display:none}
-.cat-btn{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:3px 9px;
+.cat-btn{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 10px;
   border:1px solid var(--border);color:rgba(0,245,255,.55);background:transparent;
-  cursor:pointer;white-space:nowrap;border-radius:1px;flex-shrink:0}
-.cat-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,245,255,.1)}
-
-/* SELECTED BAR with chips */
+  cursor:pointer;white-space:nowrap;border-radius:1px;flex-shrink:0;
+  font-weight:600;letter-spacing:.05em}
+.cat-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,245,255,.15)}
 .selected-bar{padding:8px 14px;border-bottom:1px solid var(--border);
-  border-top:1px solid var(--border);flex-shrink:0;
-  background:rgba(204,0,255,.04)}
+  border-top:1px solid var(--border);flex-shrink:0;background:rgba(204,0,255,.04)}
 .selected-label{font-family:'Share Tech Mono',monospace;font-size:.6rem;
   color:rgba(204,0,255,.7);letter-spacing:.12em;margin-bottom:5px;font-weight:700}
 .selected-chips{display:flex;flex-wrap:wrap;gap:5px;min-height:24px}
 .sel-chip{font-family:'Share Tech Mono',monospace;font-size:.62rem;
-  padding:3px 9px;border:1.5px solid;
-  border-radius:1px;display:flex;align-items:center;gap:6px;color:#fff;
-  background:rgba(0,0,0,.5)}
+  padding:3px 9px;border:1.5px solid;border-radius:1px;display:flex;
+  align-items:center;gap:6px;color:#fff;background:rgba(0,0,0,.5)}
 .sel-chip-color{width:9px;height:9px;border-radius:50%;border:1.5px solid #fff}
-
-/* ROW WITH ADD/REMOVE button */
 .db-list{flex:1;overflow-y:auto;padding:4px 0}
 .db-list::-webkit-scrollbar{width:3px}
 .db-list::-webkit-scrollbar-thumb{background:var(--border)}
@@ -196,30 +192,29 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   letter-spacing:.18em;padding:7px 14px 3px;color:rgba(255,255,255,.3);
   border-top:1px solid rgba(255,255,255,.05)}
 .db-row{display:flex;justify-content:space-between;align-items:center;
-  padding:7px 14px;border-bottom:1px solid rgba(255,255,255,.04);gap:8px}
+  padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.04);gap:10px}
 .db-row.selected-row{background:rgba(204,0,255,.1);border-left:3px solid var(--purple)}
 .db-row-info{flex:1;min-width:0}
-.db-name{font-family:'Share Tech Mono',monospace;font-size:.72rem;
+.db-name{font-family:'Share Tech Mono',monospace;font-size:.74rem;
   color:rgba(255,255,255,.85);display:block;line-height:1.3;
   overflow:hidden;text-overflow:ellipsis}
 .db-row.selected-row .db-name{color:#fff;font-weight:700}
-.db-ri-val{font-family:'Share Tech Mono',monospace;font-size:.66rem;display:block;margin-top:1px}
+.db-ri-val{font-family:'Share Tech Mono',monospace;font-size:.62rem;
+  display:block;margin-top:1px;color:rgba(0,245,255,.5)}
 .ri-low{color:var(--red)}.ri-med{color:var(--amber)}.ri-high{color:var(--green)}.ri-vhigh{color:var(--purple)}
-
-/* ADD/REMOVE BUTTONS */
-.db-action-btn{padding:5px 12px;border-radius:2px;font-family:'Rajdhani',sans-serif;
-  font-size:.78rem;font-weight:700;letter-spacing:.08em;cursor:pointer;
+.db-action-btn{padding:8px 16px;border-radius:2px;font-family:'Rajdhani',sans-serif;
+  font-size:.85rem;font-weight:700;letter-spacing:.08em;cursor:pointer;
   white-space:nowrap;transition:all .15s;flex-shrink:0;
-  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)}
-.db-action-btn.add-btn{border:1.5px solid var(--green);background:rgba(0,255,136,.1);
-  color:var(--green)}
-.db-action-btn.add-btn:active{background:rgba(0,255,136,.3);transform:scale(.95)}
-.db-action-btn.remove-btn{border:1.5px solid var(--red);background:rgba(255,61,61,.1);
-  color:var(--red)}
-.db-action-btn.remove-btn:active{background:rgba(255,61,61,.3);transform:scale(.95)}
-.db-action-btn.full-btn{border:1.5px solid rgba(255,255,255,.15);background:transparent;
+  clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);
+  min-width:75px;text-align:center;border:1.5px solid;background:transparent}
+.db-action-btn.add-btn{border-color:var(--green);color:var(--green);
+  background:rgba(0,255,136,.1)}
+.db-action-btn.add-btn:active{background:rgba(0,255,136,.35);transform:scale(.92)}
+.db-action-btn.remove-btn{border-color:var(--red);color:var(--red);
+  background:rgba(255,61,61,.1)}
+.db-action-btn.remove-btn:active{background:rgba(255,61,61,.35);transform:scale(.92)}
+.db-action-btn.full-btn{border-color:rgba(255,255,255,.15);
   color:rgba(255,255,255,.3);cursor:not-allowed}
-
 .db-footer{padding:10px 14px env(safe-area-inset-bottom,10px);
   border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px}
 .db-footer-btn{flex:1;padding:.7rem;text-align:center;border:1.5px solid var(--border);
@@ -228,8 +223,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .db-footer-btn.primary{border-color:var(--cyan);background:rgba(0,245,255,.1)}
 .db-footer-btn.danger{border-color:var(--red);color:var(--red)}
 .no-sel-hint{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:rgba(0,245,255,.3)}
-
-/* HISTORY PANEL */
 #history-panel{position:fixed;inset:0;z-index:55;background:rgba(0,5,7,.97);
   backdrop-filter:blur(10px);display:none;flex-direction:column}
 #history-panel.show{display:flex}
@@ -245,9 +238,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="corner-tl"></div><div class="corner-br"></div>
   <div class="hex-ring"><div style="font-size:2.2rem">💎</div></div>
   <div class="logo">SPECULIX</div>
-  <div class="tagline">AI-POWERED MATERIAL IDENTIFICATION v6.0<br>GOOGLE VISION ENGINE · COLOR-CODED TARGETING</div>
+  <div class="tagline">UNIVERSAL OBJECT IDENTIFIER v7.0<br>GEMS · METALS · GLASS · CURRENCY · MEDICATION</div>
   <button class="start-btn" onclick="startApp()">🔬 START IDENTIFYING</button>
-  <div class="version-badge">v6.0 · TARGET TRACKING · COMPOSITION DATA · HISTORY LOG</div>
+  <div class="version-badge">v7.0 · MULTI-MODE · COUNTERFEIT DETECTION · COLOR TARGETING</div>
 </div>
 
 <div class="screen hidden" id="scanner">
@@ -276,13 +269,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     </div>
     <div class="vision-body" id="vision-body">
       <div class="vision-idle">
-        Tap <strong style="color:var(--purple)">🔬 IDENTIFY</strong> or enable <strong style="color:var(--purple)">AUTO</strong><br>
-        to analyze what the camera sees
+        Tap <strong style="color:var(--purple)">🔬 IDENTIFY</strong> to analyze<br>
+        Use <strong style="color:var(--cyan)">📊 DB</strong> to select target materials
       </div>
     </div>
   </div>
 
   <div class="hud-bottom">
+    <div class="mode-row">
+      <button class="mode-btn active" id="mode-material" onclick="setMode('material')">💎 MATERIAL</button>
+      <button class="mode-btn" id="mode-currency" onclick="setMode('currency')">💵 CURRENCY</button>
+      <button class="mode-btn" id="mode-medication" onclick="setMode('medication')">💊 MEDS</button>
+    </div>
     <div class="controls-row">
       <span class="ctrl-label">HIGHLIGHT</span>
       <input type="range" id="sensitivity" min="1" max="10" value="5" oninput="updateSensitivity(this)">
@@ -300,18 +298,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 
 <div id="db-panel">
   <div class="db-header">
-    <div class="db-title">MATERIAL DATABASE</div>
-    <div class="db-sub">120+ MATERIALS · ADD UP TO 5 TARGETS · <span id="sel-count-hdr">0/5</span></div>
+    <div class="db-title">DATABASE</div>
+    <div class="db-sub">SELECT UP TO 5 PRIORITY TARGETS · <span id="sel-count-hdr">0/5</span></div>
   </div>
   <div class="db-search-wrap">
-    <input type="text" id="db-search" placeholder="Search any material..."
+    <input type="text" id="db-search" placeholder="Search any item..."
       oninput="filterDB()" autocomplete="off" autocorrect="off" spellcheck="false">
   </div>
   <div class="db-cat-scroll" id="cat-scroll"></div>
   <div class="selected-bar">
     <div class="selected-label">PRIORITY TARGETS (<span id="sel-count">0</span>/5):</div>
     <div class="selected-chips" id="selected-chips">
-      <span class="no-sel-hint">None — tap ADD to select up to 5 materials</span>
+      <span class="no-sel-hint">None — tap ADD to select up to 5</span>
     </div>
   </div>
   <div class="db-list" id="db-list"></div>
@@ -324,7 +322,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 <div id="history-panel">
   <div class="db-header">
     <div class="db-title">SCAN HISTORY</div>
-    <div class="db-sub">All identified materials with timestamps</div>
+    <div class="db-sub">All identifications with timestamps</div>
   </div>
   <div class="db-list" id="history-list"></div>
   <div class="db-footer">
@@ -338,80 +336,75 @@ const VISION_API_KEY='AIzaSyAKJmOVHpJ8y1pNlOaY-Y0BLdZlDNuD5tM';
 const VISION_API_URL=`https://vision.googleapis.com/v1/images:annotate?key=${VISION_API_KEY}`;
 
 // ═══════════════════════════════════════════════════════════════════════
-// MATERIALS DATABASE — pure materials only + jewelry types
-// Each entry has: name, category, refractive index, composition data
+// MATERIALS DATABASE
 // ═══════════════════════════════════════════════════════════════════════
 const MATERIALS=[
   // ── DIAMOND & SIMULANTS ──
   {cat:"Diamond & Simulants",name:"Diamond",ri:"2.417",riN:2.417,
     composition:"Pure Carbon (C)",hardness:"10 Mohs",density:"3.52 g/cm³",
     origin:"South Africa, Russia, Botswana",value:"$2,000–$30,000+/carat",
-    colors:"Colorless, yellow, blue, pink, green",care:"Hardest material — clean with mild soap"},
+    colors:"Colorless, yellow, blue, pink, green",
+    care:"Hardest natural material — clean with mild soap"},
   {cat:"Diamond & Simulants",name:"Lab-Grown Diamond",ri:"2.42",riN:2.42,
     composition:"Synthetic Carbon (C) — CVD or HPHT",hardness:"10 Mohs",density:"3.52 g/cm³",
     origin:"Lab-grown worldwide",value:"$500–$5,000/carat",
     colors:"Colorless, yellow, blue, pink",care:"Identical to natural diamond"},
   {cat:"Diamond & Simulants",name:"Moissanite",ri:"2.65–2.69",riN:2.67,
     composition:"Silicon Carbide (SiC)",hardness:"9.25 Mohs",density:"3.21 g/cm³",
-    origin:"Lab-grown (originally meteorite)",value:"$300–$800/carat",
+    origin:"Lab-grown",value:"$300–$800/carat",
     colors:"Near-colorless, slight yellow tint",care:"Mild soap and warm water"},
   {cat:"Diamond & Simulants",name:"Cubic Zirconia",ri:"2.15–2.18",riN:2.165,
     composition:"Zirconium Dioxide (ZrO₂)",hardness:"8.5 Mohs",density:"5.65–5.95 g/cm³",
-    origin:"Lab-grown",value:"$5–$50/carat",
-    colors:"Colorless, all colors possible",care:"Mild soap, avoid harsh chemicals"},
+    origin:"Lab-grown",value:"$5–$50/carat",colors:"Colorless, all colors",
+    care:"Mild soap, avoid harsh chemicals"},
   {cat:"Diamond & Simulants",name:"White Sapphire",ri:"1.762–1.770",riN:1.766,
     composition:"Aluminum Oxide (Al₂O₃)",hardness:"9 Mohs",density:"3.98–4.05 g/cm³",
     origin:"Sri Lanka, Madagascar",value:"$400–$1,200/carat",
-    colors:"Colorless variety of corundum",care:"Mild soap, ultrasonic safe"},
-
+    colors:"Colorless variety of corundum",care:"Mild soap"},
   // ── PRECIOUS GEMS ──
   {cat:"Precious Gems",name:"Ruby",ri:"1.762–1.770",riN:1.766,
     composition:"Aluminum Oxide (Al₂O₃) + Chromium",hardness:"9 Mohs",density:"3.97–4.05 g/cm³",
-    origin:"Myanmar (Burma), Mozambique, Thailand",value:"$1,000–$15,000+/carat",
-    colors:"Pigeon blood red to pinkish red",care:"Mild soap, avoid sudden temperature change"},
+    origin:"Myanmar, Mozambique, Thailand",value:"$1,000–$15,000+/carat",
+    colors:"Pigeon blood red to pinkish red",care:"Mild soap"},
   {cat:"Precious Gems",name:"Blue Sapphire",ri:"1.762–1.770",riN:1.766,
     composition:"Aluminum Oxide (Al₂O₃) + Iron/Titanium",hardness:"9 Mohs",density:"3.95–4.03 g/cm³",
     origin:"Kashmir, Sri Lanka, Madagascar",value:"$800–$10,000+/carat",
-    colors:"Cornflower blue, royal blue",care:"Mild soap, ultrasonic generally safe"},
+    colors:"Cornflower to royal blue",care:"Mild soap"},
   {cat:"Precious Gems",name:"Pink Sapphire",ri:"1.762–1.770",riN:1.766,
-    composition:"Aluminum Oxide (Al₂O₃) + Chromium trace",hardness:"9 Mohs",density:"3.97–4.05 g/cm³",
+    composition:"Aluminum Oxide (Al₂O₃) + Chromium",hardness:"9 Mohs",density:"3.97–4.05 g/cm³",
     origin:"Madagascar, Sri Lanka",value:"$500–$5,000/carat",
-    colors:"Pale pink to vivid hot pink",care:"Mild soap, ultrasonic safe"},
+    colors:"Pale pink to vivid hot pink",care:"Mild soap"},
   {cat:"Precious Gems",name:"Yellow Sapphire",ri:"1.762–1.770",riN:1.766,
     composition:"Aluminum Oxide (Al₂O₃) + Iron",hardness:"9 Mohs",density:"3.97–4.05 g/cm³",
     origin:"Sri Lanka, Madagascar",value:"$300–$3,000/carat",
-    colors:"Pale yellow to deep golden",care:"Mild soap, ultrasonic safe"},
+    colors:"Pale yellow to golden",care:"Mild soap"},
   {cat:"Precious Gems",name:"Emerald",ri:"1.560–1.605",riN:1.582,
     composition:"Beryllium Aluminum Silicate (Be₃Al₂Si₆O₁₈)",hardness:"7.5–8 Mohs",
     density:"2.67–2.78 g/cm³",origin:"Colombia, Zambia, Brazil",
     value:"$500–$20,000+/carat",colors:"Vivid green",
-    care:"Mild soap only — never ultrasonic, often oil-treated"},
+    care:"Mild soap only — never ultrasonic"},
   {cat:"Precious Gems",name:"Alexandrite",ri:"1.746–1.755",riN:1.750,
-    composition:"Beryllium Aluminum Oxide (BeAl₂O₄) + Chromium",hardness:"8.5 Mohs",
-    density:"3.70–3.78 g/cm³",origin:"Russia (rare), Brazil, Sri Lanka",
-    value:"$2,000–$50,000+/carat",colors:"Green in daylight, red in incandescent",
-    care:"Mild soap, color-change phenomenon"},
+    composition:"BeAl₂O₄ + Chromium",hardness:"8.5 Mohs",density:"3.70–3.78 g/cm³",
+    origin:"Russia, Brazil, Sri Lanka",value:"$2,000–$50,000+/carat",
+    colors:"Green in daylight, red in incandescent",care:"Mild soap"},
   {cat:"Precious Gems",name:"Tanzanite",ri:"1.691–1.700",riN:1.695,
-    composition:"Calcium Aluminum Silicate (Ca₂Al₃(SiO₄)₃(OH))",hardness:"6.5–7 Mohs",
+    composition:"Calcium Aluminum Silicate",hardness:"6.5–7 Mohs",
     density:"3.10–3.38 g/cm³",origin:"Tanzania (only source)",
-    value:"$300–$1,200/carat",colors:"Deep blue, violet, purple",
+    value:"$300–$1,200/carat",colors:"Deep blue, violet",
     care:"Soft cloth only — never ultrasonic"},
   {cat:"Precious Gems",name:"Aquamarine",ri:"1.567–1.590",riN:1.578,
     composition:"Beryllium Aluminum Silicate + Iron",hardness:"7.5–8 Mohs",
     density:"2.66–2.80 g/cm³",origin:"Brazil, Pakistan, Madagascar",
-    value:"$50–$500/carat",colors:"Pale to medium blue, blue-green",
-    care:"Mild soap, ultrasonic safe"},
+    value:"$50–$500/carat",colors:"Pale to medium blue",care:"Mild soap"},
   {cat:"Precious Gems",name:"Tourmaline",ri:"1.624–1.644",riN:1.634,
     composition:"Complex Boron Silicate",hardness:"7–7.5 Mohs",
     density:"2.82–3.32 g/cm³",origin:"Brazil, Afghanistan, Mozambique",
     value:"$50–$10,000+/carat",colors:"Every color (Paraiba most valuable)",
-    care:"Mild soap, can be heat-sensitive"},
+    care:"Mild soap"},
   {cat:"Precious Gems",name:"Spinel",ri:"1.712–1.726",riN:1.718,
     composition:"Magnesium Aluminate (MgAl₂O₄)",hardness:"8 Mohs",
-    density:"3.58–4.06 g/cm³",origin:"Myanmar, Sri Lanka, Tajikistan",
-    value:"$200–$5,000/carat",colors:"Red, pink, blue, purple, black",
-    care:"Mild soap, ultrasonic safe"},
-
+    density:"3.58–4.06 g/cm³",origin:"Myanmar, Sri Lanka",
+    value:"$200–$5,000/carat",colors:"Red, pink, blue, purple",care:"Mild soap"},
   // ── SEMI-PRECIOUS GEMS ──
   {cat:"Semi-Precious",name:"Amethyst",ri:"1.532–1.554",riN:1.543,
     composition:"Silicon Dioxide (SiO₂) + Iron",hardness:"7 Mohs",
@@ -421,228 +414,456 @@ const MATERIALS=[
   {cat:"Semi-Precious",name:"Citrine",ri:"1.532–1.554",riN:1.543,
     composition:"Silicon Dioxide (SiO₂) + Iron",hardness:"7 Mohs",
     density:"2.65 g/cm³",origin:"Brazil, Madagascar",
-    value:"$10–$30/carat",colors:"Pale yellow to deep golden brown",
-    care:"Mild soap, heat-treated amethyst"},
+    value:"$10–$30/carat",colors:"Pale yellow to deep golden",care:"Mild soap"},
   {cat:"Semi-Precious",name:"Peridot",ri:"1.654–1.690",riN:1.672,
-    composition:"Magnesium Iron Silicate ((Mg,Fe)₂SiO₄)",hardness:"6.5–7 Mohs",
-    density:"3.27–3.48 g/cm³",origin:"Pakistan, Myanmar, Arizona USA",
-    value:"$50–$500/carat",colors:"Olive green to lime green",
-    care:"Mild soap — never ultrasonic"},
+    composition:"(Mg,Fe)₂SiO₄",hardness:"6.5–7 Mohs",density:"3.27–3.48 g/cm³",
+    origin:"Pakistan, Myanmar, Arizona",value:"$50–$500/carat",
+    colors:"Olive to lime green",care:"Mild soap — never ultrasonic"},
   {cat:"Semi-Precious",name:"Topaz",ri:"1.619–1.627",riN:1.623,
-    composition:"Aluminum Fluorosilicate (Al₂SiO₄(F,OH)₂)",hardness:"8 Mohs",
-    density:"3.49–3.57 g/cm³",origin:"Brazil, Pakistan, Russia",
-    value:"$10–$1,000/carat",colors:"Blue, yellow, pink, imperial orange",
-    care:"Mild soap — perfect cleavage, brittle"},
+    composition:"Aluminum Fluorosilicate",hardness:"8 Mohs",density:"3.49–3.57 g/cm³",
+    origin:"Brazil, Pakistan, Russia",value:"$10–$1,000/carat",
+    colors:"Blue, yellow, pink, imperial orange",care:"Mild soap"},
   {cat:"Semi-Precious",name:"Garnet",ri:"1.730–1.830",riN:1.780,
-    composition:"Various Silicates (Mg/Fe/Mn/Ca/Al/Cr)",hardness:"6.5–7.5 Mohs",
+    composition:"Various Silicates",hardness:"6.5–7.5 Mohs",
     density:"3.5–4.3 g/cm³",origin:"Worldwide",
-    value:"$10–$5,000/carat",colors:"Red, green (Tsavorite/Demantoid), orange",
-    care:"Mild soap, ultrasonic generally safe"},
+    value:"$10–$5,000/carat",colors:"Red, green (Tsavorite), orange",care:"Mild soap"},
   {cat:"Semi-Precious",name:"Opal",ri:"1.37–1.47",riN:1.42,
-    composition:"Hydrated Silicon Dioxide (SiO₂·nH₂O)",hardness:"5.5–6.5 Mohs",
-    density:"2.00–2.25 g/cm³",origin:"Australia, Ethiopia, Mexico",
-    value:"$100–$10,000/carat",colors:"All colors — play of color phenomenon",
-    care:"Soft cloth only — porous, water-sensitive"},
+    composition:"SiO₂·nH₂O (hydrated silica)",hardness:"5.5–6.5 Mohs",
+    density:"2.00–2.25 g/cm³",origin:"Australia, Ethiopia",
+    value:"$100–$10,000/carat",colors:"Play of color phenomenon",
+    care:"Soft cloth only — porous"},
   {cat:"Semi-Precious",name:"Pearl",ri:"1.530–1.685",riN:1.607,
-    composition:"Calcium Carbonate (CaCO₃) + Conchiolin",hardness:"2.5–4.5 Mohs",
-    density:"2.60–2.85 g/cm³",origin:"Cultured: Japan, China; Natural: Persian Gulf",
+    composition:"Calcium Carbonate + Conchiolin",hardness:"2.5–4.5 Mohs",
+    density:"2.60–2.85 g/cm³",origin:"Cultured: Japan/China",
     value:"$50–$10,000+/strand",colors:"White, cream, pink, black, gold",
-    care:"Soft cloth only — avoid chemicals, perfume, ultrasonic"},
+    care:"Soft cloth only — avoid chemicals"},
   {cat:"Semi-Precious",name:"Moonstone",ri:"1.518–1.526",riN:1.522,
-    composition:"Potassium Aluminum Silicate (KAlSi₃O₈)",hardness:"6 Mohs",
-    density:"2.56–2.59 g/cm³",origin:"Sri Lanka, India, Madagascar",
+    composition:"Potassium Aluminum Silicate",hardness:"6 Mohs",
+    density:"2.56–2.59 g/cm³",origin:"Sri Lanka, India",
     value:"$10–$300/carat",colors:"White with blue/rainbow sheen",
     care:"Mild soap — no ultrasonic"},
   {cat:"Semi-Precious",name:"Jade",ri:"1.640–1.667",riN:1.653,
-    composition:"Jadeite (NaAlSi₂O₆) or Nephrite (Ca₂(Mg,Fe)₅Si₈O₂₂(OH)₂)",
-    hardness:"6.5–7 Mohs",density:"3.30–3.38 g/cm³",
-    origin:"Myanmar (jadeite), China, New Zealand (nephrite)",
-    value:"$50–$3,000,000+/piece",colors:"Imperial green, lavender, white, black",
-    care:"Mild soap — extremely tough but not hard"},
+    composition:"Jadeite or Nephrite",hardness:"6.5–7 Mohs",
+    density:"3.30–3.38 g/cm³",origin:"Myanmar, China, New Zealand",
+    value:"$50–$3,000,000+/piece",colors:"Imperial green, lavender, white",
+    care:"Mild soap"},
   {cat:"Semi-Precious",name:"Turquoise",ri:"1.610–1.650",riN:1.630,
     composition:"Hydrated Copper Aluminum Phosphate",hardness:"5–6 Mohs",
-    density:"2.6–2.9 g/cm³",origin:"Iran, USA (Arizona/Nevada), China",
-    value:"$5–$1,000/carat",colors:"Sky blue, blue-green, with matrix",
-    care:"Soft cloth — porous, avoid water/chemicals"},
+    density:"2.6–2.9 g/cm³",origin:"Iran, USA, China",
+    value:"$5–$1,000/carat",colors:"Sky blue, blue-green",
+    care:"Soft cloth — porous"},
   {cat:"Semi-Precious",name:"Amber",ri:"1.539–1.545",riN:1.542,
-    composition:"Fossilized Tree Resin (Organic)",hardness:"2–2.5 Mohs",
-    density:"1.05–1.10 g/cm³",origin:"Baltic region, Dominican Republic",
-    value:"$5–$5,000+/piece",colors:"Yellow, orange, red, blue (rare)",
-    care:"Soft cloth only — heat-sensitive, brittle"},
+    composition:"Fossilized Tree Resin",hardness:"2–2.5 Mohs",
+    density:"1.05–1.10 g/cm³",origin:"Baltic, Dominican Republic",
+    value:"$5–$5,000+/piece",colors:"Yellow, orange, red, blue",
+    care:"Soft cloth — heat-sensitive"},
   {cat:"Semi-Precious",name:"Lapis Lazuli",ri:"1.500–1.550",riN:1.525,
     composition:"Lazurite + Calcite + Pyrite",hardness:"5–5.5 Mohs",
-    density:"2.7–2.9 g/cm³",origin:"Afghanistan, Chile, Russia",
-    value:"$10–$300/carat",colors:"Deep ultramarine blue with gold pyrite",
+    density:"2.7–2.9 g/cm³",origin:"Afghanistan",
+    value:"$10–$300/carat",colors:"Deep blue with gold pyrite",
     care:"Soft cloth — porous"},
   {cat:"Semi-Precious",name:"Zircon",ri:"1.925–1.984",riN:1.955,
     composition:"Zirconium Silicate (ZrSiO₄)",hardness:"7.5 Mohs",
-    density:"4.60–4.80 g/cm³",origin:"Cambodia, Thailand, Sri Lanka",
-    value:"$50–$400/carat",colors:"Blue, white, yellow, brown",
-    care:"Mild soap — different from cubic zirconia"},
+    density:"4.60–4.80 g/cm³",origin:"Cambodia, Sri Lanka",
+    value:"$50–$400/carat",colors:"Blue, white, yellow",
+    care:"Different from cubic zirconia"},
   {cat:"Semi-Precious",name:"Quartz",ri:"1.544–1.553",riN:1.548,
     composition:"Silicon Dioxide (SiO₂)",hardness:"7 Mohs",
     density:"2.65 g/cm³",origin:"Worldwide",
-    value:"$1–$50/carat",colors:"Clear, smoky, rose, milky",
-    care:"Very durable — mild soap"},
+    value:"$1–$50/carat",colors:"Clear, smoky, rose, milky",care:"Mild soap"},
   {cat:"Semi-Precious",name:"Iolite",ri:"1.522–1.578",riN:1.550,
     composition:"Magnesium Aluminum Silicate",hardness:"7–7.5 Mohs",
-    density:"2.58–2.66 g/cm³",origin:"India, Sri Lanka, Brazil",
-    value:"$50–$300/carat",colors:"Violet-blue (pleochroic)",
-    care:"Mild soap, ultrasonic safe"},
+    density:"2.58–2.66 g/cm³",origin:"India, Sri Lanka",
+    value:"$50–$300/carat",colors:"Violet-blue (pleochroic)",care:"Mild soap"},
   {cat:"Semi-Precious",name:"Hematite",ri:"2.940–3.220",riN:3.08,
     composition:"Iron Oxide (Fe₂O₃)",hardness:"5–6 Mohs",
-    density:"5.26 g/cm³",origin:"Worldwide — Brazil, Australia",
-    value:"$5–$50/carat",colors:"Metallic black-grey",
-    care:"Mild soap, can rust if untreated"},
-
+    density:"5.26 g/cm³",origin:"Worldwide",
+    value:"$5–$50/carat",colors:"Metallic black-grey",care:"Keep dry"},
   // ── METALS ──
   {cat:"Metals",name:"Gold",ri:"0.27 (reflective)",riN:0.27,
-    composition:"Pure Au (or alloy with Cu/Ag/Pd)",hardness:"2.5–3 Mohs (24k pure)",
+    composition:"Pure Au or alloy with Cu/Ag/Pd",hardness:"2.5–3 Mohs",
     density:"19.32 g/cm³",origin:"South Africa, China, Australia",
-    value:"$60–$70/gram (24k)",colors:"Yellow, white, rose (alloyed)",
-    care:"Soft cloth or mild soap — soft metal scratches easily"},
+    value:"$60–$70/gram (24k)",colors:"Yellow, white, rose",
+    care:"Soft metal — handle gently"},
   {cat:"Metals",name:"Silver",ri:"0.18 (reflective)",riN:0.18,
-    composition:"Pure Ag (or Sterling 92.5% with Cu)",hardness:"2.5–3 Mohs",
+    composition:"Pure Ag or Sterling 92.5% with Cu",hardness:"2.5–3 Mohs",
     density:"10.49 g/cm³",origin:"Mexico, Peru, China",
     value:"$0.80/gram",colors:"White-silver, tarnishes black",
-    care:"Anti-tarnish polish, store in airtight bag"},
+    care:"Anti-tarnish polish, store airtight"},
   {cat:"Metals",name:"Platinum",ri:"2.63 (reflective)",riN:2.63,
     composition:"Pure Pt (90-95% in jewelry)",hardness:"4–4.5 Mohs",
-    density:"21.45 g/cm³",origin:"South Africa, Russia, Zimbabwe",
+    density:"21.45 g/cm³",origin:"South Africa, Russia",
     value:"$30–$35/gram",colors:"Naturally white, doesn't tarnish",
     care:"Mild soap — extremely durable"},
   {cat:"Metals",name:"Palladium",ri:"varies",riN:1.85,
     composition:"Pure Pd (95% in jewelry)",hardness:"4.75 Mohs",
     density:"12.02 g/cm³",origin:"Russia, South Africa",
     value:"$25–$35/gram",colors:"White, lighter than platinum",
-    care:"Mild soap, hypoallergenic"},
+    care:"Hypoallergenic"},
   {cat:"Metals",name:"Rose Gold",ri:"0.30 (reflective)",riN:0.30,
     composition:"75% Au + 25% Cu (14k = 58.3% Au)",hardness:"3–4 Mohs",
     density:"15.5 g/cm³",origin:"Alloyed worldwide",
-    value:"$45–$60/gram (14k)",colors:"Pinkish-red gold",
-    care:"Mild soap, can develop patina"},
+    value:"$45–$60/gram (14k)",colors:"Pinkish-red gold",care:"Mild soap"},
   {cat:"Metals",name:"White Gold",ri:"0.32 (reflective)",riN:0.32,
-    composition:"75% Au + Pd/Ni alloy + Rhodium plating",hardness:"3–4 Mohs",
+    composition:"75% Au + Pd/Ni + Rhodium plating",hardness:"3–4 Mohs",
     density:"14–17 g/cm³",origin:"Alloyed worldwide",
-    value:"$45–$60/gram (14k)",colors:"Bright white (rhodium-plated)",
+    value:"$45–$60/gram (14k)",colors:"Bright white",
     care:"Re-plate rhodium every 1-3 years"},
   {cat:"Metals",name:"Titanium",ri:"2.16 (reflective)",riN:2.16,
-    composition:"Pure Ti or Ti alloys",hardness:"6 Mohs",
-    density:"4.51 g/cm³",origin:"Australia, South Africa, Canada",
-    value:"$0.30/gram",colors:"Grey, can be anodized rainbow",
-    care:"Extremely durable, hypoallergenic"},
+    composition:"Pure Ti or alloys",hardness:"6 Mohs",
+    density:"4.51 g/cm³",origin:"Australia, South Africa",
+    value:"$0.30/gram",colors:"Grey, can be anodized",
+    care:"Hypoallergenic, durable"},
   {cat:"Metals",name:"Stainless Steel",ri:"2.95 (reflective)",riN:2.95,
     composition:"Iron + 10.5%+ Chromium + Nickel",hardness:"5.5–6 Mohs",
-    density:"7.5–8 g/cm³",origin:"Industrial worldwide",
-    value:"$0.005/gram",colors:"Silver-grey",
-    care:"Mild soap, very durable"},
+    density:"7.5–8 g/cm³",origin:"Industrial",
+    value:"$0.005/gram",colors:"Silver-grey",care:"Very durable"},
   {cat:"Metals",name:"Copper",ri:"0.62 (reflective)",riN:0.62,
-    composition:"Pure Cu",hardness:"3 Mohs",
-    density:"8.96 g/cm³",origin:"Chile, Peru, China",
-    value:"$0.01/gram",colors:"Reddish-orange, tarnishes green",
-    care:"Polish regularly, develops patina"},
-
-  // ── JEWELRY TYPES (general categories) ──
+    composition:"Pure Cu",hardness:"3 Mohs",density:"8.96 g/cm³",
+    origin:"Chile, Peru",value:"$0.01/gram",
+    colors:"Reddish-orange, tarnishes green",care:"Polish regularly"},
+  // ── JEWELRY TYPES ──
   {cat:"Jewelry",name:"Ring",ri:"varies",riN:1.7,
-    composition:"Mixed: metal band + stone(s)",hardness:"varies by stone",
-    density:"varies",origin:"Worldwide",
-    value:"$10–$1,000,000+",colors:"All",care:"Depends on materials"},
+    composition:"Mixed: metal band + stone(s)",hardness:"varies",
+    density:"varies",origin:"Worldwide",value:"$10–$1,000,000+",
+    colors:"All",care:"Depends on materials"},
   {cat:"Jewelry",name:"Earring",ri:"varies",riN:1.7,
     composition:"Mixed: metal post + stone/decoration",hardness:"varies",
-    density:"varies",origin:"Worldwide",
-    value:"$5–$100,000+",colors:"All",care:"Depends on materials"},
+    density:"varies",origin:"Worldwide",value:"$5–$100,000+",
+    colors:"All",care:"Depends on materials"},
   {cat:"Jewelry",name:"Necklace",ri:"varies",riN:1.7,
-    composition:"Metal chain + pendant/stones",hardness:"varies",
-    density:"varies",origin:"Worldwide",
-    value:"$10–$10,000,000+",colors:"All",care:"Store flat, untangled"},
+    composition:"Metal chain + pendant",hardness:"varies",density:"varies",
+    origin:"Worldwide",value:"$10–$10,000,000+",colors:"All",
+    care:"Store flat, untangled"},
   {cat:"Jewelry",name:"Bracelet",ri:"varies",riN:1.7,
-    composition:"Metal + stones/beads",hardness:"varies",
-    density:"varies",origin:"Worldwide",
-    value:"$10–$1,000,000+",colors:"All",care:"Remove during exercise"},
+    composition:"Metal + stones/beads",hardness:"varies",density:"varies",
+    origin:"Worldwide",value:"$10–$1,000,000+",colors:"All",
+    care:"Remove during exercise"},
   {cat:"Jewelry",name:"Pendant",ri:"varies",riN:1.7,
     composition:"Metal setting + central stone",hardness:"varies",
-    density:"varies",origin:"Worldwide",
-    value:"$20–$500,000+",colors:"All",care:"Depends on stone"},
-
-  // ── GLASS TYPES (relevant for hazard detection) ──
-  {cat:"Glass (Hazard)",name:"Window Glass",ri:"1.52",riN:1.52,
-    composition:"Soda-lime: SiO₂ + Na₂O + CaO",hardness:"5.5–7 Mohs",
-    density:"2.5 g/cm³",origin:"Industrial worldwide",
-    value:"Material cost only",colors:"Clear, slight green tint",
-    care:"⚠ HAZARD when broken — sharp edges"},
-  {cat:"Glass (Hazard)",name:"Bottle Glass",ri:"1.51–1.52",riN:1.515,
-    composition:"Soda-lime silica",hardness:"5.5–7 Mohs",
-    density:"2.5 g/cm³",origin:"Industrial worldwide",
-    value:"Material cost only",colors:"Clear, green, brown",
-    care:"⚠ HAZARD — extremely sharp when broken"},
-  {cat:"Glass (Hazard)",name:"Lead Crystal",ri:"1.70",riN:1.70,
-    composition:"SiO₂ + 24%+ Lead Oxide (PbO)",hardness:"5–6 Mohs",
-    density:"3.1 g/cm³",origin:"Czech, Ireland, France",
-    value:"$50–$5,000+/piece",colors:"Crystal clear, high refraction",
-    care:"⚠ HAZARD — sharp when broken, contains lead"},
-  {cat:"Glass (Hazard)",name:"Tempered Glass",ri:"1.52",riN:1.52,
-    composition:"Heat-treated soda-lime",hardness:"5.5–7 Mohs",
-    density:"2.5 g/cm³",origin:"Industrial worldwide",
-    value:"Material cost",colors:"Clear",
-    care:"⚠ Breaks into small chunks — less sharp than regular"},
-  {cat:"Glass (Hazard)",name:"Borosilicate (Pyrex)",ri:"1.47",riN:1.47,
-    composition:"SiO₂ + B₂O₃",hardness:"5.5–7 Mohs",
-    density:"2.23 g/cm³",origin:"Industrial worldwide",
-    value:"Material cost",colors:"Clear",
-    care:"⚠ Heat-resistant glass, sharp when broken"},
-  {cat:"Glass (Hazard)",name:"Mirror Glass",ri:"1.52",riN:1.52,
-    composition:"Glass + silver/aluminum coating",hardness:"5.5 Mohs",
-    density:"2.5 g/cm³",origin:"Industrial worldwide",
-    value:"Material cost",colors:"Reflective silver",
-    care:"⚠ HAZARD — extremely sharp, coating toxic"},
-  {cat:"Glass (Hazard)",name:"Obsidian",ri:"1.48–1.51",riN:1.495,
-    composition:"Volcanic glass (SiO₂)",hardness:"5–5.5 Mohs",
-    density:"2.35–2.60 g/cm³",origin:"Volcanic regions worldwide",
-    value:"$5–$100/piece",colors:"Black, snowflake, rainbow",
-    care:"⚠ Razor sharp natural edges"},
-
-  // ── CRYSTALS / MINERALS ──
-  {cat:"Crystals",name:"Rock Crystal",ri:"1.544–1.553",riN:1.548,
-    composition:"Pure quartz (SiO₂)",hardness:"7 Mohs",
-    density:"2.65 g/cm³",origin:"Brazil, USA, Madagascar",
-    value:"$1–$100/carat",colors:"Clear",care:"Mild soap"},
-  {cat:"Crystals",name:"Calcite",ri:"1.486–1.658",riN:1.572,
-    composition:"Calcium Carbonate (CaCO₃)",hardness:"3 Mohs",
-    density:"2.71 g/cm³",origin:"Worldwide",
-    value:"$1–$50/specimen",colors:"All — most colors possible",
-    care:"Soft — handle carefully, avoid acids"},
-  {cat:"Crystals",name:"Fluorite",ri:"1.434",riN:1.434,
-    composition:"Calcium Fluoride (CaF₂)",hardness:"4 Mohs",
-    density:"3.18 g/cm³",origin:"China, Mexico, USA",
-    value:"$5–$200/carat",colors:"Purple, green, blue, yellow",
-    care:"Soft — avoid heat and ultrasonic"},
-  {cat:"Crystals",name:"Selenite",ri:"1.519–1.530",riN:1.524,
-    composition:"Hydrous Calcium Sulfate (CaSO₄·2H₂O)",hardness:"2 Mohs",
-    density:"2.32 g/cm³",origin:"Mexico, Morocco",
-    value:"$5–$50/piece",colors:"Translucent white",
-    care:"⚠ Water-soluble — never wet"},
-  {cat:"Crystals",name:"Pyrite",ri:"1.810",riN:1.810,
-    composition:"Iron Sulfide (FeS₂)",hardness:"6–6.5 Mohs",
-    density:"4.95–5.10 g/cm³",origin:"Spain, Peru, USA",
-    value:"$5–$200/specimen",colors:"Brassy gold ('fool's gold')",
-    care:"Can oxidize — keep dry"},
+    density:"varies",origin:"Worldwide",value:"$20–$500,000+",
+    colors:"All",care:"Depends on stone"},
+  // ── GLASS (single entry) ──
+  {cat:"Glass (Hazard)",name:"Glass",ri:"1.47–1.70",riN:1.52,
+    composition:"Silica (SiO₂) + Soda + Lime / Lead / Borosilicate variants",
+    hardness:"5.5–7 Mohs",density:"2.2–3.1 g/cm³",
+    origin:"Industrial worldwide",value:"⚠ Safety hazard",
+    colors:"Clear, green, brown, frosted, mirror-coated",
+    care:"⚠ HAZARD when broken — sharp edges, can contain lead"},
 ];
 
-const CATEGORIES=["All","Diamond & Simulants","Precious Gems","Semi-Precious","Metals","Jewelry","Glass (Hazard)","Crystals"];
+// ═══════════════════════════════════════════════════════════════════════
+// CURRENCY DATABASE
+// ═══════════════════════════════════════════════════════════════════════
+const CURRENCIES=[
+  {cat:"NIS (Israeli Shekel)",name:"20 NIS",
+    description:"Rachel Bluwstein (poet) — orange/red bill",
+    securityFeatures:[
+      "Polymer note (plastic, not paper)",
+      "Transparent window with shekel symbol",
+      "Color-shifting ink (orange to green)",
+      "Raised tactile printing on portrait",
+      "Watermark of Rachel Bluwstein",
+      "Hidden text under UV light",
+      "Microprinting around portrait"
+    ],
+    counterfeit:"Common counterfeits use paper instead of polymer — easy to detect by texture"},
+  {cat:"NIS (Israeli Shekel)",name:"50 NIS",
+    description:"Saul Tchernichovsky (poet) — green bill",
+    securityFeatures:[
+      "Polymer note (plastic)",
+      "Transparent window with floral design",
+      "Color-shifting ink window",
+      "Raised tactile features",
+      "Watermark of Tchernichovsky",
+      "UV-fluorescent fibers and patterns",
+      "Microtext details"
+    ],
+    counterfeit:"Check polymer feel — paper fakes are common"},
+  {cat:"NIS (Israeli Shekel)",name:"100 NIS",
+    description:"Leah Goldberg (poet) — blue bill",
+    securityFeatures:[
+      "Polymer note (plastic)",
+      "Transparent window with menorah",
+      "Color-shifting blue/green ink",
+      "Raised tactile printing",
+      "Watermark of Leah Goldberg",
+      "UV security features",
+      "Microprinting"
+    ],
+    counterfeit:"Most counterfeited NIS denomination — verify polymer feel"},
+  {cat:"NIS (Israeli Shekel)",name:"200 NIS",
+    description:"Nathan Alterman (poet) — red/pink bill",
+    securityFeatures:[
+      "Polymer note",
+      "Large transparent window",
+      "Strong color-shifting ink",
+      "Raised tactile elements",
+      "Multi-tone watermark",
+      "UV fluorescence",
+      "Holographic stripe"
+    ],
+    counterfeit:"Highest value NIS — examine all security features carefully"},
+  {cat:"USD (US Dollar)",name:"$1 Bill",
+    description:"George Washington — green and black",
+    securityFeatures:[
+      "Cotton/linen blend paper (not regular paper)",
+      "Red and blue fibers embedded",
+      "Raised printing (intaglio)",
+      "Treasury seal in green",
+      "Federal Reserve seal in black"
+    ],
+    counterfeit:"Rarely counterfeited — too low value"},
+  {cat:"USD (US Dollar)",name:"$5 Bill",
+    description:"Abraham Lincoln — purple/gray accents",
+    securityFeatures:[
+      "Watermark of Lincoln (right side)",
+      "Security thread reads 'USA FIVE'",
+      "Color-shifting '5' (copper to green)",
+      "Cotton/linen paper",
+      "Microprinting on portrait"
+    ],
+    counterfeit:"Hold to light to verify watermark"},
+  {cat:"USD (US Dollar)",name:"$10 Bill",
+    description:"Alexander Hamilton — orange/red accents",
+    securityFeatures:[
+      "Watermark of Hamilton",
+      "Security thread reads 'USA TEN'",
+      "Color-shifting '10'",
+      "Microprinting",
+      "3D security ribbon (newer notes)"
+    ],
+    counterfeit:"Check for watermark and security thread"},
+  {cat:"USD (US Dollar)",name:"$20 Bill",
+    description:"Andrew Jackson — most counterfeited",
+    securityFeatures:[
+      "Watermark of Jackson",
+      "Security thread reads 'USA TWENTY'",
+      "Color-shifting '20' (copper-green)",
+      "Microprinting around portrait",
+      "Subtle background colors (peach/blue)"
+    ],
+    counterfeit:"Most-counterfeited US bill — check ALL features"},
+  {cat:"USD (US Dollar)",name:"$50 Bill",
+    description:"Ulysses S. Grant — red accents",
+    securityFeatures:[
+      "Watermark of Grant",
+      "Security thread reads 'USA 50'",
+      "Color-shifting '50'",
+      "Star pattern in background",
+      "American flag on inside"
+    ],
+    counterfeit:"Verify color-shifting ink"},
+  {cat:"USD (US Dollar)",name:"$100 Bill",
+    description:"Benjamin Franklin — most secure US note",
+    securityFeatures:[
+      "3D blue security ribbon (woven, not printed)",
+      "Bell in inkwell color-shifts copper to green",
+      "Color-shifting '100' (copper to green)",
+      "Watermark of Franklin",
+      "Security thread reads 'USA 100'",
+      "Raised printing on shoulder",
+      "Microprinting on jacket collar"
+    ],
+    counterfeit:"Most counterfeited high-value bill — 3D ribbon is hardest feature to fake"},
+  {cat:"EUR (Euro)",name:"€5 Note",
+    description:"Gray-green bill — Classical architecture",
+    securityFeatures:[
+      "Cotton paper with raised print",
+      "Holographic stripe with €5",
+      "Watermark visible against light",
+      "Security thread embedded",
+      "UV-fluorescent stars"
+    ],
+    counterfeit:"Lowest denomination — rarely faked"},
+  {cat:"EUR (Euro)",name:"€10 Note",
+    description:"Red bill — Romanesque architecture",
+    securityFeatures:[
+      "Cotton paper",
+      "Holographic stripe",
+      "Watermark of architecture and €10",
+      "Security thread reads EURO €10",
+      "UV features"
+    ],
+    counterfeit:"Check holographic stripe authenticity"},
+  {cat:"EUR (Euro)",name:"€20 Note",
+    description:"Blue bill — Gothic architecture, portrait of Europa",
+    securityFeatures:[
+      "Portrait window of Europa (transparent)",
+      "Holographic stripe with Europa",
+      "Watermark of Europa",
+      "Color-shifting emerald number",
+      "Security thread",
+      "Raised printing"
+    ],
+    counterfeit:"Most-counterfeited Euro — Europa portrait window is the key feature"},
+  {cat:"EUR (Euro)",name:"€50 Note",
+    description:"Orange bill — Renaissance architecture",
+    securityFeatures:[
+      "Portrait window of Europa",
+      "Holographic stripe with Europa portrait",
+      "Color-shifting emerald 50",
+      "Watermark",
+      "Security thread"
+    ],
+    counterfeit:"Examine portrait window carefully"},
+  {cat:"EUR (Euro)",name:"€100 Note",
+    description:"Green bill — Baroque/Rococo architecture",
+    securityFeatures:[
+      "Portrait window of Europa",
+      "Satellite hologram (€ symbols revolve around 100)",
+      "Color-shifting emerald number",
+      "Watermark",
+      "Enhanced security thread"
+    ],
+    counterfeit:"New series has satellite hologram — much harder to fake"},
+  {cat:"EUR (Euro)",name:"€200 Note",
+    description:"Yellow-brown bill — Iron and glass architecture",
+    securityFeatures:[
+      "Portrait window of Europa",
+      "Satellite hologram",
+      "Color-shifting emerald 200",
+      "Watermark",
+      "Premium security thread"
+    ],
+    counterfeit:"High-security new series — very hard to counterfeit"},
+];
+
+// ═══════════════════════════════════════════════════════════════════════
+// MEDICATION DATABASE — common pills and counterfeit warnings
+// ═══════════════════════════════════════════════════════════════════════
+const MEDICATIONS=[
+  {cat:"Pain Relief",name:"Paracetamol/Acetaminophen 500mg",
+    appearance:"White round/oval tablet, often scored, may have 'P' or '500' imprint",
+    realFeatures:[
+      "Manufacturer logo and dose imprint",
+      "Consistent color (no spots)",
+      "Smooth uniform surface",
+      "Original blister packaging with batch number"
+    ],
+    counterfeit:"Counterfeits may have wrong color, missing imprints, or chalky texture",
+    risk:"Low-risk medication but counterfeits may contain wrong dose"},
+  {cat:"Pain Relief",name:"Ibuprofen 400mg",
+    appearance:"White or orange tablet, oval/round, coated",
+    realFeatures:[
+      "Brand imprint (Advil, Nurofen, etc.)",
+      "Smooth coating",
+      "Consistent color",
+      "Sealed blister pack"
+    ],
+    counterfeit:"Wrong color or lack of coating indicates counterfeit",
+    risk:"Verify with pharmacist if appearance differs"},
+  {cat:"Antibiotics",name:"Amoxicillin",
+    appearance:"Capsule (yellow/red, blue/yellow) or white tablet — depends on dose",
+    realFeatures:[
+      "Two-tone capsule with manufacturer code",
+      "Imprint with dose (250mg, 500mg)",
+      "Original prescription packaging",
+      "Pharmacy label attached"
+    ],
+    counterfeit:"⚠ DANGEROUS — counterfeit antibiotics may contain no active ingredient or wrong drug",
+    risk:"HIGH RISK — only buy from licensed pharmacy"},
+  {cat:"Cardiac",name:"Aspirin 100mg",
+    appearance:"Small white round tablet, sometimes coated",
+    realFeatures:[
+      "Manufacturer mark (Bayer cross, etc.)",
+      "Consistent shape",
+      "Enteric coating (smooth)",
+      "Original packaging"
+    ],
+    counterfeit:"Loose tablets without packaging are suspicious",
+    risk:"Cardiac patients depend on these — buy only from pharmacy"},
+  {cat:"Erectile Dysfunction",name:"Viagra (Sildenafil)",
+    appearance:"Blue diamond-shaped tablet with 'PFIZER' on one side and 'VGR' + dose on other",
+    realFeatures:[
+      "Distinctive blue diamond shape",
+      "PFIZER imprint clearly visible",
+      "VGR + dose number (25/50/100)",
+      "Original blister with hologram"
+    ],
+    counterfeit:"⚠ MOST-COUNTERFEITED MEDICATION — fakes often contain wrong drugs or dangerous substances",
+    risk:"EXTREMELY HIGH RISK — never buy online without prescription"},
+  {cat:"Diabetes",name:"Metformin 500mg",
+    appearance:"White round/oval tablet, scored, with imprint code",
+    realFeatures:[
+      "Manufacturer code",
+      "Score line for splitting",
+      "Smooth uniform surface",
+      "Pharmacy packaging"
+    ],
+    counterfeit:"⚠ Counterfeit diabetes drugs are dangerous",
+    risk:"HIGH RISK — diabetics need verified medication"},
+  {cat:"Mental Health",name:"Xanax (Alprazolam)",
+    appearance:"Bar-shaped white/yellow/green tablet with 'XANAX' or score lines",
+    realFeatures:[
+      "Pharmacy bottle with prescription label",
+      "Consistent imprint",
+      "Bar shape with 4 score lines (2mg)",
+      "Original blister"
+    ],
+    counterfeit:"⚠ EXTREMELY DANGEROUS — counterfeits often contain fentanyl",
+    risk:"DEADLY RISK — many fentanyl deaths from fake Xanax"},
+  {cat:"Mental Health",name:"Adderall",
+    appearance:"Orange/peach round tablet, sometimes blue or pink, with imprint",
+    realFeatures:[
+      "Pharmacy prescription label",
+      "Manufacturer imprint",
+      "Uniform color",
+      "Original bottle"
+    ],
+    counterfeit:"⚠ Counterfeit Adderall often contains methamphetamine",
+    risk:"DEADLY RISK — buy only from licensed US pharmacy"},
+  {cat:"Opioids",name:"Oxycodone",
+    appearance:"Round white/blue/green tablet with imprint",
+    realFeatures:[
+      "Pharmacy bottle ONLY",
+      "Imprint with manufacturer code",
+      "Consistent shape and color",
+      "Prescription required"
+    ],
+    counterfeit:"⚠ MOST DEADLY COUNTERFEIT — fake oxy pills often contain fentanyl",
+    risk:"DEADLY — DEA reports 6 of 10 counterfeit pills contain lethal fentanyl dose"},
+  {cat:"Recreational Drugs",name:"MDMA / Ecstasy",
+    appearance:"Pressed pills in various shapes, colors, and imprints",
+    realFeatures:[
+      "⚠ NO LEGAL VERIFICATION POSSIBLE",
+      "Drug-checking services exist (DanceSafe, etc.)",
+      "Reagent test kits available"
+    ],
+    counterfeit:"⚠ DEADLY — most 'ecstasy' contains other substances: meth, PMA, fentanyl, bath salts",
+    risk:"EXTREME — pill testing services like DanceSafe save lives"},
+  {cat:"Recreational Drugs",name:"Cocaine",
+    appearance:"White powder or rock crystal",
+    realFeatures:[
+      "⚠ NO LEGAL FORM EXISTS",
+      "Reagent tests can detect adulterants",
+      "Often cut with fentanyl, levamisole"
+    ],
+    counterfeit:"⚠ DEADLY — fentanyl contamination is increasingly common",
+    risk:"EXTREME RISK — fentanyl test strips are essential harm reduction"},
+  {cat:"Recreational Drugs",name:"Cannabis",
+    appearance:"Dried flower/buds, oils, edibles",
+    realFeatures:[
+      "Dispensary packaging (where legal)",
+      "Lab-tested THC/CBD content listed",
+      "Batch numbers and expiration",
+      "Smell test — real cannabis has distinct terpene profile"
+    ],
+    counterfeit:"Counterfeit edibles may contain synthetic cannabinoids — extremely dangerous",
+    risk:"Buy only from licensed dispensaries where legal"},
+];
 
 // 5 unique target colors
 const TARGET_COLORS=['#cc00ff','#00ff88','#ffd700','#ff3d3d','#00f5ff'];
 
 // ═══════════════════════════════════════════════════════════════════════
-// VISION LABEL → MATERIAL MATCHING
+// LABEL → MATERIAL/CURRENCY/MEDICATION matching
 // ═══════════════════════════════════════════════════════════════════════
 function findMaterialFromLabel(label){
   const lower=label.toLowerCase();
-  // Direct match by name
   for(const mat of MATERIALS){
     if(lower.includes(mat.name.toLowerCase())) return mat;
   }
-  // Keyword aliases
   const aliases={
     'diamond':'Diamond','moissanite':'Moissanite','zirconia':'Cubic Zirconia',
     'cz':'Cubic Zirconia','sapphire':'Blue Sapphire','ruby':'Ruby',
@@ -654,14 +875,14 @@ function findMaterialFromLabel(label){
     'gold':'Gold','silver':'Silver','platinum':'Platinum',
     'titanium':'Titanium','copper':'Copper','steel':'Stainless Steel',
     'palladium':'Palladium','iolite':'Iolite','hematite':'Hematite',
-    'pyrite':'Pyrite','fluorite':'Fluorite','selenite':'Selenite',
-    'glass':'Window Glass','bottle':'Bottle Glass','crystal':'Lead Crystal',
-    'mirror':'Mirror Glass','obsidian':'Obsidian','pyrex':'Borosilicate (Pyrex)',
+    'glass':'Glass','bottle':'Glass','crystal':'Glass',
+    'mirror':'Glass','obsidian':'Glass','pyrex':'Glass',
+    'shard':'Glass','window':'Glass','drinkware':'Glass',
+    'cup':'Glass','tumbler':'Glass','wine glass':'Glass',
     'ring':'Ring','earring':'Earring','necklace':'Necklace',
     'bracelet':'Bracelet','pendant':'Pendant','jewelry':'Ring',
     'jewellery':'Ring','moonstone':'Moonstone','zircon':'Zircon',
-    'alexandrite':'Alexandrite','rock crystal':'Rock Crystal',
-    'lapis lazuli':'Lapis Lazuli','lapis':'Lapis Lazuli',
+    'alexandrite':'Alexandrite','lapis':'Lapis Lazuli',
     'rose gold':'Rose Gold','white gold':'White Gold',
   };
   for(const[key,val]of Object.entries(aliases)){
@@ -673,25 +894,67 @@ function findMaterialFromLabel(label){
   return null;
 }
 
+function findCurrencyFromLabel(label){
+  const lower=label.toLowerCase();
+  // Try direct denomination matches first
+  for(const cur of CURRENCIES){
+    const num=cur.name.match(/\d+/);
+    if(num && lower.includes(num[0])){
+      if(cur.cat.includes('NIS')&&(lower.includes('shekel')||lower.includes('israel'))) return cur;
+      if(cur.cat.includes('USD')&&(lower.includes('dollar')||lower.includes('us'))) return cur;
+      if(cur.cat.includes('EUR')&&(lower.includes('euro'))) return cur;
+    }
+  }
+  // Generic currency match
+  if(lower.includes('banknote')||lower.includes('currency')||lower.includes('cash')||lower.includes('bill')||lower.includes('money')){
+    return CURRENCIES[2]; // default to NIS 100 as example
+  }
+  return null;
+}
+
+function findMedicationFromLabel(label){
+  const lower=label.toLowerCase();
+  for(const med of MEDICATIONS){
+    const firstWord=med.name.split(/[\s/]/)[0].toLowerCase();
+    if(lower.includes(firstWord)) return med;
+  }
+  if(lower.includes('pill')||lower.includes('tablet')||lower.includes('capsule')||lower.includes('medicine')||lower.includes('drug')){
+    return MEDICATIONS[0]; // default to paracetamol
+  }
+  return null;
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════════════
-let stream=null, track=null;
-let torchOn=false, autoMode=false;
+let stream=null,track=null;
+let torchOn=false,autoMode=false;
 let sensitivity=5;
 let scanCount=0;
 let isAnalyzing=false;
 let autoInterval=null;
-let selectedMaterials=[]; // {material, color}
+let selectedMaterials=[];
 let currentCat="All";
 let scanHistory=[];
-let lastDetections=[]; // for drawing colored circles
+let lastDetections=[];
+let currentMode='material'; // 'material' | 'currency' | 'medication'
 
 const video=document.getElementById('video');
 const canvas=document.getElementById('canvas');
 const ctx=canvas.getContext('2d',{willReadFrequently:true});
 const hCanvas=document.getElementById('highlight-canvas');
 const hCtx=hCanvas.getContext('2d');
+
+function getCurrentDB(){
+  if(currentMode==='currency') return CURRENCIES;
+  if(currentMode==='medication') return MEDICATIONS;
+  return MATERIALS;
+}
+
+function getCategories(){
+  const db=getCurrentDB();
+  return ["All",...new Set(db.map(m=>m.cat))];
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // HIGHLIGHT LOOP
@@ -702,25 +965,19 @@ function highlightLoop(){
 
   const threshold=240-(sensitivity*10);
   ctx.drawImage(video,0,0,canvas.width,canvas.height);
-
-  // Draw priority target circles overlay
   drawTargetCircles();
 
-  // Brightness highlight
   const img=ctx.getImageData(0,0,canvas.width,canvas.height);
   const data=img.data;
   hCanvas.width=canvas.width;hCanvas.height=canvas.height;
   const hImg=hCtx.createImageData(canvas.width,canvas.height);
   const hData=hImg.data;
-
   for(let i=0;i<data.length;i+=4){
     const br=data[i]*0.299+data[i+1]*0.587+data[i+2]*0.114;
     if(br>threshold){
       const intensity=Math.min(255,(br-threshold)*3);
-      hData[i]=intensity*0.5;
-      hData[i+1]=intensity*0.3;
-      hData[i+2]=intensity;
-      hData[i+3]=intensity*0.6;
+      hData[i]=intensity*0.5;hData[i+1]=intensity*0.3;
+      hData[i+2]=intensity;hData[i+3]=intensity*0.6;
     }
   }
   hCtx.putImageData(hImg,0,0);
@@ -733,30 +990,16 @@ function drawTargetCircles(){
     if(!det.color) continue;
     const t=Date.now()/600;
     const pulseR=det.radius+Math.sin(t)*4;
-
-    // Outer glow ring
     ctx.save();
-    ctx.shadowColor=det.color;
-    ctx.shadowBlur=20;
-    ctx.beginPath();
-    ctx.arc(det.x,det.y,pulseR,0,Math.PI*2);
-    ctx.strokeStyle=det.color;
-    ctx.lineWidth=3;
-    ctx.stroke();
-
-    // Crosshair arcs
+    ctx.shadowColor=det.color;ctx.shadowBlur=20;
+    ctx.beginPath();ctx.arc(det.x,det.y,pulseR,0,Math.PI*2);
+    ctx.strokeStyle=det.color;ctx.lineWidth=3;ctx.stroke();
     [0,Math.PI/2,Math.PI,3*Math.PI/2].forEach(a=>{
-      ctx.beginPath();
-      ctx.arc(det.x,det.y,pulseR+8,a,a+Math.PI/6);
-      ctx.lineWidth=4;
-      ctx.stroke();
+      ctx.beginPath();ctx.arc(det.x,det.y,pulseR+8,a,a+Math.PI/6);
+      ctx.lineWidth=4;ctx.stroke();
     });
-
-    // Label
     ctx.shadowBlur=0;
-    ctx.font='600 13px "Share Tech Mono"';
-    ctx.fillStyle=det.color;
-    ctx.textAlign='center';
+    ctx.font='600 13px "Share Tech Mono"';ctx.fillStyle=det.color;ctx.textAlign='center';
     ctx.fillText(det.label,det.x,det.y-pulseR-12);
     ctx.restore();
   }
@@ -765,18 +1008,18 @@ function drawTargetCircles(){
 function resizeCanvas(){
   canvas.width=video.videoWidth||window.innerWidth;
   canvas.height=video.videoHeight||window.innerHeight;
-  hCanvas.width=canvas.width;
-  hCanvas.height=canvas.height;
+  hCanvas.width=canvas.width;hCanvas.height=canvas.height;
 }
 window.addEventListener('resize',resizeCanvas);
 
 // ═══════════════════════════════════════════════════════════════════════
-// GOOGLE VISION
+// VISION
 // ═══════════════════════════════════════════════════════════════════════
 async function callVision(base64){
   const body={requests:[{image:{content:base64},features:[
     {type:'LABEL_DETECTION',maxResults:15},
     {type:'OBJECT_LOCALIZATION',maxResults:8},
+    {type:'TEXT_DETECTION',maxResults:5}
   ]}]};
   const r=await fetch(VISION_API_URL,{method:'POST',
     headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -809,12 +1052,31 @@ function renderResult(result){
 
   const labels=(result.labelAnnotations||[]).map(l=>({name:l.description,score:Math.round(l.score*100)}));
   const objects=(result.localizedObjectAnnotations||[]).map(o=>({
-    name:o.name,score:Math.round(o.score*100),
-    boundingPoly:o.boundingPoly
-  }));
+    name:o.name,score:Math.round(o.score*100),boundingPoly:o.boundingPoly}));
+  const detectedText=(result.textAnnotations||[]).map(t=>t.description).join(' ');
   const allItems=[...objects,...labels];
 
-  // Check if any selected target matches
+  // Add detected text as a label for matching
+  if(detectedText) allItems.push({name:detectedText.substring(0,50),score:90});
+
+  let html='';
+
+  if(currentMode==='currency'){
+    html=renderCurrencyResult(allItems,detectedText);
+  } else if(currentMode==='medication'){
+    html=renderMedicationResult(allItems,detectedText);
+  } else {
+    html=renderMaterialResult(allItems);
+  }
+
+  // Always show detected labels
+  html+=`<div class="vision-labels">ALSO SEEN:</div>`;
+  html+=allItems.slice(0,8).map(l=>`<span class="label-item">${l.name.substring(0,30)} ${l.score}%</span>`).join('');
+  body.innerHTML=html;
+}
+
+function renderMaterialResult(allItems){
+  // Priority match check
   let priorityMatch=null;
   if(selectedMaterials.length>0){
     for(const sel of selectedMaterials){
@@ -822,15 +1084,13 @@ function renderResult(result){
       for(const item of allItems){
         const itemLower=item.name.toLowerCase();
         if(itemLower.includes(matName)||matName.includes(itemLower.split(' ')[0])){
-          priorityMatch={target:sel,item};
-          break;
+          priorityMatch={target:sel,item};break;
         }
       }
       if(priorityMatch) break;
     }
   }
 
-  // Find best general material match
   let bestMatch=null;
   for(const item of allItems){
     const mat=findMaterialFromLabel(item.name);
@@ -847,8 +1107,6 @@ function renderResult(result){
     html+=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET: ${matToShow.name.toUpperCase()}</div>
       <div class="vision-detail">Detected as: ${priorityMatch.item.name}<br>Confidence: ${priorityMatch.item.score}%</div>
       <div class="vision-ri" style="color:${detColor};border-color:${detColor}">RI = ${matToShow.ri}</div>`;
-
-    // Update colored circles on screen
     if(priorityMatch.item.boundingPoly){
       updateDetectionCircles(priorityMatch.item.boundingPoly,detColor,matToShow.name);
     } else {
@@ -856,7 +1114,7 @@ function renderResult(result){
     }
   } else if(bestMatch){
     matToShow=bestMatch.material;
-    const isHazard=matToShow.cat==="Glass (Hazard)";
+    const isHazard=matToShow.cat.includes("Hazard");
     const isGem=matToShow.cat.includes("Gems")||matToShow.cat.includes("Diamond");
     const isJewelry=matToShow.cat==="Jewelry";
     const cls=isHazard?'hazard':isGem?'gem':isJewelry?'jewelry':'';
@@ -870,38 +1128,116 @@ function renderResult(result){
     if(top){
       html+=`<div class="vision-name">${top.name.toUpperCase()}</div>
         <div class="vision-detail">No specific material data<br>Confidence: ${top.score}%</div>`;
-    } else {
-      html+=`<div class="vision-error">Nothing recognizable detected</div>`;
-    }
+    } else {html+=`<div class="vision-error">Nothing recognizable</div>`;}
     lastDetections=[];
   }
 
-  // Composition dropdown
   if(matToShow){
-    html+=`<div class="detail-dropdown">
-      <div class="detail-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.arrow').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
-        <span>📋 COMPOSITION & PROPERTIES</span>
-        <span class="arrow">▼</span>
-      </div>
-      <div class="detail-content">
-        <div class="detail-row"><span class="detail-key">Composition:</span><span class="detail-val">${matToShow.composition||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Hardness:</span><span class="detail-val">${matToShow.hardness||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Density:</span><span class="detail-val">${matToShow.density||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Origin:</span><span class="detail-val">${matToShow.origin||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Value:</span><span class="detail-val">${matToShow.value||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Colors:</span><span class="detail-val">${matToShow.colors||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Care:</span><span class="detail-val">${matToShow.care||'—'}</span></div>
-      </div>
-    </div>`;
+    html+=buildCompositionDropdown(matToShow);
+    addToHistory(matToShow.name,matToShow.cat,priorityMatch?'Target Match':'Identified');
+  }
+  return html;
+}
 
-    // Add to history
-    addToHistory(matToShow,priorityMatch?'Target Match':'Identified');
+function renderCurrencyResult(allItems,detectedText){
+  // Try to find currency match
+  let currencyMatch=null;
+  for(const item of allItems){
+    const cur=findCurrencyFromLabel(item.name);
+    if(cur){currencyMatch=cur;break;}
+  }
+  if(!currencyMatch&&detectedText){
+    currencyMatch=findCurrencyFromLabel(detectedText);
   }
 
-  // All labels
-  html+=`<div class="vision-labels">ALSO SEEN:</div>`;
-  html+=allItems.slice(0,8).map(l=>`<span class="label-item">${l.name} ${l.score}%</span>`).join('');
-  body.innerHTML=html;
+  let html='';
+  if(currencyMatch){
+    html+=`<div class="vision-name currency">💵 ${currencyMatch.name}</div>
+      <div class="vision-detail">${currencyMatch.cat}<br>${currencyMatch.description}</div>
+      <div class="warning-box">
+        ⚠ AUTHENTICATION CHECKLIST<br>
+        Verify EACH security feature manually:
+      </div>
+      <ul class="security-list">`;
+    currencyMatch.securityFeatures.forEach(f=>{
+      html+=`<li><span class="check-box"></span><span>${f}</span></li>`;
+    });
+    html+=`</ul>
+      <div class="warning-box" style="border-color:var(--red);color:var(--red);background:rgba(255,61,61,.08);margin-top:8px">
+        ⚠ COUNTERFEIT WARNING:<br>${currencyMatch.counterfeit}
+      </div>`;
+    addToHistory(currencyMatch.name,currencyMatch.cat,'Currency Check');
+  } else {
+    html+=`<div class="vision-name">NO CURRENCY DETECTED</div>
+      <div class="vision-detail">Point camera at a banknote and tap IDENTIFY</div>`;
+  }
+  lastDetections=[];
+  return html;
+}
+
+function renderMedicationResult(allItems,detectedText){
+  let medMatch=null;
+  for(const item of allItems){
+    const m=findMedicationFromLabel(item.name);
+    if(m){medMatch=m;break;}
+  }
+  if(!medMatch&&detectedText){
+    medMatch=findMedicationFromLabel(detectedText);
+  }
+
+  let html='';
+  if(medMatch){
+    const isDangerous=medMatch.risk.includes('DEADLY')||medMatch.risk.includes('EXTREME');
+    html+=`<div class="vision-name medication">💊 ${medMatch.name}</div>
+      <div class="vision-detail">${medMatch.cat}<br>Appearance: ${medMatch.appearance}</div>
+      <div class="warning-box">
+        ⚠ AUTHENTICATION CHECKLIST<br>
+        Verify EACH feature manually:
+      </div>
+      <ul class="security-list">`;
+    medMatch.realFeatures.forEach(f=>{
+      html+=`<li><span class="check-box"></span><span>${f}</span></li>`;
+    });
+    html+=`</ul>`;
+    if(isDangerous){
+      html+=`<div class="warning-box" style="border-color:var(--red);color:var(--red);background:rgba(255,61,61,.15);margin-top:8px;font-weight:700">
+        ☠ DEADLY RISK ☠<br>${medMatch.counterfeit}
+      </div>
+      <div class="warning-box" style="margin-top:6px">
+        RISK LEVEL: ${medMatch.risk}
+      </div>`;
+    } else {
+      html+=`<div class="warning-box" style="border-color:var(--red);color:var(--red);background:rgba(255,61,61,.08);margin-top:8px">
+        ⚠ COUNTERFEIT WARNING:<br>${medMatch.counterfeit}
+      </div>
+      <div class="warning-box" style="margin-top:6px">
+        RISK: ${medMatch.risk}
+      </div>`;
+    }
+    addToHistory(medMatch.name,medMatch.cat,'Medication Check');
+  } else {
+    html+=`<div class="vision-name">NO MEDICATION DETECTED</div>
+      <div class="vision-detail">Point camera at pill/tablet and tap IDENTIFY<br>Visual checks only — always verify with pharmacist</div>`;
+  }
+  lastDetections=[];
+  return html;
+}
+
+function buildCompositionDropdown(mat){
+  return `<div class="detail-dropdown">
+    <div class="detail-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.arrow').textContent=this.nextElementSibling.classList.contains('open')?'▲':'▼'">
+      <span>📋 COMPOSITION & PROPERTIES</span><span class="arrow">▼</span>
+    </div>
+    <div class="detail-content">
+      <div class="detail-row"><span class="detail-key">Composition:</span><span class="detail-val">${mat.composition||'—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Hardness:</span><span class="detail-val">${mat.hardness||'—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Density:</span><span class="detail-val">${mat.density||'—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Origin:</span><span class="detail-val">${mat.origin||'—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Value:</span><span class="detail-val">${mat.value||'—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Colors:</span><span class="detail-val">${mat.colors||'—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Care:</span><span class="detail-val">${mat.care||'—'}</span></div>
+    </div>
+  </div>`;
 }
 
 function updateDetectionCircles(boundingPoly,color,label){
@@ -928,7 +1264,6 @@ async function identifyNow(){
   document.getElementById('scan-count').textContent=`${scanCount} SCAN${scanCount!==1?'S':''}`;
   const body=document.getElementById('vision-body');
   body.innerHTML='<div class="vision-loading">🔬 ANALYZING WITH GOOGLE VISION...</div>';
-
   try{
     ctx.drawImage(video,0,0,canvas.width,canvas.height);
     const base64=captureFrame();
@@ -954,22 +1289,32 @@ function toggleAuto(){
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// HISTORY
-// ═══════════════════════════════════════════════════════════════════════
-function addToHistory(material,context){
-  const now=new Date();
-  const time=now.toLocaleTimeString();
-  const date=now.toLocaleDateString();
-  scanHistory.unshift({time,date,material:material.name,
-    cat:material.cat,ri:material.ri,context});
-  if(scanHistory.length>50) scanHistory.pop();
+// MODE SWITCHER
+function setMode(mode){
+  currentMode=mode;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mode-'+mode).classList.add('active');
+  // Reset selections when changing modes since DBs differ
+  selectedMaterials=[];
+  updateSelectionUI();
+  updateLegend();
+  // Update vision panel hint
+  const body=document.getElementById('vision-body');
+  let hint='';
+  if(mode==='material') hint='💎 MATERIAL MODE<br>Identify gems, metals, glass, jewelry';
+  if(mode==='currency') hint='💵 CURRENCY MODE<br>Identify NIS / USD / EUR banknotes<br>Get authentication checklist';
+  if(mode==='medication') hint='💊 MEDICATION MODE<br>⚠ Visual checks only — always consult pharmacist';
+  body.innerHTML=`<div class="vision-idle">${hint}</div>`;
 }
 
-function showHistory(){
-  document.getElementById('history-panel').classList.add('show');
-  renderHistory();
+// HISTORY
+function addToHistory(name,cat,context){
+  const now=new Date();
+  scanHistory.unshift({time:now.toLocaleTimeString(),date:now.toLocaleDateString(),
+    name,cat,context,mode:currentMode});
+  if(scanHistory.length>100) scanHistory.pop();
 }
+function showHistory(){document.getElementById('history-panel').classList.add('show');renderHistory();}
 function hideHistory(){document.getElementById('history-panel').classList.remove('show');}
 function clearHistory(){scanHistory=[];renderHistory();}
 function renderHistory(){
@@ -980,15 +1325,13 @@ function renderHistory(){
   }
   list.innerHTML=scanHistory.map(h=>`
     <div class="history-row">
-      <div class="history-time">${h.date} · ${h.time} · ${h.context}</div>
-      <div class="history-name">${h.material}</div>
-      <div class="history-detail">${h.cat} · RI ${h.ri}</div>
+      <div class="history-time">${h.date} · ${h.time} · ${h.context} · ${h.mode.toUpperCase()}</div>
+      <div class="history-name">${h.name}</div>
+      <div class="history-detail">${h.cat}</div>
     </div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════════════
 // LIFECYCLE
-// ═══════════════════════════════════════════════════════════════════════
 async function startApp(){
   document.getElementById('splash').classList.add('hidden');
   document.getElementById('scanner').classList.remove('hidden');
@@ -1004,8 +1347,7 @@ async function startApp(){
       document.getElementById('btn-torch').classList.add('active');
     }catch(e){}
     video.addEventListener('loadedmetadata',()=>{
-      resizeCanvas();
-      requestAnimationFrame(highlightLoop);
+      resizeCanvas();requestAnimationFrame(highlightLoop);
     });
   }catch(err){setStatus('CAM ERROR',false);}
 }
@@ -1024,27 +1366,33 @@ function updateSensitivity(el){
   document.getElementById('sens-val').textContent=sensitivity;
   el.style.setProperty('--pct',((sensitivity-1)/9*100).toFixed(1)+'%');
 }
-
 canvas.addEventListener('click',identifyNow);
 hCanvas.addEventListener('click',identifyNow);
 
 // ═══════════════════════════════════════════════════════════════════════
-// DATABASE PANEL
+// DATABASE PANEL — uses event delegation now (FIXED)
 // ═══════════════════════════════════════════════════════════════════════
-function showDB(){document.getElementById('db-panel').classList.add('show');buildCats();renderDB();updateLegend();}
-function hideDB(){document.getElementById('db-panel').classList.remove('show');updateLegend();}
+function showDB(){
+  document.getElementById('db-panel').classList.add('show');
+  buildCats();renderDB();updateLegend();
+}
+function hideDB(){
+  document.getElementById('db-panel').classList.remove('show');
+  updateLegend();
+}
 
 function buildCats(){
-  document.getElementById('cat-scroll').innerHTML=CATEGORIES.map(c=>
-    `<button class="cat-btn${c===currentCat?' active':''}" onclick="setCat('${c}')">${c}</button>`
+  const cats=getCategories();
+  document.getElementById('cat-scroll').innerHTML=cats.map(c=>
+    `<button class="cat-btn${c===currentCat?' active':''}" data-cat="${c.replace(/"/g,'&quot;')}">${c}</button>`
   ).join('');
 }
-function setCat(c){currentCat=c;document.getElementById('db-search').value='';buildCats();renderDB();}
+
 function filterDB(){currentCat='All';buildCats();renderDB();}
 
 function renderDB(){
   const q=document.getElementById('db-search').value.toLowerCase();
-  let list=MATERIALS;
+  let list=getCurrentDB();
   if(currentCat!=='All') list=list.filter(m=>m.cat===currentCat);
   if(q) list=list.filter(m=>m.name.toLowerCase().includes(q)||m.cat.toLowerCase().includes(q));
   const groups={};
@@ -1052,27 +1400,26 @@ function renderDB(){
   let html='';
   Object.keys(groups).forEach(cat=>{
     html+=`<div class="db-section-hdr">${cat}</div>`;
-    groups[cat].forEach(m=>{
+    groups[cat].forEach((m,i)=>{
       const sel=selectedMaterials.find(s=>s.material.name===m.name);
       const isSel=!!sel;
       const isFull=selectedMaterials.length>=5&&!isSel;
-      const rc=m.riN<1.4?'ri-low':m.riN<1.7?'ri-med':m.riN<2.1?'ri-high':'ri-vhigh';
+      const rc=m.riN?(m.riN<1.4?'ri-low':m.riN<1.7?'ri-med':m.riN<2.1?'ri-high':'ri-vhigh'):'';
+      const riText=m.ri?`RI ${m.ri}`:(m.description||'');
 
-      // Escape name for safe attribute usage
-      const safeName=m.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
       let btnHTML='';
       if(isSel){
-        btnHTML=`<button class="db-action-btn remove-btn" data-mat="${safeName}" onclick="event.stopPropagation();removeMaterial(this.dataset.mat)">REMOVE</button>`;
+        btnHTML=`<button class="db-action-btn remove-btn" data-action="remove" data-name="${m.name.replace(/"/g,'&quot;')}">REMOVE</button>`;
       } else if(isFull){
         btnHTML=`<button class="db-action-btn full-btn" disabled>FULL</button>`;
       } else {
-        btnHTML=`<button class="db-action-btn add-btn" data-mat="${safeName}" onclick="event.stopPropagation();addMaterial(this.dataset.mat)">+ ADD</button>`;
+        btnHTML=`<button class="db-action-btn add-btn" data-action="add" data-name="${m.name.replace(/"/g,'&quot;')}">+ ADD</button>`;
       }
 
       html+=`<div class="db-row${isSel?' selected-row':''}" style="${isSel?`border-left-color:${sel.color}`:''}">
         <div class="db-row-info">
           <span class="db-name">${m.name}</span>
-          <span class="db-ri-val ${rc}">RI ${m.ri}</span>
+          <span class="db-ri-val ${rc}">${riText}</span>
         </div>
         ${btnHTML}
       </div>`;
@@ -1082,12 +1429,33 @@ function renderDB(){
   document.getElementById('db-list').innerHTML=html;
 }
 
+// EVENT DELEGATION — single listener handles all add/remove/category clicks
+document.getElementById('db-list').addEventListener('click',function(e){
+  const btn=e.target.closest('.db-action-btn');
+  if(!btn||btn.disabled) return;
+  const action=btn.dataset.action;
+  const name=btn.dataset.name;
+  if(!name) return;
+  if(action==='add') addMaterial(name);
+  else if(action==='remove') removeMaterial(name);
+});
+
+document.getElementById('cat-scroll').addEventListener('click',function(e){
+  const btn=e.target.closest('.cat-btn');
+  if(!btn) return;
+  const cat=btn.dataset.cat;
+  if(!cat) return;
+  currentCat=cat;
+  document.getElementById('db-search').value='';
+  buildCats();renderDB();
+});
+
 function addMaterial(name){
   if(selectedMaterials.length>=5) return;
-  const mat=MATERIALS.find(m=>m.name===name);
+  const db=getCurrentDB();
+  const mat=db.find(m=>m.name===name);
   if(!mat) return;
   if(selectedMaterials.find(s=>s.material.name===name)) return;
-  // Find next unused color
   const usedColors=selectedMaterials.map(s=>s.color);
   const color=TARGET_COLORS.find(c=>!usedColors.includes(c))||TARGET_COLORS[0];
   selectedMaterials.push({material:mat,color});
@@ -1107,7 +1475,7 @@ function updateSelectionUI(){
   document.getElementById('sel-count-hdr').textContent=`${n}/5`;
   const el=document.getElementById('selected-chips');
   if(n===0){
-    el.innerHTML='<span class="no-sel-hint">None — tap ADD to select up to 5 materials</span>';
+    el.innerHTML='<span class="no-sel-hint">None — tap ADD to select up to 5</span>';
   } else {
     el.innerHTML=selectedMaterials.map(s=>
       `<div class="sel-chip" style="border-color:${s.color}">
