@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v9.1</title>
+<title>SPECULIX v9.3 HAZARD</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
@@ -252,9 +252,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="corner-tl"></div><div class="corner-br"></div>
   <div class="hex-ring"><div style="font-size:2.2rem">📡</div></div>
   <div class="logo">SPECULIX</div>
-  <div class="tagline">v9.1 · OPTIMIZED FOR ACCURACY<br>GOOGLE VISION AI · 6 SCAN MODES</div>
-  <button class="start-btn" onclick="startApp()">📡 START SCANNER</button>
-  <div class="version-badge">⚠ TIP: Place objects on PLAIN WHITE PAPER<br>Use natural daylight · Hold phone 20cm away</div>
+  <div class="tagline">v9.3 · 🛡️ HAZARD DETECTION ACTIVE<br>BROKEN GLASS · SHARP OBJECTS · DANGER</div>
+  <button class="start-btn" onclick="startApp()">🛡️ ACTIVATE HAZARD SCANNER</button>
+  <div class="version-badge">RED CIRCLES = POTENTIAL DANGER<br>Sweep phone over floor to find broken glass</div>
 </div>
 
 <div class="screen hidden" id="scanner">
@@ -266,6 +266,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     <div class="hud-status"><div class="dot" id="status-dot"></div><span id="status-text">READY</span></div>
   </div>
   <div id="priority-legend"><div class="legend-title">TARGETS:</div><div id="legend-list"></div></div>
+  <div id="hazard-badge" style="position:absolute;top:55px;left:10px;z-index:21;background:rgba(255,61,61,.15);border:2px solid #ff3d3d;padding:4px 10px;backdrop-filter:blur(4px);display:none;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#ff3d3d;font-weight:700;letter-spacing:.1em">⚠ <span id="hazard-count">0</span> HAZARDS</div>
   <div id="vision-panel">
     <div class="vision-header">
       <span class="vision-title">📡 MULTI-AI ANALYSIS</span>
@@ -273,14 +274,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     </div>
     <div class="vision-body" id="vision-body">
       <div class="vision-idle">
-        <strong style="color:var(--cyan)">📡 SCANNER READY</strong><br><br>
-        Tap <strong style="color:var(--purple)">🔬 IDENTIFY</strong> to scan<br>
-        Use <strong style="color:var(--cyan)">📊 DB</strong> to set targets<br><br>
-        <strong style="color:var(--amber)">📷 BEST RESULTS:</strong><br>
-        ✓ Plain background (white paper, black cloth)<br>
-        ✓ Good lighting (daylight ideal)<br>
-        ✓ Hold 20cm away from object<br>
-        ✗ Avoid patterned surfaces
+        <strong style="color:#ff3d3d">🛡️ HAZARD MODE ACTIVE</strong><br><br>
+        <strong>RED dashed circles</strong> mark potential broken glass<br>
+        <strong>Detection runs continuously</strong> — sweep phone slowly<br><br>
+        <strong style="color:var(--cyan)">For ID details:</strong><br>
+        Tap <strong style="color:var(--purple)">🔬 IDENTIFY</strong> · Use <strong>📊 DB</strong> for targets<br><br>
+        <strong style="color:var(--amber)">⚙️ ALG</strong> → toggle Hazard Detection
       </div>
     </div>
   </div>
@@ -367,6 +366,7 @@ const AI_ENGINES=[
   {id:'ai_roboflow',name:'🟣 Roboflow (Your AI)',desc:'Create project at roboflow.com first',on:false},
 ];
 const ALGORITHMS=[
+  {id:'hazard',name:'⚠ HAZARD DETECTION',desc:'🛡️ FINDS BROKEN GLASS · sharp edges + reflections (recommended)',on:true},
   {id:'preprocess',name:'1. Image Preprocessing',desc:'⚠ Can distort — turn OFF if accuracy drops',on:false},
   {id:'multiframe',name:'2. Multi-Frame Averaging',desc:'Combines 3 frames (slower)',on:false},
   {id:'smartcrop',name:'3. Smart Cropping',desc:'⚠ May crop wrong — turn OFF if missing object',on:false},
@@ -628,49 +628,60 @@ const TARGET_COLORS=['#cc00ff','#00ff88','#ffd700','#ff3d3d','#00f5ff'];
 
 function findMaterialFromLabel(label){
   const lower=label.toLowerCase();
-  // First check — exact name match
-  for(const mat of MATERIALS){if(lower.includes(mat.name.toLowerCase())) return mat;}
-  // Stricter aliases — gems matched directly, metals require metal context
+  // Color words that Google often uses as descriptors, not material names
+  const ambiguousColors=['silver','gold','copper','rose gold','white gold'];
+  // Check if label is JUST a color word (then it's not a material match)
+  for(const ac of ambiguousColors){
+    if(lower===ac||lower===ac+' color'||lower===ac+'-colored') return null;
+  }
+  // First check — exact name match BUT skip ambiguous colors unless metal context exists
+  const metalContext=lower.includes('metal')||lower.includes('alloy')||lower.includes('coin')||lower.includes('bar')||lower.includes('ingot')||lower.includes('jewelry')||lower.includes('jewellery')||lower.includes('chain')||lower.includes('ring');
+  for(const mat of MATERIALS){
+    const matLower=mat.name.toLowerCase();
+    // Skip ambiguous color-name materials unless metal context present
+    if(ambiguousColors.includes(matLower)&&!metalContext) continue;
+    if(lower.includes(matLower)) return mat;
+  }
+  // Gem aliases — these are not ambiguous colors
   const gemAliases={'diamond':'Diamond','moissanite':'Moissanite','zirconia':'Cubic Zirconia',
     'sapphire':'Blue Sapphire','ruby':'Ruby','emerald':'Emerald','pearl':'Pearl',
     'opal':'Opal','jade':'Jade','amber':'Amber','amethyst':'Amethyst',
     'citrine':'Citrine','topaz':'Topaz','garnet':'Garnet','turquoise':'Turquoise',
     'tourmaline':'Tourmaline','aquamarine':'Aquamarine','glass':'Glass',
-    'bottle':'Glass','crystal':'Glass','mirror':'Glass','shard':'Glass',
+    'bottle':'Glass','mirror':'Glass','shard':'Glass',
     'gemstone':'Diamond','jewel':'Diamond'};
   for(const[key,val]of Object.entries(gemAliases)){
     if(lower.includes(key)){const m=MATERIALS.find(x=>x.name===val);if(m)return m;}
   }
   // Jewelry types
-  if(lower.includes('ring')&&!lower.includes('earring')) return MATERIALS.find(m=>m.name==='Ring');
   if(lower.includes('earring')) return MATERIALS.find(m=>m.name==='Earring');
   if(lower.includes('necklace')) return MATERIALS.find(m=>m.name==='Necklace');
   if(lower.includes('bracelet')) return MATERIALS.find(m=>m.name==='Bracelet');
-  if(lower.includes('jewelry')||lower.includes('jewellery')) return MATERIALS.find(m=>m.name==='Ring');
-  // Metals — require strong metal context (not just "silver" color)
-  const metalContext=lower.includes('metal')||lower.includes('alloy')||lower.includes('coin')||lower.includes('bar')||lower.includes('ingot');
-  if(metalContext){
-    if(lower.includes('gold')) return MATERIALS.find(m=>m.name==='Gold');
-    if(lower.includes('silver')) return MATERIALS.find(m=>m.name==='Silver');
-    if(lower.includes('platinum')) return MATERIALS.find(m=>m.name==='Platinum');
-    if(lower.includes('titanium')) return MATERIALS.find(m=>m.name==='Titanium');
-    if(lower.includes('copper')) return MATERIALS.find(m=>m.name==='Copper');
-    if(lower.includes('steel')) return MATERIALS.find(m=>m.name==='Stainless Steel');
-  }
   return null;
 }
 function findMineralFromLabel(label){
   const lower=label.toLowerCase();
-  for(const m of MINERALS){if(lower.includes(m.name.toLowerCase())) return m;}
+  // Skip pure color matches
+  const ambiguousColors=['silver','gold','copper'];
+  for(const ac of ambiguousColors){
+    if(lower===ac||lower===ac+' color') return null;
+  }
+  // Check if label is just describing color, not metal
+  const isColorOnly=ambiguousColors.some(c=>lower.includes(c))&&!lower.includes('mineral')&&!lower.includes('rock')&&!lower.includes('crystal')&&!lower.includes('native')&&!lower.includes('ore')&&!lower.includes('nugget');
+  // Direct matches with name (skip native metals if just color described)
+  for(const m of MINERALS){
+    const mLower=m.name.toLowerCase();
+    if(mLower.includes('native')&&isColorOnly) continue;
+    if(lower.includes(mLower)) return m;
+  }
   const aliases={'pyrite':'Pyrite','quartz':'Quartz','calcite':'Calcite',
     'mica':'Mica (Muscovite)','feldspar':'Feldspar (Orthoclase)','olivine':'Olivine',
     'magnetite':'Magnetite','hematite':'Hematite','fluorite':'Fluorite',
-    'gypsum':'Gypsum','salt':'Halite (Rock Salt)','obsidian':'Obsidian',
+    'gypsum':'Gypsum','rock salt':'Halite (Rock Salt)','obsidian':'Obsidian',
     'amber':'Amber','pearl':'Pearl','coral':'Coral','agate':'Quartz',
-    'crystal':'Quartz','meteorite':'Meteorite (Stony)','tektite':'Tektite',
+    'rock crystal':'Quartz','meteorite':'Meteorite (Stony)','tektite':'Tektite',
     'moldavite':'Moldavite','malachite':'Malachite','azurite':'Azurite',
-    'galena':'Galena','sulfur':'Sulfur','gold':'Native Gold','silver':'Native Silver',
-    'copper':'Native Copper','platinum':'Native Platinum','graphite':'Graphite'};
+    'galena':'Galena','sulfur':'Sulfur','graphite':'Graphite'};
   for(const[key,val]of Object.entries(aliases)){
     if(lower.includes(key)){const m=MINERALS.find(x=>x.name===val);if(m)return m;}
   }
@@ -807,7 +818,17 @@ function highlightLoop(){
   if(video.readyState<2||canvas.width===0) return;
   const threshold=240-(sensitivity*10);
   ctx.drawImage(video,0,0,canvas.width,canvas.height);
+
+  // ═══ HAZARD DETECTION — physics-based glass finder ═══
+  if(algoSettings.hazard){
+    detectHazards();
+  } else {
+    hazardDetections=[];
+  }
+
+  drawHazardCircles();
   drawTargetCircles();
+
   const img=ctx.getImageData(0,0,canvas.width,canvas.height);
   const data=img.data;
   hCanvas.width=canvas.width;hCanvas.height=canvas.height;
@@ -823,6 +844,177 @@ function highlightLoop(){
   }
   hCtx.putImageData(hImg,0,0);
   hCanvas.classList.add('show');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// HAZARD DETECTION — 3 ALGORITHMS COMBINED
+// Detects broken glass and other hazards using PURE MATH (no AI needed)
+// ═══════════════════════════════════════════════════════════════════════
+let hazardDetections=[];
+let hazardLastRun=0;
+const HAZARD_INTERVAL=400; // run every 400ms (saves CPU)
+
+function detectHazards(){
+  const now=Date.now();
+  if(now-hazardLastRun<HAZARD_INTERVAL) return;
+  hazardLastRun=now;
+
+  const W=canvas.width,H=canvas.height;
+  if(W<100||H<100) return;
+
+  // Downsample for performance (run on smaller image)
+  const scale=0.25;
+  const sW=Math.floor(W*scale);
+  const sH=Math.floor(H*scale);
+  const tc=document.createElement('canvas');
+  tc.width=sW;tc.height=sH;
+  const tctx=tc.getContext('2d');
+  tctx.drawImage(canvas,0,0,sW,sH);
+  const img=tctx.getImageData(0,0,sW,sH);
+  const data=img.data;
+
+  // Block size for analysis
+  const blockSize=20;
+  const candidates=[];
+
+  for(let by=0;by<sH-blockSize;by+=blockSize/2){
+    for(let bx=0;bx<sW-blockSize;bx+=blockSize/2){
+      // ── ALGO 1: Specular hot pixel detection ──
+      let hotPixels=0;
+      let totalBright=0;
+      // ── ALGO 3: Saturation analysis ──
+      let satSum=0;
+      let pixelCount=0;
+      let edgePixels=0;
+
+      for(let y=by;y<by+blockSize&&y<sH;y++){
+        for(let x=bx;x<bx+blockSize&&x<sW;x++){
+          const i=(y*sW+x)*4;
+          const r=data[i],g=data[i+1],b=data[i+2];
+          const lum=r*0.299+g*0.587+b*0.114;
+
+          // Hot pixel (specular reflection from glass edge)
+          if(lum>235) hotPixels++;
+          totalBright+=lum;
+
+          // Saturation (glass has very low color saturation)
+          const max=Math.max(r,g,b);
+          const min=Math.min(r,g,b);
+          const sat=max>0?(max-min)/max:0;
+          satSum+=sat;
+          pixelCount++;
+
+          // ── ALGO 2: Edge detection (Sobel-lite) ──
+          if(x>0&&y>0&&x<sW-1&&y<sH-1){
+            const lL=(data[(y*sW+x-1)*4])*0.299+(data[(y*sW+x-1)*4+1])*0.587+(data[(y*sW+x-1)*4+2])*0.114;
+            const lR=(data[(y*sW+x+1)*4])*0.299+(data[(y*sW+x+1)*4+1])*0.587+(data[(y*sW+x+1)*4+2])*0.114;
+            const lU=(data[((y-1)*sW+x)*4])*0.299+(data[((y-1)*sW+x)*4+1])*0.587+(data[((y-1)*sW+x)*4+2])*0.114;
+            const lD=(data[((y+1)*sW+x)*4])*0.299+(data[((y+1)*sW+x)*4+1])*0.587+(data[((y+1)*sW+x)*4+2])*0.114;
+            const grad=Math.abs(lL-lR)+Math.abs(lU-lD);
+            if(grad>60) edgePixels++;
+          }
+        }
+      }
+
+      const avgBright=totalBright/pixelCount;
+      const avgSat=satSum/pixelCount;
+      const edgeDensity=edgePixels/pixelCount;
+      const hotRatio=hotPixels/pixelCount;
+
+      // GLASS SIGNATURE: high edges + low saturation + has hot pixels OR brightness
+      // Score from 0-100
+      let glassScore=0;
+      if(edgeDensity>0.15) glassScore+=40; // many edges
+      else if(edgeDensity>0.08) glassScore+=20;
+
+      if(avgSat<0.20) glassScore+=30; // colorless
+      else if(avgSat<0.35) glassScore+=15;
+
+      if(hotRatio>0.02) glassScore+=20; // specular flashes
+      else if(hotRatio>0.005) glassScore+=10;
+
+      if(avgBright>120&&avgBright<240) glassScore+=10; // medium brightness
+
+      if(glassScore>=60){
+        // Convert downsampled coords back to canvas coords
+        const cx=(bx+blockSize/2)/scale;
+        const cy=(by+blockSize/2)/scale;
+        candidates.push({x:cx,y:cy,score:glassScore,edges:edgeDensity,sat:avgSat});
+      }
+    }
+  }
+
+  // Cluster nearby candidates into single detections
+  const clusters=[];
+  const used=new Set();
+  const clusterRadius=80/scale;
+  for(let i=0;i<candidates.length;i++){
+    if(used.has(i)) continue;
+    let cx=candidates[i].x,cy=candidates[i].y;
+    let maxScore=candidates[i].score;
+    let count=1;
+    used.add(i);
+    for(let j=i+1;j<candidates.length;j++){
+      if(used.has(j)) continue;
+      const dx=candidates[j].x-cx;
+      const dy=candidates[j].y-cy;
+      if(Math.sqrt(dx*dx+dy*dy)<clusterRadius){
+        cx=(cx*count+candidates[j].x)/(count+1);
+        cy=(cy*count+candidates[j].y)/(count+1);
+        maxScore=Math.max(maxScore,candidates[j].score);
+        count++;
+        used.add(j);
+      }
+    }
+    clusters.push({x:cx,y:cy,score:maxScore,size:count});
+  }
+
+  // Filter — only keep clusters with at least 2 supporting candidates (reduces noise)
+  hazardDetections=clusters.filter(c=>c.size>=2).slice(0,8); // max 8 hazards on screen
+}
+
+function drawHazardCircles(){
+  // Update badge
+  const badge=document.getElementById('hazard-badge');
+  if(badge){
+    if(hazardDetections.length>0&&algoSettings.hazard){
+      badge.style.display='block';
+      document.getElementById('hazard-count').textContent=hazardDetections.length;
+    } else {
+      badge.style.display='none';
+    }
+  }
+  if(!hazardDetections.length) return;
+  for(const h of hazardDetections){
+    const t=Date.now()/300;
+    const radius=Math.max(40,Math.min(80,h.size*15));
+    const pulseR=radius+Math.sin(t)*5;
+    ctx.save();
+    // Red warning glow
+    ctx.shadowColor='#ff3d3d';ctx.shadowBlur=25;
+    ctx.beginPath();ctx.arc(h.x,h.y,pulseR,0,Math.PI*2);
+    ctx.strokeStyle='#ff3d3d';ctx.lineWidth=4;
+    ctx.setLineDash([8,8]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Inner X mark for hazard
+    ctx.shadowBlur=0;
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    ctx.moveTo(h.x-12,h.y-12);ctx.lineTo(h.x+12,h.y+12);
+    ctx.moveTo(h.x+12,h.y-12);ctx.lineTo(h.x-12,h.y+12);
+    ctx.stroke();
+    // Score label
+    ctx.font='700 12px "Share Tech Mono"';
+    ctx.fillStyle='rgba(0,0,0,0.85)';
+    const labelW=80;
+    ctx.fillRect(h.x-labelW/2,h.y+pulseR+6,labelW,18);
+    ctx.strokeStyle='#ff3d3d';ctx.lineWidth=1.5;
+    ctx.strokeRect(h.x-labelW/2,h.y+pulseR+6,labelW,18);
+    ctx.fillStyle='#ff3d3d';ctx.textAlign='center';
+    ctx.fillText('⚠ '+h.score+'%',h.x,h.y+pulseR+19);
+    ctx.restore();
+  }
 }
 function drawTargetCircles(){
   if(!lastDetections.length) return;
