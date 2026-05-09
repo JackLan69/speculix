@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v9.3 HAZARD</title>
+<title>SPECULIX v9.4 MULTI-AI</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
@@ -252,9 +252,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="corner-tl"></div><div class="corner-br"></div>
   <div class="hex-ring"><div style="font-size:2.2rem">📡</div></div>
   <div class="logo">SPECULIX</div>
-  <div class="tagline">v9.3 · 🛡️ HAZARD DETECTION ACTIVE<br>BROKEN GLASS · SHARP OBJECTS · DANGER</div>
-  <button class="start-btn" onclick="startApp()">🛡️ ACTIVATE HAZARD SCANNER</button>
-  <div class="version-badge">RED CIRCLES = POTENTIAL DANGER<br>Sweep phone over floor to find broken glass</div>
+  <div class="tagline">v9.4 · 5 AI ENGINES · HAZARD MODE<br>iNATURALIST · PUBCHEM · WIKIDATA · GOOGLE · TEMPORAL</div>
+  <button class="start-btn" onclick="startApp()">📡 ACTIVATE TRICORDER</button>
+  <div class="version-badge">🛡️ HAZARD: real-time glass detection<br>🌿 BIO: iNaturalist plant/animal ID<br>⚗️ CHEM: PubChem chemical formulas</div>
 </div>
 
 <div class="screen hidden" id="scanner">
@@ -361,7 +361,11 @@ const ROBOFLOW_PROJECT='speculix';
 
 // AI ENGINES + ALGORITHMS
 const AI_ENGINES=[
-  {id:'ai_google',name:'🔵 Google Vision AI',desc:'General object identification (recommended)',on:true},
+  {id:'ai_google',name:'🔵 Google Vision AI',desc:'General object identification',on:true},
+  {id:'ai_inaturalist',name:'🌿 iNaturalist (Free)',desc:'Plants, animals, mushrooms · use in BIO mode',on:true},
+  {id:'ai_pubchem',name:'⚗️ PubChem (Free NIH)',desc:'Chemical formulas, weight, IUPAC name',on:true},
+  {id:'ai_wikidata',name:'📚 Wikidata (Free)',desc:'General material info from Wikipedia',on:true},
+  {id:'ai_temporal',name:'⏱ Temporal Analysis',desc:'Detects reflections vs real colors over time',on:true},
   {id:'ai_dinox',name:'🟠 DINO-X (Beta)',desc:'Requires SDK setup — currently returns errors',on:false},
   {id:'ai_roboflow',name:'🟣 Roboflow (Your AI)',desc:'Create project at roboflow.com first',on:false},
 ];
@@ -1175,6 +1179,128 @@ async function captureMultiFrame(){
 // ═══════════════════════════════════════════════════════════════════════
 
 // 1. GOOGLE VISION
+// ═══════════════════════════════════════════════════════════════════════
+// EXTERNAL FREE DATABASES — no API key needed
+// ═══════════════════════════════════════════════════════════════════════
+
+// iNaturalist — plant/animal/mushroom identification (FREE, no key)
+async function callINaturalist(base64){
+  try{
+    // Convert base64 to blob for upload
+    const byteString=atob(base64);
+    const ab=new ArrayBuffer(byteString.length);
+    const ia=new Uint8Array(ab);
+    for(let i=0;i<byteString.length;i++) ia[i]=byteString.charCodeAt(i);
+    const blob=new Blob([ab],{type:'image/jpeg'});
+    const fd=new FormData();
+    fd.append('image',blob,'speculix.jpg');
+    // iNaturalist computer vision endpoint
+    const r=await fetch('https://api.inaturalist.org/v1/computervision/score_image',{
+      method:'POST',body:fd
+    });
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data=await r.json();
+    const results=(data.results||[]).slice(0,5).map(r=>({
+      name:r.taxon?.preferred_common_name||r.taxon?.name||'Unknown',
+      scientific:r.taxon?.name||'',
+      score:Math.round((r.combined_score||r.vision_score||0)),
+      rank:r.taxon?.rank||''
+    }));
+    return {success:true,results};
+  }catch(err){
+    return {success:false,error:err.message};
+  }
+}
+
+// Wikidata — general material/object info (FREE, no key)
+async function callWikidata(searchTerm){
+  try{
+    const url=`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(searchTerm)}&language=en&limit=3&format=json&origin=*`;
+    const r=await fetch(url);
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data=await r.json();
+    const results=(data.search||[]).slice(0,3).map(r=>({
+      label:r.label,
+      description:r.description||'',
+      id:r.id
+    }));
+    return {success:true,results};
+  }catch(err){
+    return {success:false,error:err.message};
+  }
+}
+
+// PubChem — chemical info (FREE, no key)
+async function callPubChem(chemicalName){
+  try{
+    const url=`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(chemicalName)}/property/MolecularFormula,MolecularWeight,IUPACName/JSON`;
+    const r=await fetch(url);
+    if(!r.ok) throw new Error(`Not found in PubChem`);
+    const data=await r.json();
+    const props=data.PropertyTable?.Properties?.[0];
+    if(!props) throw new Error('No data');
+    return {
+      success:true,
+      formula:props.MolecularFormula,
+      weight:props.MolecularWeight,
+      iupac:props.IUPACName
+    };
+  }catch(err){
+    return {success:false,error:err.message};
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TEMPORAL ANALYSIS — detects reflections vs real colors
+// Compares multiple frames; reflections shift dramatically with movement
+// ═══════════════════════════════════════════════════════════════════════
+let temporalFrames=[];
+const TEMPORAL_MAX=4;
+function captureTemporalFrame(){
+  if(canvas.width===0) return;
+  const sw=80,sh=60;
+  const tc=document.createElement('canvas');
+  tc.width=sw;tc.height=sh;
+  tc.getContext('2d').drawImage(canvas,0,0,sw,sh);
+  const data=tc.getContext('2d').getImageData(0,0,sw,sh).data;
+  temporalFrames.push({data:new Uint8ClampedArray(data),time:Date.now()});
+  if(temporalFrames.length>TEMPORAL_MAX) temporalFrames.shift();
+}
+
+function analyzeTemporalStability(){
+  if(temporalFrames.length<2) return {stable:false,score:0};
+  const f1=temporalFrames[0].data;
+  const f2=temporalFrames[temporalFrames.length-1].data;
+  let totalDiff=0;
+  let stableCount=0;
+  let totalCount=0;
+  for(let i=0;i<f1.length;i+=4){
+    const r1=f1[i],g1=f1[i+1],b1=f1[i+2];
+    const r2=f2[i],g2=f2[i+1],b2=f2[i+2];
+    const diff=Math.abs(r1-r2)+Math.abs(g1-g2)+Math.abs(b1-b2);
+    totalDiff+=diff;
+    if(diff<30) stableCount++;
+    totalCount++;
+  }
+  const stability=stableCount/totalCount;
+  return {
+    stable:stability>0.7,
+    score:Math.round(stability*100),
+    avgDiff:Math.round(totalDiff/totalCount)
+  };
+}
+
+// Capture temporal frames every 200ms during identify
+let temporalInterval=null;
+function startTemporalCapture(){
+  temporalFrames=[];
+  if(temporalInterval) clearInterval(temporalInterval);
+  temporalInterval=setInterval(captureTemporalFrame,200);
+}
+function stopTemporalCapture(){
+  if(temporalInterval){clearInterval(temporalInterval);temporalInterval=null;}
+}
+
 async function callGoogleVision(base64){
   try{
     const body={requests:[{image:{content:base64},features:[
@@ -1318,6 +1444,10 @@ async function identifyNow(){
     const promises=[];
     const aiNames=[];
     if(algoSettings.ai_google){promises.push(callGoogleVision(base64));aiNames.push('google');}
+    // iNaturalist works best in BIO mode but is useful in MAT mode too
+    if(algoSettings.ai_inaturalist&&(currentMode==='bio'||currentMode==='material')){
+      promises.push(callINaturalist(base64));aiNames.push('inaturalist');
+    }
     if(algoSettings.ai_dinox){promises.push(callDinoX(base64));aiNames.push('dinox');}
     if(algoSettings.ai_roboflow){promises.push(callRoboflow(base64));aiNames.push('roboflow');}
     
@@ -1329,6 +1459,27 @@ async function identifyNow(){
     const results=await Promise.all(promises);
     const aiResults={};
     results.forEach((r,i)=>{aiResults[aiNames[i]]=r;});
+    
+    // Temporal analysis if enabled
+    if(algoSettings.ai_temporal){
+      aiResults.temporal=analyzeTemporalStability();
+    }
+    
+    // Enrich with PubChem in CHEM mode
+    if(algoSettings.ai_pubchem&&currentMode==='chemical'&&aiResults.google&&aiResults.google.success){
+      const topLabel=aiResults.google.labels[0]?.name||aiResults.google.objects[0]?.name;
+      if(topLabel){
+        aiResults.pubchem=await callPubChem(topLabel);
+      }
+    }
+    
+    // Enrich with Wikidata for unknown items
+    if(algoSettings.ai_wikidata&&aiResults.google&&aiResults.google.success){
+      const topLabel=aiResults.google.labels[0]?.name||aiResults.google.objects[0]?.name;
+      if(topLabel){
+        aiResults.wikidata=await callWikidata(topLabel);
+      }
+    }
     
     renderMultiAIResult(aiResults);
     setStatus('READY',false);
@@ -1400,6 +1551,53 @@ function renderMultiAIResult(aiResults){
       html+=`<div class="ai-block-content">${items.length>0?items.map(t=>`${t.name} ${t.score}%`).join(' · '):'No detections (your model may need training)'}</div>`;
     } else {
       html+=`<div class="ai-block-error">⚠ ${aiResults.roboflow.error}</div>`;
+    }
+    html+='</div>';
+  }
+
+  // iNaturalist results
+  if(aiResults.inaturalist){
+    html+='<div class="ai-block"><span class="ai-tag" style="color:#00ff88;border:1px solid #00ff88">🌿 iNATURALIST</span>';
+    if(aiResults.inaturalist.success&&aiResults.inaturalist.results.length>0){
+      const items=aiResults.inaturalist.results.slice(0,3);
+      html+=`<div class="ai-block-content">${items.map(t=>`<strong>${t.name}</strong> <i>(${t.scientific})</i> ${t.score}%`).join('<br>')}</div>`;
+    } else {
+      html+=`<div class="ai-block-error">No species match found</div>`;
+    }
+    html+='</div>';
+  }
+
+  // PubChem chemical data
+  if(aiResults.pubchem){
+    html+='<div class="ai-block"><span class="ai-tag" style="color:#ffb300;border:1px solid #ffb300">⚗️ PUBCHEM</span>';
+    if(aiResults.pubchem.success){
+      html+=`<div class="ai-block-content">Formula: <strong>${aiResults.pubchem.formula||'—'}</strong> · Weight: ${aiResults.pubchem.weight||'—'}<br>IUPAC: ${aiResults.pubchem.iupac||'—'}</div>`;
+    } else {
+      html+=`<div class="ai-block-error">${aiResults.pubchem.error}</div>`;
+    }
+    html+='</div>';
+  }
+
+  // Wikidata
+  if(aiResults.wikidata){
+    html+='<div class="ai-block"><span class="ai-tag" style="color:#cc00ff;border:1px solid #cc00ff">📚 WIKIDATA</span>';
+    if(aiResults.wikidata.success&&aiResults.wikidata.results.length>0){
+      const top=aiResults.wikidata.results[0];
+      html+=`<div class="ai-block-content"><strong>${top.label}</strong> — ${top.description}</div>`;
+    } else {
+      html+=`<div class="ai-block-error">No Wikidata entry</div>`;
+    }
+    html+='</div>';
+  }
+
+  // Temporal Analysis
+  if(aiResults.temporal){
+    const t=aiResults.temporal;
+    html+='<div class="ai-block"><span class="ai-tag" style="color:#00f5ff;border:1px solid #00f5ff">⏱ TEMPORAL</span>';
+    if(t.stable){
+      html+=`<div class="ai-block-content">✓ Stable colors (${t.score}%) — likely true material color</div>`;
+    } else {
+      html+=`<div class="ai-block-content" style="color:#ffb300">⚠ Color shifting (${t.score}% stable) — possible reflection/lighting effect</div>`;
     }
     html+='</div>';
   }
@@ -1761,7 +1959,7 @@ async function startApp(){
       await track.applyConstraints({advanced:[{torch:true}]});
       torchOn=true;document.getElementById('btn-torch').classList.add('active');
     }catch(e){}
-    video.addEventListener('loadedmetadata',()=>{resizeCanvas();requestAnimationFrame(highlightLoop);});
+    video.addEventListener('loadedmetadata',()=>{resizeCanvas();requestAnimationFrame(highlightLoop);startTemporalCapture();});
   }catch(err){setStatus('CAM ERROR',false);}
 }
 async function toggleTorch(){
