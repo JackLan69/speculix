@@ -252,9 +252,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="corner-tl"></div><div class="corner-br"></div>
   <div class="hex-ring"><div style="font-size:2.2rem">📡</div></div>
   <div class="logo">SPECULIX</div>
-  <div class="tagline">v8.5 · 3 AI ENGINES CONNECTED<br>GOOGLE VISION · DINO-X · ROBOFLOW</div>
+  <div class="tagline">v9.0 TRICORDER · 6 SCAN MODES<br>3 AI ENGINES · 250+ ITEMS DATABASE</div>
   <button class="start-btn" onclick="startApp()">📡 START SCANNER</button>
-  <div class="version-badge">3 AIs WORKING TOGETHER · 9 ALGORITHMS<br>MATERIALS · CURRENCY · MEDICATION</div>
+  <div class="version-badge">MATERIALS · MINERALS · CHEMICALS · BIO<br>CURRENCY · MEDICATION · 9 ALGORITHMS</div>
 </div>
 
 <div class="screen hidden" id="scanner">
@@ -282,9 +282,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   </div>
   <div class="hud-bottom">
     <div class="mode-row">
-      <button class="mode-btn active" id="mode-material" onclick="setMode('material')">💎 MATERIAL</button>
-      <button class="mode-btn" id="mode-currency" onclick="setMode('currency')">💵 CURRENCY</button>
-      <button class="mode-btn" id="mode-medication" onclick="setMode('medication')">💊 MEDS</button>
+      <button class="mode-btn active" id="mode-material" onclick="setMode('material')">💎 MAT</button>
+      <button class="mode-btn" id="mode-mineral" onclick="setMode('mineral')">🪨 MIN</button>
+      <button class="mode-btn" id="mode-chemical" onclick="setMode('chemical')">⚗️ CHEM</button>
+      <button class="mode-btn" id="mode-bio" onclick="setMode('bio')">🌿 BIO</button>
+      <button class="mode-btn" id="mode-currency" onclick="setMode('currency')">💵 CUR</button>
+      <button class="mode-btn" id="mode-medication" onclick="setMode('medication')">💊 MED</button>
     </div>
     <div class="controls-row">
       <span class="ctrl-label">HIGHLIGHT</span>
@@ -418,6 +421,198 @@ const CURRENCIES=[
   {cat:"EUR",name:"€20 Note",description:"Blue — Europa",securityFeatures:["Portrait window","Hologram","Watermark","Color-shifting"],counterfeit:"Most-counterfeited EUR"},
   {cat:"EUR",name:"€50 Note",description:"Orange",securityFeatures:["Portrait window","Hologram","Color-shift","Watermark"],counterfeit:"Examine portrait window"},
 ];
+// ═══════════════════════════════════════════════════════════════════════
+// MINERALS DATABASE — 80+ minerals (Step 2)
+// ═══════════════════════════════════════════════════════════════════════
+const MINERALS=[
+  // Native Elements
+  {cat:"Native Elements",name:"Sulfur",ri:"1.96–2.25",riN:2.10,composition:"S",hardness:"1.5–2.5 Mohs",density:"2.07 g/cm³",origin:"Volcanic, sedimentary",value:"$5–$50/specimen",colors:"Yellow",care:"Brittle, flammable"},
+  {cat:"Native Elements",name:"Graphite",ri:"varies",riN:2.0,composition:"C",hardness:"1–2 Mohs",density:"2.09–2.23 g/cm³",origin:"Metamorphic",value:"$1–$20/specimen",colors:"Black-grey",care:"Soft, smudges"},
+  {cat:"Native Elements",name:"Native Gold",ri:"0.27",riN:0.27,composition:"Au",hardness:"2.5–3 Mohs",density:"15–19.3 g/cm³",origin:"Hydrothermal",value:"$60+/gram",colors:"Yellow",care:"Soft, malleable"},
+  {cat:"Native Elements",name:"Native Silver",ri:"0.18",riN:0.18,composition:"Ag",hardness:"2.5–3 Mohs",density:"10.5 g/cm³",origin:"Hydrothermal",value:"$0.80+/gram",colors:"Silver, tarnishes",care:"Tarnishes"},
+  {cat:"Native Elements",name:"Native Copper",ri:"0.62",riN:0.62,composition:"Cu",hardness:"2.5–3 Mohs",density:"8.96 g/cm³",origin:"Volcanic",value:"$10–$500/specimen",colors:"Reddish-orange",care:"Patinas green"},
+  {cat:"Native Elements",name:"Native Platinum",ri:"2.63",riN:2.63,composition:"Pt",hardness:"4–4.5 Mohs",density:"21.45 g/cm³",origin:"Igneous",value:"$30+/gram",colors:"Silver-white",care:"Very rare"},
+  // Sulfides
+  {cat:"Sulfides",name:"Pyrite",ri:"1.81",riN:1.81,composition:"FeS₂",hardness:"6–6.5 Mohs",density:"4.95–5.10 g/cm³",origin:"Worldwide",value:"$5–$200/specimen",colors:"Brassy gold (fool's gold)",care:"Can oxidize"},
+  {cat:"Sulfides",name:"Galena",ri:"varies",riN:2.0,composition:"PbS",hardness:"2.5 Mohs",density:"7.4 g/cm³",origin:"Hydrothermal",value:"$5–$100",colors:"Lead-grey metallic",care:"⚠ Contains lead"},
+  {cat:"Sulfides",name:"Sphalerite",ri:"2.37",riN:2.37,composition:"ZnS",hardness:"3.5–4 Mohs",density:"3.9–4.1 g/cm³",origin:"Hydrothermal",value:"$10–$300",colors:"Brown, yellow, red",care:"Brittle"},
+  {cat:"Sulfides",name:"Chalcopyrite",ri:"varies",riN:2.5,composition:"CuFeS₂",hardness:"3.5–4 Mohs",density:"4.1–4.3 g/cm³",origin:"Hydrothermal",value:"$5–$50",colors:"Brassy yellow, iridescent",care:"Tarnishes rainbow"},
+  {cat:"Sulfides",name:"Cinnabar",ri:"2.91–3.26",riN:3.08,composition:"HgS",hardness:"2–2.5 Mohs",density:"8.10 g/cm³",origin:"Volcanic",value:"$20–$500",colors:"Vermilion red",care:"⚠ TOXIC mercury"},
+  {cat:"Sulfides",name:"Stibnite",ri:"3.19–4.30",riN:3.75,composition:"Sb₂S₃",hardness:"2 Mohs",density:"4.6 g/cm³",origin:"Hydrothermal",value:"$10–$200",colors:"Lead-grey metallic",care:"Soft, brittle"},
+  {cat:"Sulfides",name:"Realgar",ri:"2.54–2.68",riN:2.61,composition:"AsS",hardness:"1.5–2 Mohs",density:"3.56 g/cm³",origin:"Volcanic",value:"$15–$300",colors:"Red-orange",care:"⚠ ARSENIC"},
+  {cat:"Sulfides",name:"Orpiment",ri:"2.4–3.02",riN:2.71,composition:"As₂S₃",hardness:"1.5–2 Mohs",density:"3.49 g/cm³",origin:"Volcanic",value:"$10–$200",colors:"Yellow",care:"⚠ ARSENIC"},
+  {cat:"Sulfides",name:"Molybdenite",ri:"varies",riN:2.5,composition:"MoS₂",hardness:"1–1.5 Mohs",density:"4.7 g/cm³",origin:"Igneous",value:"$5–$50",colors:"Blue-grey metallic",care:"Greasy feel"},
+  // Halides
+  {cat:"Halides",name:"Fluorite",ri:"1.434",riN:1.434,composition:"CaF₂",hardness:"4 Mohs",density:"3.18 g/cm³",origin:"Hydrothermal",value:"$5–$200/carat",colors:"Purple, green, blue, yellow",care:"Soft, cleaves easily"},
+  {cat:"Halides",name:"Halite (Rock Salt)",ri:"1.544",riN:1.544,composition:"NaCl",hardness:"2.5 Mohs",density:"2.17 g/cm³",origin:"Evaporite",value:"$1–$50",colors:"Clear, pink, blue",care:"Water-soluble"},
+  {cat:"Halides",name:"Sylvite",ri:"1.49",riN:1.49,composition:"KCl",hardness:"2 Mohs",density:"1.99 g/cm³",origin:"Evaporite",value:"$5–$50",colors:"Clear, yellow, red",care:"Water-soluble"},
+  // Oxides
+  {cat:"Oxides",name:"Quartz",ri:"1.544–1.553",riN:1.548,composition:"SiO₂",hardness:"7 Mohs",density:"2.65 g/cm³",origin:"Worldwide",value:"$1–$1,000/specimen",colors:"All colors",care:"Very durable"},
+  {cat:"Oxides",name:"Magnetite",ri:"varies",riN:2.42,composition:"Fe₃O₄",hardness:"5.5–6.5 Mohs",density:"5.18 g/cm³",origin:"Igneous, metamorphic",value:"$5–$100",colors:"Black metallic",care:"Magnetic"},
+  {cat:"Oxides",name:"Hematite",ri:"2.94–3.22",riN:3.08,composition:"Fe₂O₃",hardness:"5–6 Mohs",density:"5.26 g/cm³",origin:"Sedimentary",value:"$5–$200",colors:"Metallic grey, red streak",care:"Iron source"},
+  {cat:"Oxides",name:"Rutile",ri:"2.62–2.90",riN:2.76,composition:"TiO₂",hardness:"6–6.5 Mohs",density:"4.23 g/cm³",origin:"Igneous",value:"$10–$1,000/carat",colors:"Red, brown, black",care:"Brilliant luster"},
+  {cat:"Oxides",name:"Cassiterite",ri:"1.997–2.093",riN:2.045,composition:"SnO₂",hardness:"6–7 Mohs",density:"6.99 g/cm³",origin:"Hydrothermal",value:"$10–$200",colors:"Black, brown, yellow",care:"Tin source"},
+  {cat:"Oxides",name:"Corundum",ri:"1.762–1.770",riN:1.766,composition:"Al₂O₃",hardness:"9 Mohs",density:"3.98–4.10 g/cm³",origin:"Igneous, metamorphic",value:"$50+/carat",colors:"All (Ruby/Sapphire)",care:"Extremely hard"},
+  {cat:"Oxides",name:"Ilmenite",ri:"varies",riN:2.7,composition:"FeTiO₃",hardness:"5–6 Mohs",density:"4.7 g/cm³",origin:"Igneous",value:"$5–$50",colors:"Black",care:"Slightly magnetic"},
+  {cat:"Oxides",name:"Spinel",ri:"1.712–1.726",riN:1.718,composition:"MgAl₂O₄",hardness:"8 Mohs",density:"3.58–4.06 g/cm³",origin:"Metamorphic",value:"$200+/carat",colors:"All",care:"Mild soap"},
+  {cat:"Oxides",name:"Chromite",ri:"varies",riN:2.16,composition:"FeCr₂O₄",hardness:"5.5 Mohs",density:"4.5–4.8 g/cm³",origin:"Igneous",value:"$5–$50",colors:"Black",care:"Source of chromium"},
+  // Carbonates
+  {cat:"Carbonates",name:"Calcite",ri:"1.486–1.658",riN:1.572,composition:"CaCO₃",hardness:"3 Mohs",density:"2.71 g/cm³",origin:"Sedimentary, hydrothermal",value:"$1–$200",colors:"Clear, all colors",care:"Reacts with acids"},
+  {cat:"Carbonates",name:"Aragonite",ri:"1.530–1.686",riN:1.608,composition:"CaCO₃",hardness:"3.5–4 Mohs",density:"2.93 g/cm³",origin:"Marine, hot springs",value:"$5–$100",colors:"White, blue, green",care:"Reacts with acids"},
+  {cat:"Carbonates",name:"Dolomite",ri:"1.500–1.682",riN:1.591,composition:"CaMg(CO₃)₂",hardness:"3.5–4 Mohs",density:"2.84 g/cm³",origin:"Sedimentary",value:"$5–$50",colors:"White, pink, grey",care:"Slow acid reaction"},
+  {cat:"Carbonates",name:"Malachite",ri:"1.655–1.909",riN:1.782,composition:"Cu₂CO₃(OH)₂",hardness:"3.5–4 Mohs",density:"3.6–4.05 g/cm³",origin:"Oxidized copper",value:"$10–$1,000",colors:"Bright green banded",care:"Avoid acids"},
+  {cat:"Carbonates",name:"Azurite",ri:"1.730–1.838",riN:1.784,composition:"Cu₃(CO₃)₂(OH)₂",hardness:"3.5–4 Mohs",density:"3.77 g/cm³",origin:"Oxidized copper",value:"$10–$500",colors:"Deep blue",care:"Avoid acids"},
+  {cat:"Carbonates",name:"Rhodochrosite",ri:"1.597–1.817",riN:1.707,composition:"MnCO₃",hardness:"3.5–4 Mohs",density:"3.7 g/cm³",origin:"Hydrothermal",value:"$50–$500/carat",colors:"Pink to red",care:"Soft, brittle"},
+  {cat:"Carbonates",name:"Siderite",ri:"1.630–1.875",riN:1.752,composition:"FeCO₃",hardness:"3.5–4.5 Mohs",density:"3.96 g/cm³",origin:"Sedimentary",value:"$5–$100",colors:"Brown, yellow",care:"Reacts with acids"},
+  // Sulfates
+  {cat:"Sulfates",name:"Gypsum",ri:"1.519–1.530",riN:1.524,composition:"CaSO₄·2H₂O",hardness:"2 Mohs",density:"2.32 g/cm³",origin:"Evaporite",value:"$1–$200",colors:"White, clear, pink",care:"Dehydrates with heat"},
+  {cat:"Sulfates",name:"Selenite",ri:"1.519–1.530",riN:1.524,composition:"CaSO₄·2H₂O",hardness:"2 Mohs",density:"2.32 g/cm³",origin:"Evaporite",value:"$5–$200",colors:"Clear, white",care:"⚠ Water-soluble"},
+  {cat:"Sulfates",name:"Barite",ri:"1.636–1.648",riN:1.642,composition:"BaSO₄",hardness:"3–3.5 Mohs",density:"4.5 g/cm³",origin:"Hydrothermal",value:"$5–$200",colors:"White, blue, brown",care:"Heavy"},
+  {cat:"Sulfates",name:"Celestine",ri:"1.621–1.631",riN:1.626,composition:"SrSO₄",hardness:"3–3.5 Mohs",density:"3.97 g/cm³",origin:"Sedimentary",value:"$10–$500",colors:"Sky blue",care:"Brittle"},
+  {cat:"Sulfates",name:"Anhydrite",ri:"1.569–1.614",riN:1.591,composition:"CaSO₄",hardness:"3–3.5 Mohs",density:"2.97 g/cm³",origin:"Evaporite",value:"$5–$100",colors:"Clear, blue",care:"Becomes gypsum with water"},
+  // Phosphates
+  {cat:"Phosphates",name:"Apatite",ri:"1.632–1.642",riN:1.637,composition:"Ca₅(PO₄)₃(F,Cl,OH)",hardness:"5 Mohs",density:"3.16–3.22 g/cm³",origin:"Igneous",value:"$10–$500/carat",colors:"All colors",care:"Mild soap"},
+  {cat:"Phosphates",name:"Turquoise",ri:"1.610–1.650",riN:1.630,composition:"CuAl₆(PO₄)₄(OH)₈·4H₂O",hardness:"5–6 Mohs",density:"2.6–2.9 g/cm³",origin:"Arid copper deposits",value:"$5–$1,000/carat",colors:"Sky blue to green",care:"Porous"},
+  {cat:"Phosphates",name:"Vivianite",ri:"1.579–1.633",riN:1.606,composition:"Fe₃(PO₄)₂·8H₂O",hardness:"1.5–2 Mohs",density:"2.65 g/cm³",origin:"Sedimentary",value:"$10–$200",colors:"Blue-green",care:"Color darkens with light"},
+  {cat:"Phosphates",name:"Wavellite",ri:"1.518–1.561",riN:1.540,composition:"Al₃(PO₄)₂(OH,F)₃·5H₂O",hardness:"3.5–4 Mohs",density:"2.36 g/cm³",origin:"Sedimentary",value:"$10–$100",colors:"Green, yellow",care:"Radiating crystals"},
+  // Silicates
+  {cat:"Silicates",name:"Olivine",ri:"1.654–1.690",riN:1.672,composition:"(Mg,Fe)₂SiO₄",hardness:"6.5–7 Mohs",density:"3.27–3.48 g/cm³",origin:"Mantle igneous",value:"$10–$500/carat",colors:"Olive green",care:"Peridot is gem variety"},
+  {cat:"Silicates",name:"Garnet (Pyrope)",ri:"1.730–1.760",riN:1.745,composition:"Mg₃Al₂(SiO₄)₃",hardness:"7–7.5 Mohs",density:"3.62–3.87 g/cm³",origin:"Metamorphic",value:"$20–$500/carat",colors:"Red",care:"Mild soap"},
+  {cat:"Silicates",name:"Garnet (Almandine)",ri:"1.750–1.830",riN:1.790,composition:"Fe₃Al₂(SiO₄)₃",hardness:"7–7.5 Mohs",density:"4.05–4.30 g/cm³",origin:"Metamorphic",value:"$10–$200/carat",colors:"Deep red",care:"Mild soap"},
+  {cat:"Silicates",name:"Garnet (Andradite)",ri:"1.880–1.890",riN:1.885,composition:"Ca₃Fe₂(SiO₄)₃",hardness:"6.5–7 Mohs",density:"3.7–4.1 g/cm³",origin:"Metamorphic",value:"$50–$5,000/carat",colors:"Green, brown",care:"Demantoid is gem variety"},
+  {cat:"Silicates",name:"Beryl",ri:"1.567–1.605",riN:1.586,composition:"Be₃Al₂Si₆O₁₈",hardness:"7.5–8 Mohs",density:"2.66–2.87 g/cm³",origin:"Pegmatite",value:"$50+/carat",colors:"Many (Emerald/Aquamarine)",care:"Brittle"},
+  {cat:"Silicates",name:"Topaz",ri:"1.619–1.627",riN:1.623,composition:"Al₂SiO₄(F,OH)₂",hardness:"8 Mohs",density:"3.49–3.57 g/cm³",origin:"Pegmatite",value:"$10–$1,000/carat",colors:"All colors",care:"Perfect cleavage"},
+  {cat:"Silicates",name:"Tourmaline",ri:"1.624–1.644",riN:1.634,composition:"Complex Boron Silicate",hardness:"7–7.5 Mohs",density:"2.82–3.32 g/cm³",origin:"Pegmatite",value:"$50–$10,000+/carat",colors:"All",care:"Pyroelectric"},
+  {cat:"Silicates",name:"Mica (Muscovite)",ri:"1.552–1.611",riN:1.580,composition:"KAl₂(AlSi₃O₁₀)(OH)₂",hardness:"2.5–3 Mohs",density:"2.76–3.0 g/cm³",origin:"Igneous, metamorphic",value:"$5–$50",colors:"Clear, brown",care:"Splits in sheets"},
+  {cat:"Silicates",name:"Mica (Biotite)",ri:"1.565–1.696",riN:1.630,composition:"K(Mg,Fe)₃(AlSi₃O₁₀)(OH)₂",hardness:"2.5–3 Mohs",density:"2.7–3.4 g/cm³",origin:"Igneous, metamorphic",value:"$5–$30",colors:"Black-brown",care:"Sheets"},
+  {cat:"Silicates",name:"Talc",ri:"1.539–1.589",riN:1.564,composition:"Mg₃Si₄O₁₀(OH)₂",hardness:"1 Mohs",density:"2.58–2.83 g/cm³",origin:"Metamorphic",value:"$1–$20",colors:"White, green, grey",care:"Softest mineral"},
+  {cat:"Silicates",name:"Serpentine",ri:"1.555–1.571",riN:1.563,composition:"Mg₃Si₂O₅(OH)₄",hardness:"3–6 Mohs",density:"2.4–2.8 g/cm³",origin:"Metamorphic",value:"$5–$200",colors:"Green",care:"⚠ Some types contain asbestos"},
+  {cat:"Silicates",name:"Feldspar (Orthoclase)",ri:"1.518–1.526",riN:1.522,composition:"KAlSi₃O₈",hardness:"6 Mohs",density:"2.55–2.63 g/cm³",origin:"Igneous",value:"$5–$300",colors:"White, pink, green",care:"Common rock-former"},
+  {cat:"Silicates",name:"Feldspar (Plagioclase)",ri:"1.527–1.588",riN:1.557,composition:"NaAlSi₃O₈ to CaAl₂Si₂O₈",hardness:"6 Mohs",density:"2.62–2.76 g/cm³",origin:"Igneous",value:"$5–$300",colors:"White, grey, blue",care:"Labradorite shows iridescence"},
+  {cat:"Silicates",name:"Zircon",ri:"1.925–1.984",riN:1.955,composition:"ZrSiO₄",hardness:"7.5 Mohs",density:"4.60–4.80 g/cm³",origin:"Igneous",value:"$50–$400/carat",colors:"All",care:"Very high RI"},
+  {cat:"Silicates",name:"Andalusite",ri:"1.629–1.650",riN:1.640,composition:"Al₂SiO₅",hardness:"6.5–7.5 Mohs",density:"3.13–3.21 g/cm³",origin:"Metamorphic",value:"$50–$500/carat",colors:"Brown, green, red",care:"Strong pleochroism"},
+  {cat:"Silicates",name:"Kyanite",ri:"1.712–1.728",riN:1.720,composition:"Al₂SiO₅",hardness:"4.5–7 Mohs",density:"3.53–3.65 g/cm³",origin:"Metamorphic",value:"$10–$300/carat",colors:"Blue, green",care:"Hardness varies by direction"},
+  {cat:"Silicates",name:"Sillimanite",ri:"1.657–1.680",riN:1.668,composition:"Al₂SiO₅",hardness:"6.5–7.5 Mohs",density:"3.23–3.27 g/cm³",origin:"Metamorphic",value:"$20–$200",colors:"White, brown, blue",care:"Fibrous"},
+  {cat:"Silicates",name:"Epidote",ri:"1.733–1.768",riN:1.750,composition:"Ca₂(Al,Fe)₃(SiO₄)₃(OH)",hardness:"6–7 Mohs",density:"3.4–3.5 g/cm³",origin:"Metamorphic",value:"$10–$300",colors:"Pistachio green",care:"Strong pleochroism"},
+  {cat:"Silicates",name:"Vesuvianite",ri:"1.703–1.752",riN:1.728,composition:"Complex Ca-Al silicate",hardness:"6.5 Mohs",density:"3.32–3.43 g/cm³",origin:"Metamorphic",value:"$20–$500",colors:"Green, brown, yellow",care:"Also called Idocrase"},
+  // Special / Other
+  {cat:"Special",name:"Obsidian",ri:"1.48–1.51",riN:1.495,composition:"Volcanic Glass (SiO₂)",hardness:"5–5.5 Mohs",density:"2.35–2.60 g/cm³",origin:"Volcanic",value:"$5–$100",colors:"Black, snowflake, rainbow",care:"⚠ Razor sharp edges"},
+  {cat:"Special",name:"Tektite",ri:"1.48–1.52",riN:1.50,composition:"Impact glass",hardness:"5.5 Mohs",density:"2.4 g/cm³",origin:"Meteor impact",value:"$5–$500",colors:"Black, green",care:"Splash form"},
+  {cat:"Special",name:"Moldavite",ri:"1.48–1.50",riN:1.49,composition:"Tektite glass",hardness:"5.5 Mohs",density:"2.32 g/cm³",origin:"Czech meteor impact",value:"$50–$5,000",colors:"Forest green",care:"Rare tektite"},
+  {cat:"Special",name:"Amber",ri:"1.539–1.545",riN:1.542,composition:"Fossilized resin",hardness:"2–2.5 Mohs",density:"1.05–1.10 g/cm³",origin:"Baltic, Dominican",value:"$5–$5,000",colors:"Yellow, blue (rare)",care:"⚠ Heat-sensitive"},
+  {cat:"Special",name:"Jet",ri:"1.66",riN:1.66,composition:"Fossilized wood/coal",hardness:"2.5–4 Mohs",density:"1.30–1.34 g/cm³",origin:"Sedimentary",value:"$5–$200",colors:"Black",care:"Lightweight"},
+  {cat:"Special",name:"Coral",ri:"1.486–1.658",riN:1.572,composition:"CaCO₃ (organic)",hardness:"3–4 Mohs",density:"2.6–2.7 g/cm³",origin:"Marine",value:"$10–$1,000+",colors:"Red, pink, white, black",care:"⚠ Conservation issues"},
+  {cat:"Special",name:"Pearl",ri:"1.530–1.685",riN:1.607,composition:"CaCO₃ + Conchiolin",hardness:"2.5–4.5 Mohs",density:"2.60–2.85 g/cm³",origin:"Mollusks",value:"$50+/strand",colors:"All",care:"Soft cloth"},
+  {cat:"Special",name:"Meteorite (Iron)",ri:"varies",riN:2.95,composition:"Fe-Ni alloy",hardness:"4–5 Mohs",density:"7.5–8 g/cm³",origin:"Space",value:"$1–$1,000+/gram",colors:"Grey-silver",care:"Widmanstätten patterns when etched"},
+  {cat:"Special",name:"Meteorite (Stony)",ri:"varies",riN:1.7,composition:"Silicates + chondrules",hardness:"5–6 Mohs",density:"3.0–3.7 g/cm³",origin:"Space",value:"$0.50–$100/gram",colors:"Dark grey-black",care:"Most common meteorite type"},
+];
+
+// ═══════════════════════════════════════════════════════════════════════
+// CHEMICALS DATABASE (Step 3) — formula, hazards, uses, risk warnings
+// ═══════════════════════════════════════════════════════════════════════
+const CHEMICALS=[
+  // Household
+  {cat:"Household",name:"Sodium Chloride (Salt)",formula:"NaCl",appearance:"White crystalline solid",hazard:"None at normal use",uses:"Food seasoning, ice melting, preserving",risk:"Safe in moderation"},
+  {cat:"Household",name:"Sucrose (Sugar)",formula:"C₁₂H₂₂O₁₁",appearance:"White crystalline solid",hazard:"None",uses:"Food sweetener",risk:"Safe"},
+  {cat:"Household",name:"Sodium Bicarbonate (Baking Soda)",formula:"NaHCO₃",appearance:"White powder",hazard:"None",uses:"Cleaning, baking, deodorizing, fire suppression",risk:"Safe"},
+  {cat:"Household",name:"Acetic Acid (Vinegar)",formula:"CH₃COOH",appearance:"Clear liquid, sour smell",hazard:"Skin/eye irritant when concentrated",uses:"Cooking, cleaning, preserving",risk:"Safe diluted"},
+  {cat:"Household",name:"Citric Acid",formula:"C₆H₈O₇",appearance:"White crystalline powder",hazard:"Mild eye/skin irritant",uses:"Food acidifier, cleaning, descaling",risk:"Safe"},
+  {cat:"Household",name:"Calcium Carbonate (Chalk)",formula:"CaCO₃",appearance:"White powder/solid",hazard:"None",uses:"Antacid, supplement, chalk",risk:"Safe"},
+  // Cleaners
+  {cat:"Cleaners",name:"Sodium Hypochlorite (Bleach)",formula:"NaClO",appearance:"Yellowish liquid, strong smell",hazard:"⚠ Corrosive, releases toxic gas if mixed with ammonia",uses:"Disinfectant, whitener",risk:"⚠ NEVER mix with ammonia or acids"},
+  {cat:"Cleaners",name:"Ammonia",formula:"NH₃",appearance:"Clear liquid, pungent smell",hazard:"⚠ Corrosive, toxic fumes",uses:"Cleaning, refrigerant",risk:"⚠ NEVER mix with bleach"},
+  {cat:"Cleaners",name:"Hydrogen Peroxide",formula:"H₂O₂",appearance:"Clear liquid",hazard:"Skin/eye irritant at high concentrations",uses:"Antiseptic, bleaching",risk:"Safe at 3%, dangerous at 30%+"},
+  {cat:"Cleaners",name:"Isopropyl Alcohol",formula:"C₃H₈O",appearance:"Clear liquid, alcohol smell",hazard:"⚠ Flammable, drying to skin",uses:"Disinfectant, electronics cleaner",risk:"⚠ Toxic if ingested"},
+  {cat:"Cleaners",name:"Trisodium Phosphate (TSP)",formula:"Na₃PO₄",appearance:"White granules/powder",hazard:"Skin irritant, caustic",uses:"Heavy-duty cleaner, paint prep",risk:"Wear gloves"},
+  // Acids/Bases
+  {cat:"Acids/Bases",name:"Hydrochloric Acid",formula:"HCl",appearance:"Clear liquid, pungent",hazard:"⚠ STRONG ACID — burns skin, lungs",uses:"Pool maintenance, industrial",risk:"⚠ EXTREMELY DANGEROUS"},
+  {cat:"Acids/Bases",name:"Sulfuric Acid",formula:"H₂SO₄",appearance:"Clear oily liquid",hazard:"⚠ EXTREMELY CORROSIVE",uses:"Battery acid, industrial",risk:"⚠ DEADLY ON CONTACT"},
+  {cat:"Acids/Bases",name:"Nitric Acid",formula:"HNO₃",appearance:"Clear/yellow liquid, fumes",hazard:"⚠ STRONG ACID, oxidizer",uses:"Industrial, gold testing",risk:"⚠ EXTREMELY DANGEROUS"},
+  {cat:"Acids/Bases",name:"Sodium Hydroxide (Lye)",formula:"NaOH",appearance:"White solid or clear liquid",hazard:"⚠ STRONG BASE — caustic burns",uses:"Drain cleaner, soap making",risk:"⚠ EXTREMELY DANGEROUS"},
+  {cat:"Acids/Bases",name:"Potassium Hydroxide",formula:"KOH",appearance:"White solid/flakes",hazard:"⚠ STRONG BASE",uses:"Soap making, food processing",risk:"⚠ Caustic burns"},
+  {cat:"Acids/Bases",name:"Calcium Hydroxide (Lime)",formula:"Ca(OH)₂",appearance:"White powder",hazard:"Caustic, eye/skin irritant",uses:"Construction, agriculture",risk:"Wear protection"},
+  // Solvents
+  {cat:"Solvents",name:"Acetone",formula:"(CH₃)₂CO",appearance:"Clear liquid, sweet smell",hazard:"⚠ Highly flammable",uses:"Nail polish remover, paint thinner",risk:"Volatile, ventilate"},
+  {cat:"Solvents",name:"Ethanol",formula:"C₂H₆O",appearance:"Clear liquid",hazard:"Flammable",uses:"Beverages, fuel, sanitizer",risk:"Safe topically"},
+  {cat:"Solvents",name:"Methanol",formula:"CH₃OH",appearance:"Clear liquid",hazard:"⚠ TOXIC IF INGESTED — causes blindness",uses:"Industrial solvent, antifreeze",risk:"⚠ NEVER drink"},
+  {cat:"Solvents",name:"Toluene",formula:"C₇H₈",appearance:"Clear liquid",hazard:"⚠ Toxic, flammable, neurotoxic",uses:"Paint thinner, solvent",risk:"⚠ Avoid inhalation"},
+  {cat:"Solvents",name:"Xylene",formula:"C₈H₁₀",appearance:"Clear liquid, sweet smell",hazard:"⚠ Toxic, flammable",uses:"Paint thinner, industrial",risk:"⚠ Avoid breathing"},
+  {cat:"Solvents",name:"Turpentine",formula:"Mixture of terpenes",appearance:"Clear liquid, pine smell",hazard:"Flammable, skin irritant",uses:"Paint thinner",risk:"Toxic if ingested"},
+  // Hazardous Materials
+  {cat:"Hazardous",name:"Mercury",formula:"Hg",appearance:"Silver liquid metal",hazard:"⚠ EXTREMELY TOXIC",uses:"Old thermometers, switches",risk:"⚠ NEVER TOUCH — toxic vapors"},
+  {cat:"Hazardous",name:"Asbestos",formula:"Various silicates",appearance:"White/grey fibrous material",hazard:"⚠ CARCINOGEN — causes mesothelioma",uses:"Old insulation, brake pads",risk:"⚠ DEADLY — never disturb"},
+  {cat:"Hazardous",name:"Lead Paint",formula:"PbCO₃",appearance:"Old paint chips",hazard:"⚠ TOXIC especially to children",uses:"Pre-1978 paint",risk:"⚠ Lead poisoning"},
+  {cat:"Hazardous",name:"Arsenic",formula:"As",appearance:"Silver-grey metalloid",hazard:"⚠ DEADLY POISON",uses:"Industrial (rare today)",risk:"⚠ DEADLY in tiny doses"},
+  {cat:"Hazardous",name:"Formaldehyde",formula:"CH₂O",appearance:"Clear liquid (formalin)",hazard:"⚠ Carcinogen, irritant",uses:"Embalming, resins",risk:"⚠ Avoid inhalation"},
+  {cat:"Hazardous",name:"Sodium Cyanide",formula:"NaCN",appearance:"White crystalline powder",hazard:"⚠ EXTREMELY POISONOUS",uses:"Industrial mining",risk:"⚠ DEADLY"},
+  // Fuels
+  {cat:"Fuels",name:"Gasoline",formula:"C₈H₁₈ (octane)",appearance:"Clear/yellow liquid",hazard:"⚠ HIGHLY FLAMMABLE",uses:"Vehicle fuel",risk:"⚠ Toxic vapors"},
+  {cat:"Fuels",name:"Diesel",formula:"Heavier hydrocarbons",appearance:"Yellow-amber liquid",hazard:"Flammable",uses:"Trucks, generators",risk:"Less volatile than gasoline"},
+  {cat:"Fuels",name:"Propane",formula:"C₃H₈",appearance:"Compressed gas/liquid",hazard:"⚠ EXTREMELY FLAMMABLE",uses:"Heating, BBQ",risk:"⚠ Explosive if leaked"},
+  {cat:"Fuels",name:"Butane",formula:"C₄H₁₀",appearance:"Compressed gas",hazard:"⚠ EXTREMELY FLAMMABLE",uses:"Lighters, camping",risk:"⚠ Explosive"},
+];
+
+// ═══════════════════════════════════════════════════════════════════════
+// BIOLOGICAL DATABASE — plants, animals, fungi, fibers
+// ═══════════════════════════════════════════════════════════════════════
+const BIOLOGICAL=[
+  // Plants
+  {cat:"Plants",name:"Generic Plant",appearance:"Leaves, stems, flowers",care:"Varies by species",info:"Use Google Vision species ID for specific plant"},
+  {cat:"Plants",name:"Aloe Vera",appearance:"Thick spiky green succulent leaves",care:"Bright light, sparse water",info:"Medicinal sap inside leaves"},
+  {cat:"Plants",name:"Cactus",appearance:"Spiny, water-storing plant",care:"Bright light, very little water",info:"Many varieties — some edible (prickly pear)"},
+  {cat:"Plants",name:"Cannabis",appearance:"Serrated leaves, sticky buds",care:"⚠ Verify legal status in your region",info:"THC content varies by strain"},
+  {cat:"Plants",name:"Roses",appearance:"Flowers with thorny stems",care:"Full sun, regular watering",info:"Many varieties — cultivated for beauty"},
+  {cat:"Plants",name:"Mint",appearance:"Square stems, jagged green leaves",care:"Partial shade, moist soil",info:"Edible, spreads aggressively"},
+  {cat:"Plants",name:"Basil",appearance:"Bright green oval leaves, aromatic",care:"Warm, sunny",info:"Culinary herb"},
+  {cat:"Plants",name:"Poison Ivy",appearance:"Three leaflets, glossy",care:"⚠ DO NOT TOUCH",info:"Causes severe rash — 'leaves of three, let it be'"},
+  {cat:"Plants",name:"Stinging Nettle",appearance:"Heart-shaped serrated leaves with stinging hairs",care:"⚠ Causes painful sting",info:"Edible when cooked"},
+  // Mushrooms
+  {cat:"Mushrooms",name:"Generic Mushroom",appearance:"Various fleshy fungi with cap and stem",care:"⚠ NEVER eat unidentified mushrooms",info:"Many lookalikes are deadly"},
+  {cat:"Mushrooms",name:"Death Cap (Amanita phalloides)",appearance:"White/greenish cap, white gills, ring on stem",care:"⚠ DEADLY POISONOUS",info:"⚠ Responsible for most fatal mushroom poisonings worldwide"},
+  {cat:"Mushrooms",name:"Destroying Angel",appearance:"Pure white mushroom, bulbous base",care:"⚠ DEADLY POISONOUS",info:"⚠ Causes fatal liver/kidney failure"},
+  {cat:"Mushrooms",name:"Button Mushroom",appearance:"Small white/brown round cap",care:"Edible, commonly cultivated",info:"Commercial variety — safe"},
+  {cat:"Mushrooms",name:"Portobello",appearance:"Large brown flat cap",care:"Edible, mature button mushroom",info:"Meaty texture, cultivated"},
+  {cat:"Mushrooms",name:"Chanterelle",appearance:"Trumpet-shaped, golden-yellow",care:"Edible — must verify exact ID",info:"Prized edible — false chanterelles exist"},
+  // Animals
+  {cat:"Animals",name:"Dog",appearance:"Domestic canine",care:"Approach with caution if unknown",info:"Many breeds — temperament varies"},
+  {cat:"Animals",name:"Cat",appearance:"Domestic feline",care:"Generally safe if calm",info:"Wild cats and bobcats can resemble domestics"},
+  {cat:"Animals",name:"Bird",appearance:"Feathered animal",care:"Most are safe, some can bite/scratch",info:"Identify species for behavior"},
+  {cat:"Animals",name:"Fish",appearance:"Aquatic vertebrate",care:"Some have venomous spines",info:"Identify species before handling"},
+  {cat:"Animals",name:"Snake",appearance:"Limbless reptile",care:"⚠ Some venomous — assume danger",info:"Identify before approaching"},
+  {cat:"Animals",name:"Lizard",appearance:"Scaly reptile with legs",care:"Most harmless, some bite",info:"Identify species"},
+  // Insects
+  {cat:"Insects",name:"Honey Bee",appearance:"Yellow/black striped, fuzzy, ~1cm",care:"Generally non-aggressive when away from hive",info:"Important pollinator — protect"},
+  {cat:"Insects",name:"Wasp",appearance:"Yellow/black striped, smooth, narrow waist",care:"⚠ Can sting repeatedly",info:"Aggressive when threatened"},
+  {cat:"Insects",name:"Hornet",appearance:"Larger than wasps, brown/yellow",care:"⚠ Painful sting, dangerous in numbers",info:"Asian Giant Hornets especially dangerous"},
+  {cat:"Insects",name:"Mosquito",appearance:"Small flying insect, long proboscis",care:"⚠ Disease vector",info:"Spreads malaria, dengue, Zika, West Nile"},
+  {cat:"Insects",name:"House Fly",appearance:"Small grey fly with red eyes",care:"Disease vector",info:"Spreads bacteria"},
+  {cat:"Insects",name:"Spider (Generic)",appearance:"8 legs, body in two segments",care:"Most are harmless",info:"Identify species — some venomous"},
+  {cat:"Insects",name:"Black Widow",appearance:"Black with red hourglass on belly",care:"⚠ Venomous bite",info:"Bite can be serious — seek medical care"},
+  {cat:"Insects",name:"Brown Recluse",appearance:"Small brown spider with violin shape on back",care:"⚠ Necrotic venom",info:"Bite causes tissue death"},
+  {cat:"Insects",name:"Tarantula",appearance:"Large hairy spider",care:"Painful bite but rarely dangerous",info:"Most species not medically significant"},
+  {cat:"Insects",name:"Cockroach",appearance:"Flat brown insect, fast-moving",care:"Disease vector",info:"Spreads bacteria, allergens"},
+  {cat:"Insects",name:"Ant",appearance:"Small social insect, segmented",care:"Most harmless, some sting (fire ants)",info:"Many species worldwide"},
+  // Wood
+  {cat:"Wood",name:"Oak",appearance:"Hard, prominent grain",care:"Durable hardwood",info:"Used in furniture, flooring, barrels"},
+  {cat:"Wood",name:"Pine",appearance:"Soft, knotty, light colored",care:"Common construction wood",info:"Easy to work, cheap"},
+  {cat:"Wood",name:"Mahogany",appearance:"Reddish-brown, fine grain",care:"Premium hardwood",info:"Furniture, instruments — endangered"},
+  {cat:"Wood",name:"Walnut",appearance:"Dark brown with rich grain",care:"Premium hardwood",info:"Furniture, gunstocks"},
+  {cat:"Wood",name:"Maple",appearance:"Light cream to reddish-brown",care:"Hard, durable",info:"Flooring, instruments"},
+  {cat:"Wood",name:"Cedar",appearance:"Reddish, aromatic, soft",care:"Naturally moth/insect repellent",info:"Closets, outdoor furniture"},
+  {cat:"Wood",name:"Bamboo",appearance:"Hollow segmented stems",care:"Technically grass, not wood",info:"Sustainable, fast-growing"},
+  {cat:"Wood",name:"Teak",appearance:"Golden-brown, oily",care:"Naturally weather-resistant",info:"Boats, outdoor furniture"},
+  // Fibers / Fabrics
+  {cat:"Fibers",name:"Cotton",appearance:"Soft white fluffy fibers",care:"Plant-based natural",info:"Most common natural fiber"},
+  {cat:"Fibers",name:"Wool",appearance:"Crimped fibrous, varied colors",care:"Animal-based natural",info:"From sheep, goats, alpacas"},
+  {cat:"Fibers",name:"Silk",appearance:"Smooth lustrous fibers",care:"Animal-based natural",info:"From silkworms"},
+  {cat:"Fibers",name:"Linen",appearance:"Crisp natural fiber from flax",care:"Plant-based",info:"Wrinkles easily"},
+  {cat:"Fibers",name:"Polyester",appearance:"Smooth synthetic fiber",care:"Petroleum-based",info:"Most common synthetic"},
+  {cat:"Fibers",name:"Nylon",appearance:"Strong elastic synthetic",care:"Petroleum-based",info:"Hosiery, ropes, parachutes"},
+  {cat:"Fibers",name:"Acrylic",appearance:"Wool-like synthetic",care:"Petroleum-based",info:"Cheap wool substitute"},
+  {cat:"Fibers",name:"Leather",appearance:"Animal hide, varied finishes",care:"Animal-based",info:"Cow, sheep, goat, exotic animals"},
+  {cat:"Fibers",name:"Suede",appearance:"Soft napped leather",care:"Underside of leather",info:"More delicate than top-grain"},
+];
+
 const MEDICATIONS=[
   {cat:"Pain Relief",name:"Paracetamol 500mg",appearance:"White round/oval, scored",realFeatures:["Manufacturer logo","Consistent color","Smooth surface","Original blister"],counterfeit:"Wrong color/chalky",risk:"Low risk"},
   {cat:"Antibiotics",name:"Amoxicillin",appearance:"Capsule (yellow/red) or tablet",realFeatures:["Two-tone capsule","Manufacturer code","Original packaging","Pharmacy label"],counterfeit:"⚠ DANGEROUS — fakes may have no active ingredient",risk:"HIGH RISK"},
@@ -444,6 +639,92 @@ function findMaterialFromLabel(label){
   }
   return null;
 }
+function findMineralFromLabel(label){
+  const lower=label.toLowerCase();
+  for(const m of MINERALS){if(lower.includes(m.name.toLowerCase())) return m;}
+  const aliases={'pyrite':'Pyrite','quartz':'Quartz','calcite':'Calcite',
+    'mica':'Mica (Muscovite)','feldspar':'Feldspar (Orthoclase)','olivine':'Olivine',
+    'magnetite':'Magnetite','hematite':'Hematite','fluorite':'Fluorite',
+    'gypsum':'Gypsum','salt':'Halite (Rock Salt)','obsidian':'Obsidian',
+    'amber':'Amber','pearl':'Pearl','coral':'Coral','agate':'Quartz',
+    'crystal':'Quartz','meteorite':'Meteorite (Stony)','tektite':'Tektite',
+    'moldavite':'Moldavite','malachite':'Malachite','azurite':'Azurite',
+    'galena':'Galena','sulfur':'Sulfur','gold':'Native Gold','silver':'Native Silver',
+    'copper':'Native Copper','platinum':'Native Platinum','graphite':'Graphite'};
+  for(const[key,val]of Object.entries(aliases)){
+    if(lower.includes(key)){const m=MINERALS.find(x=>x.name===val);if(m)return m;}
+  }
+  return null;
+}
+
+function findChemicalFromLabel(label){
+  const lower=label.toLowerCase();
+  for(const c of CHEMICALS){if(lower.includes(c.name.toLowerCase())) return c;}
+  const aliases={'salt':'Sodium Chloride (Salt)','sugar':'Sucrose (Sugar)',
+    'baking soda':'Sodium Bicarbonate (Baking Soda)','vinegar':'Acetic Acid (Vinegar)',
+    'bleach':'Sodium Hypochlorite (Bleach)','ammonia':'Ammonia',
+    'peroxide':'Hydrogen Peroxide','alcohol':'Isopropyl Alcohol',
+    'acetone':'Acetone','mercury':'Mercury','asbestos':'Asbestos',
+    'gasoline':'Gasoline','diesel':'Diesel','propane':'Propane',
+    'butane':'Butane','toluene':'Toluene','xylene':'Xylene',
+    'turpentine':'Turpentine','formaldehyde':'Formaldehyde',
+    'arsenic':'Arsenic','cyanide':'Sodium Cyanide','lye':'Sodium Hydroxide (Lye)',
+    'chalk':'Calcium Carbonate (Chalk)','citric':'Citric Acid'};
+  for(const[key,val]of Object.entries(aliases)){
+    if(lower.includes(key)){const m=CHEMICALS.find(x=>x.name===val);if(m)return m;}
+  }
+  return null;
+}
+
+function findBioFromLabel(label){
+  const lower=label.toLowerCase();
+  for(const b of BIOLOGICAL){if(lower.includes(b.name.toLowerCase())) return b;}
+  // Plant matches
+  if(lower.includes('plant')||lower.includes('flower')||lower.includes('leaf')||lower.includes('flora')) return BIOLOGICAL.find(b=>b.name==='Generic Plant');
+  if(lower.includes('aloe')) return BIOLOGICAL.find(b=>b.name==='Aloe Vera');
+  if(lower.includes('cactus')||lower.includes('succulent')) return BIOLOGICAL.find(b=>b.name==='Cactus');
+  if(lower.includes('rose')) return BIOLOGICAL.find(b=>b.name==='Roses');
+  if(lower.includes('mint')) return BIOLOGICAL.find(b=>b.name==='Mint');
+  if(lower.includes('basil')) return BIOLOGICAL.find(b=>b.name==='Basil');
+  // Mushroom matches
+  if(lower.includes('mushroom')||lower.includes('fungi')||lower.includes('fungus')) return BIOLOGICAL.find(b=>b.name==='Generic Mushroom');
+  // Animal matches
+  if(lower.includes('dog')||lower.includes('canine')||lower.includes('puppy')) return BIOLOGICAL.find(b=>b.name==='Dog');
+  if(lower.includes('cat')||lower.includes('feline')||lower.includes('kitten')) return BIOLOGICAL.find(b=>b.name==='Cat');
+  if(lower.includes('bird')) return BIOLOGICAL.find(b=>b.name==='Bird');
+  if(lower.includes('fish')) return BIOLOGICAL.find(b=>b.name==='Fish');
+  if(lower.includes('snake')||lower.includes('serpent')) return BIOLOGICAL.find(b=>b.name==='Snake');
+  if(lower.includes('lizard')||lower.includes('gecko')) return BIOLOGICAL.find(b=>b.name==='Lizard');
+  // Insect matches
+  if(lower.includes('bee')&&!lower.includes('beetle')) return BIOLOGICAL.find(b=>b.name==='Honey Bee');
+  if(lower.includes('wasp')) return BIOLOGICAL.find(b=>b.name==='Wasp');
+  if(lower.includes('hornet')) return BIOLOGICAL.find(b=>b.name==='Hornet');
+  if(lower.includes('mosquito')) return BIOLOGICAL.find(b=>b.name==='Mosquito');
+  if(lower.includes('fly')&&!lower.includes('butterfly')) return BIOLOGICAL.find(b=>b.name==='House Fly');
+  if(lower.includes('spider')) return BIOLOGICAL.find(b=>b.name==='Spider (Generic)');
+  if(lower.includes('cockroach')||lower.includes('roach')) return BIOLOGICAL.find(b=>b.name==='Cockroach');
+  if(lower.includes('ant')&&!lower.includes('plant')) return BIOLOGICAL.find(b=>b.name==='Ant');
+  // Wood matches
+  if(lower.includes('oak')) return BIOLOGICAL.find(b=>b.name==='Oak');
+  if(lower.includes('pine')) return BIOLOGICAL.find(b=>b.name==='Pine');
+  if(lower.includes('mahogany')) return BIOLOGICAL.find(b=>b.name==='Mahogany');
+  if(lower.includes('walnut')) return BIOLOGICAL.find(b=>b.name==='Walnut');
+  if(lower.includes('maple')) return BIOLOGICAL.find(b=>b.name==='Maple');
+  if(lower.includes('cedar')) return BIOLOGICAL.find(b=>b.name==='Cedar');
+  if(lower.includes('bamboo')) return BIOLOGICAL.find(b=>b.name==='Bamboo');
+  if(lower.includes('teak')) return BIOLOGICAL.find(b=>b.name==='Teak');
+  // Fiber matches
+  if(lower.includes('cotton')) return BIOLOGICAL.find(b=>b.name==='Cotton');
+  if(lower.includes('wool')) return BIOLOGICAL.find(b=>b.name==='Wool');
+  if(lower.includes('silk')) return BIOLOGICAL.find(b=>b.name==='Silk');
+  if(lower.includes('linen')) return BIOLOGICAL.find(b=>b.name==='Linen');
+  if(lower.includes('polyester')) return BIOLOGICAL.find(b=>b.name==='Polyester');
+  if(lower.includes('nylon')) return BIOLOGICAL.find(b=>b.name==='Nylon');
+  if(lower.includes('leather')) return BIOLOGICAL.find(b=>b.name==='Leather');
+  if(lower.includes('suede')) return BIOLOGICAL.find(b=>b.name==='Suede');
+  return null;
+}
+
 function findCurrencyFromLabel(label){
   const lower=label.toLowerCase();
   for(const cur of CURRENCIES){
@@ -485,6 +766,9 @@ const hCanvas=document.getElementById('highlight-canvas');
 const hCtx=hCanvas.getContext('2d');
 
 function getCurrentDB(){
+  if(currentMode==='mineral') return MINERALS;
+  if(currentMode==='chemical') return CHEMICALS;
+  if(currentMode==='bio') return BIOLOGICAL;
   if(currentMode==='currency') return CURRENCIES;
   if(currentMode==='medication') return MEDICATIONS;
   return MATERIALS;
@@ -724,6 +1008,21 @@ function getDinoXPrompt(){
       selectedMaterials.forEach(s=>parts.push(s.material.name.toLowerCase()));
     }
     parts.push('gemstone','jewelry','metal','glass','ring','diamond');
+  } else if(currentMode==='mineral'){
+    if(selectedMaterials.length>0){
+      selectedMaterials.forEach(s=>parts.push(s.material.name.toLowerCase()));
+    }
+    parts.push('mineral','rock','crystal','quartz','pyrite','calcite','meteorite');
+  } else if(currentMode==='chemical'){
+    if(selectedMaterials.length>0){
+      selectedMaterials.forEach(s=>parts.push(s.material.name.toLowerCase()));
+    }
+    parts.push('chemical','liquid','powder','bottle','container','solvent','acid');
+  } else if(currentMode==='bio'){
+    if(selectedMaterials.length>0){
+      selectedMaterials.forEach(s=>parts.push(s.material.name.toLowerCase()));
+    }
+    parts.push('plant','flower','tree','animal','insect','mushroom','fabric');
   } else if(currentMode==='currency'){
     parts.push('banknote','currency','dollar bill','shekel','euro');
   } else if(currentMode==='medication'){
@@ -830,6 +1129,9 @@ function renderMultiAIResult(aiResults){
   // Determine best match based on mode
   if(currentMode==='currency') html+=renderCurrencyResult(allItems);
   else if(currentMode==='medication') html+=renderMedicationResult(allItems);
+  else if(currentMode==='mineral') html+=renderMineralResult(allItems);
+  else if(currentMode==='chemical') html+=renderChemicalResult(allItems);
+  else if(currentMode==='bio') html+=renderBioResult(allItems);
   else html+=renderMaterialResult(allItems,aiResults.google);
   
   // Show each AI's response
@@ -928,6 +1230,125 @@ function renderMaterialResult(allItems,googleData){
     html+=buildCompositionDropdown(matToShow);
     addToHistory(matToShow.name,matToShow.cat,priorityMatch?'Target':'Identified');
   }
+  return html;
+}
+
+function renderMineralResult(allItems){
+  let priorityMatch=null;
+  if(selectedMaterials.length>0){
+    for(const sel of selectedMaterials){
+      const matName=sel.material.name.toLowerCase();
+      for(const item of allItems){
+        const il=item.name.toLowerCase();
+        if(il.includes(matName)||matName.includes(il.split(' ')[0])){
+          priorityMatch={target:sel,item};break;
+        }
+      }
+      if(priorityMatch) break;
+    }
+  }
+  let bestMatch=null;
+  for(const item of allItems){
+    const m=findMineralFromLabel(item.name);
+    if(m){bestMatch={item,material:m};break;}
+  }
+  let html='',matToShow=null,detColor=null;
+  if(priorityMatch){
+    matToShow=priorityMatch.target.material;detColor=priorityMatch.target.color;
+    html+=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET: ${matToShow.name.toUpperCase()}</div>
+      <div class="vision-detail">Detected as: ${priorityMatch.item.name}<br>Confidence: ${priorityMatch.item.score}%</div>
+      <div class="vision-ri" style="color:${detColor};border-color:${detColor}">RI = ${matToShow.ri}</div>`;
+    if(priorityMatch.item.boundingPoly){
+      updateDetectionCircles(priorityMatch.item.boundingPoly,detColor,matToShow.name);
+    } else {
+      let roi={x:canvas.width/2,y:canvas.height/2,radius:60,color:detColor,label:matToShow.name};
+      if(algoSettings.stabilize) roi=algoStabilize(roi);
+      lastDetections=[roi];
+    }
+  } else if(bestMatch){
+    matToShow=bestMatch.material;
+    html+=`<div class="vision-name gem">🪨 ${matToShow.name.toUpperCase()}</div>
+      <div class="vision-detail">${matToShow.cat}<br>Detected as: ${bestMatch.item.name} (${bestMatch.item.score}%)</div>
+      <div class="vision-ri">RI ≈ ${matToShow.ri}</div>`;
+    lastDetections=[];
+  } else {
+    const top=allItems[0];
+    if(top){
+      html+=`<div class="vision-name">${top.name.toUpperCase()}</div>
+        <div class="vision-detail">No specific mineral data<br>Confidence: ${top.score}%</div>`;
+    } else html+=`<div class="vision-error">Nothing detected</div>`;
+    lastDetections=[];
+  }
+  if(matToShow){
+    html+=buildCompositionDropdown(matToShow);
+    addToHistory(matToShow.name,matToShow.cat,priorityMatch?'Target':'Mineral');
+  }
+  return html;
+}
+
+function renderChemicalResult(allItems){
+  let chemMatch=null;
+  for(const item of allItems){const c=findChemicalFromLabel(item.name);if(c){chemMatch=c;break;}}
+  let html='';
+  if(chemMatch){
+    const isHazard=chemMatch.cat==='Hazardous'||chemMatch.cat==='Acids/Bases'||chemMatch.cat==='Fuels';
+    const isExtreme=chemMatch.risk.includes('DEADLY')||chemMatch.risk.includes('EXTREMELY');
+    html+=`<div class="vision-name ${isHazard?'hazard':''}">⚗️ ${chemMatch.name.toUpperCase()}</div>
+      <div class="vision-detail">${chemMatch.cat}<br>Formula: <strong style="color:#fff">${chemMatch.formula}</strong></div>
+      <div class="vision-detail" style="margin-top:6px"><strong style="color:var(--cyan)">APPEARANCE:</strong> ${chemMatch.appearance}</div>
+      <div class="vision-detail"><strong style="color:var(--cyan)">USES:</strong> ${chemMatch.uses}</div>`;
+    if(isExtreme){
+      html+=`<div class="warning-box" style="border-color:var(--red);color:var(--red);background:rgba(255,61,61,.15);margin-top:8px;font-weight:700">☠ EXTREME DANGER ☠<br>${chemMatch.hazard}</div>
+        <div class="warning-box" style="margin-top:6px;border-color:var(--red);color:var(--red)">RISK: ${chemMatch.risk}</div>`;
+    } else if(isHazard){
+      html+=`<div class="warning-box" style="border-color:var(--amber);color:var(--amber);margin-top:8px">⚠ HAZARD: ${chemMatch.hazard}</div>
+        <div class="warning-box" style="margin-top:6px">SAFETY: ${chemMatch.risk}</div>`;
+    } else {
+      html+=`<div class="warning-box" style="border-color:var(--green);color:var(--green);background:rgba(0,255,136,.08);margin-top:8px">✓ Generally safe — ${chemMatch.risk}</div>`;
+    }
+    addToHistory(chemMatch.name,chemMatch.cat,'Chemical');
+  } else {
+    const top=allItems[0];
+    if(top){
+      html+=`<div class="vision-name">${top.name.toUpperCase()}</div>
+        <div class="vision-detail">No specific chemical data available<br>Detected as: ${top.name} (${top.score}%)</div>
+        <div class="warning-box" style="margin-top:6px">⚠ If this is a chemical, consult MSDS / Safety Data Sheet</div>`;
+    } else html+=`<div class="vision-error">Nothing detected</div>`;
+  }
+  lastDetections=[];
+  return html;
+}
+
+function renderBioResult(allItems){
+  let bioMatch=null;
+  for(const item of allItems){const b=findBioFromLabel(item.name);if(b){bioMatch=b;break;}}
+  let html='';
+  if(bioMatch){
+    const careLower=(bioMatch.care||'').toLowerCase();
+    const infoLower=(bioMatch.info||'').toLowerCase();
+    const isDanger=careLower.includes('deadly')||careLower.includes('toxic')||careLower.includes('venomous')||careLower.includes('do not touch')||infoLower.includes('deadly')||infoLower.includes('fatal');
+    const isCaution=careLower.includes('⚠')||careLower.includes('caution')||careLower.includes('aggressive');
+    html+=`<div class="vision-name ${isDanger?'hazard':''}">🌿 ${bioMatch.name.toUpperCase()}</div>
+      <div class="vision-detail">${bioMatch.cat}<br>${bioMatch.appearance}</div>`;
+    if(isDanger){
+      html+=`<div class="warning-box" style="border-color:var(--red);color:var(--red);background:rgba(255,61,61,.15);margin-top:8px;font-weight:700">☠ DANGER ☠<br>${bioMatch.care}</div>
+        <div class="warning-box" style="margin-top:6px">${bioMatch.info}</div>`;
+    } else if(isCaution){
+      html+=`<div class="warning-box" style="border-color:var(--amber);color:var(--amber);margin-top:8px">⚠ ${bioMatch.care}</div>
+        <div class="warning-box" style="margin-top:6px">${bioMatch.info}</div>`;
+    } else {
+      html+=`<div class="vision-detail" style="margin-top:8px"><strong style="color:var(--cyan)">CARE:</strong> ${bioMatch.care}</div>
+        <div class="vision-detail"><strong style="color:var(--cyan)">INFO:</strong> ${bioMatch.info}</div>`;
+    }
+    addToHistory(bioMatch.name,bioMatch.cat,'Biological');
+  } else {
+    const top=allItems[0];
+    if(top){
+      html+=`<div class="vision-name">${top.name.toUpperCase()}</div>
+        <div class="vision-detail">Detected as: ${top.name} (${top.score}%)<br>No specific biological data</div>`;
+    } else html+=`<div class="vision-error">Nothing detected</div>`;
+  }
+  lastDetections=[];
   return html;
 }
 
@@ -1033,6 +1454,9 @@ function setMode(mode){
   const body=document.getElementById('vision-body');
   let hint='';
   if(mode==='material') hint='💎 MATERIAL MODE<br>Identify gems, metals, glass, jewelry';
+  if(mode==='mineral') hint='🪨 MINERAL MODE<br>Identify rocks, minerals, crystals, meteorites';
+  if(mode==='chemical') hint='⚗️ CHEMICAL MODE<br>Identify substances · ⚠ Visual only — verify MSDS';
+  if(mode==='bio') hint='🌿 BIOLOGICAL MODE<br>Plants, animals, fungi, fibers, wood';
   if(mode==='currency') hint='💵 CURRENCY MODE<br>NIS / USD / EUR with auth checklist';
   if(mode==='medication') hint='💊 MEDICATION MODE<br>⚠ Visual checks only';
   body.innerHTML=`<div class="vision-idle">${hint}</div>`;
@@ -1137,7 +1561,7 @@ function renderDB(){
     groups[cat].forEach(m=>{
       const sel=selectedMaterials.find(s=>s.material.name===m.name);
       const isSel=!!sel,isFull=selectedMaterials.length>=5&&!isSel;
-      const riText=m.ri?`RI ${m.ri}`:(m.description||'');
+      const riText=m.ri?`RI ${m.ri}`:(m.formula?`Formula: ${m.formula}`:(m.description||m.cat||''));
       let btnHTML='';
       if(isSel) btnHTML=`<button class="db-action-btn remove-btn" data-action="remove" data-name="${m.name.replace(/"/g,'&quot;')}">REMOVE</button>`;
       else if(isFull) btnHTML=`<button class="db-action-btn full-btn" disabled>FULL</button>`;
