@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v9.0 TRICORDER</title>
+<title>SPECULIX v9.1</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
@@ -252,9 +252,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="corner-tl"></div><div class="corner-br"></div>
   <div class="hex-ring"><div style="font-size:2.2rem">📡</div></div>
   <div class="logo">SPECULIX</div>
-  <div class="tagline">v9.0 TRICORDER · 6 SCAN MODES<br>3 AI ENGINES · 250+ ITEMS DATABASE</div>
+  <div class="tagline">v9.1 · OPTIMIZED FOR ACCURACY<br>GOOGLE VISION AI · 6 SCAN MODES</div>
   <button class="start-btn" onclick="startApp()">📡 START SCANNER</button>
-  <div class="version-badge">MATERIALS · MINERALS · CHEMICALS · BIO<br>CURRENCY · MEDICATION · 9 ALGORITHMS</div>
+  <div class="version-badge">⚠ TIP: Place objects on PLAIN WHITE PAPER<br>Use natural daylight · Hold phone 20cm away</div>
 </div>
 
 <div class="screen hidden" id="scanner">
@@ -273,10 +273,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     </div>
     <div class="vision-body" id="vision-body">
       <div class="vision-idle">
-        <strong style="color:var(--cyan)">📡 3 AI ENGINES READY</strong><br><br>
-        🔵 Google Vision · 🟠 DINO-X · 🟣 Roboflow<br><br>
+        <strong style="color:var(--cyan)">📡 SCANNER READY</strong><br><br>
         Tap <strong style="color:var(--purple)">🔬 IDENTIFY</strong> to scan<br>
-        Use <strong style="color:var(--amber)">⚙️ ALG</strong> to toggle AIs
+        Use <strong style="color:var(--cyan)">📊 DB</strong> to set targets<br><br>
+        <strong style="color:var(--amber)">📷 BEST RESULTS:</strong><br>
+        ✓ Plain background (white paper, black cloth)<br>
+        ✓ Good lighting (daylight ideal)<br>
+        ✓ Hold 20cm away from object<br>
+        ✗ Avoid patterned surfaces
       </div>
     </div>
   </div>
@@ -358,20 +362,20 @@ const ROBOFLOW_PROJECT='speculix';
 
 // AI ENGINES + ALGORITHMS
 const AI_ENGINES=[
-  {id:'ai_google',name:'🔵 Google Vision AI',desc:'General object identification',on:true},
-  {id:'ai_dinox',name:'🟠 DINO-X AI',desc:'Open-vocabulary detection',on:true},
-  {id:'ai_roboflow',name:'🟣 Roboflow (Your AI)',desc:'Custom-trained model — needs project setup',on:false},
+  {id:'ai_google',name:'🔵 Google Vision AI',desc:'General object identification (recommended)',on:true},
+  {id:'ai_dinox',name:'🟠 DINO-X (Beta)',desc:'Requires SDK setup — currently returns errors',on:false},
+  {id:'ai_roboflow',name:'🟣 Roboflow (Your AI)',desc:'Create project at roboflow.com first',on:false},
 ];
 const ALGORITHMS=[
-  {id:'preprocess',name:'1. Image Preprocessing',desc:'Sharpens, adjusts contrast',on:true},
-  {id:'multiframe',name:'2. Multi-Frame Averaging',desc:'Combines 3 frames',on:false},
-  {id:'smartcrop',name:'3. Smart Cropping',desc:'Auto-crops bright region',on:true},
-  {id:'confidence',name:'4. Confidence Aggregation',desc:'Multiple AI calls voted',on:false},
-  {id:'edge',name:'5. Edge Detection',desc:'Finds glass surfaces',on:true},
-  {id:'histogram',name:'6. Histogram Equalization',desc:'Improves dark/bright details',on:true},
-  {id:'specular',name:'7. Specular Highlight',desc:'Finds reflective flashes',on:true},
-  {id:'colortemp',name:'8. Color Temperature',desc:'Handles lighting',on:true},
-  {id:'stabilize',name:'9. ROI Stabilization',desc:'Steady detection box',on:true},
+  {id:'preprocess',name:'1. Image Preprocessing',desc:'⚠ Can distort — turn OFF if accuracy drops',on:false},
+  {id:'multiframe',name:'2. Multi-Frame Averaging',desc:'Combines 3 frames (slower)',on:false},
+  {id:'smartcrop',name:'3. Smart Cropping',desc:'⚠ May crop wrong — turn OFF if missing object',on:false},
+  {id:'confidence',name:'4. Confidence Aggregation',desc:'3x API calls voted',on:false},
+  {id:'edge',name:'5. Edge Detection',desc:'Finds glass surfaces',on:false},
+  {id:'histogram',name:'6. Histogram Equalization',desc:'⚠ Distorts colors — keep OFF for natural objects',on:false},
+  {id:'specular',name:'7. Specular Highlight',desc:'Finds reflective flashes',on:false},
+  {id:'colortemp',name:'8. Color Temperature',desc:'⚠ Changes natural colors — keep OFF',on:false},
+  {id:'stabilize',name:'9. ROI Stabilization',desc:'Steady detection box (recommended ON)',on:true},
 ];
 let algoSettings={};
 [...AI_ENGINES,...ALGORITHMS].forEach(a=>algoSettings[a.id]=a.on);
@@ -624,18 +628,34 @@ const TARGET_COLORS=['#cc00ff','#00ff88','#ffd700','#ff3d3d','#00f5ff'];
 
 function findMaterialFromLabel(label){
   const lower=label.toLowerCase();
+  // First check — exact name match
   for(const mat of MATERIALS){if(lower.includes(mat.name.toLowerCase())) return mat;}
-  const aliases={'diamond':'Diamond','moissanite':'Moissanite','zirconia':'Cubic Zirconia',
+  // Stricter aliases — gems matched directly, metals require metal context
+  const gemAliases={'diamond':'Diamond','moissanite':'Moissanite','zirconia':'Cubic Zirconia',
     'sapphire':'Blue Sapphire','ruby':'Ruby','emerald':'Emerald','pearl':'Pearl',
     'opal':'Opal','jade':'Jade','amber':'Amber','amethyst':'Amethyst',
     'citrine':'Citrine','topaz':'Topaz','garnet':'Garnet','turquoise':'Turquoise',
-    'tourmaline':'Tourmaline','aquamarine':'Aquamarine','gold':'Gold','silver':'Silver',
-    'platinum':'Platinum','titanium':'Titanium','copper':'Copper','glass':'Glass',
+    'tourmaline':'Tourmaline','aquamarine':'Aquamarine','glass':'Glass',
     'bottle':'Glass','crystal':'Glass','mirror':'Glass','shard':'Glass',
-    'ring':'Ring','earring':'Earring','necklace':'Necklace','bracelet':'Bracelet',
-    'jewelry':'Ring','jewellery':'Ring'};
-  for(const[key,val]of Object.entries(aliases)){
+    'gemstone':'Diamond','jewel':'Diamond'};
+  for(const[key,val]of Object.entries(gemAliases)){
     if(lower.includes(key)){const m=MATERIALS.find(x=>x.name===val);if(m)return m;}
+  }
+  // Jewelry types
+  if(lower.includes('ring')&&!lower.includes('earring')) return MATERIALS.find(m=>m.name==='Ring');
+  if(lower.includes('earring')) return MATERIALS.find(m=>m.name==='Earring');
+  if(lower.includes('necklace')) return MATERIALS.find(m=>m.name==='Necklace');
+  if(lower.includes('bracelet')) return MATERIALS.find(m=>m.name==='Bracelet');
+  if(lower.includes('jewelry')||lower.includes('jewellery')) return MATERIALS.find(m=>m.name==='Ring');
+  // Metals — require strong metal context (not just "silver" color)
+  const metalContext=lower.includes('metal')||lower.includes('alloy')||lower.includes('coin')||lower.includes('bar')||lower.includes('ingot');
+  if(metalContext){
+    if(lower.includes('gold')) return MATERIALS.find(m=>m.name==='Gold');
+    if(lower.includes('silver')) return MATERIALS.find(m=>m.name==='Silver');
+    if(lower.includes('platinum')) return MATERIALS.find(m=>m.name==='Platinum');
+    if(lower.includes('titanium')) return MATERIALS.find(m=>m.name==='Titanium');
+    if(lower.includes('copper')) return MATERIALS.find(m=>m.name==='Copper');
+    if(lower.includes('steel')) return MATERIALS.find(m=>m.name==='Stainless Steel');
   }
   return null;
 }
@@ -659,16 +679,20 @@ function findMineralFromLabel(label){
 
 function findChemicalFromLabel(label){
   const lower=label.toLowerCase();
+  // STRICT: Direct name match only — no metal aliases that confuse with materials mode
   for(const c of CHEMICALS){if(lower.includes(c.name.toLowerCase())) return c;}
+  // Only match if label clearly refers to a chemical context
+  const chemContext=lower.includes('chemical')||lower.includes('liquid')||lower.includes('powder')||lower.includes('bottle')||lower.includes('container')||lower.includes('cleaner')||lower.includes('solvent')||lower.includes('acid')||lower.includes('fuel');
+  if(!chemContext) return null;
   const aliases={'salt':'Sodium Chloride (Salt)','sugar':'Sucrose (Sugar)',
     'baking soda':'Sodium Bicarbonate (Baking Soda)','vinegar':'Acetic Acid (Vinegar)',
     'bleach':'Sodium Hypochlorite (Bleach)','ammonia':'Ammonia',
-    'peroxide':'Hydrogen Peroxide','alcohol':'Isopropyl Alcohol',
-    'acetone':'Acetone','mercury':'Mercury','asbestos':'Asbestos',
+    'peroxide':'Hydrogen Peroxide','isopropyl':'Isopropyl Alcohol',
+    'acetone':'Acetone','asbestos':'Asbestos',
     'gasoline':'Gasoline','diesel':'Diesel','propane':'Propane',
     'butane':'Butane','toluene':'Toluene','xylene':'Xylene',
     'turpentine':'Turpentine','formaldehyde':'Formaldehyde',
-    'arsenic':'Arsenic','cyanide':'Sodium Cyanide','lye':'Sodium Hydroxide (Lye)',
+    'cyanide':'Sodium Cyanide','lye':'Sodium Hydroxide (Lye)',
     'chalk':'Calcium Carbonate (Chalk)','citric':'Citric Acid'};
   for(const[key,val]of Object.entries(aliases)){
     if(lower.includes(key)){const m=CHEMICALS.find(x=>x.name===val);if(m)return m;}
@@ -678,48 +702,48 @@ function findChemicalFromLabel(label){
 
 function findBioFromLabel(label){
   const lower=label.toLowerCase();
+  // STRICT: Direct name match only first
   for(const b of BIOLOGICAL){if(lower.includes(b.name.toLowerCase())) return b;}
-  // Plant matches
-  if(lower.includes('plant')||lower.includes('flower')||lower.includes('leaf')||lower.includes('flora')) return BIOLOGICAL.find(b=>b.name==='Generic Plant');
+  // Plant matches (require plant-specific terms)
+  if(lower.includes('plant')||lower.includes('flower')||lower.includes('leaf')||lower.includes('flora')||lower.includes('flowering')||lower.includes('botany')) return BIOLOGICAL.find(b=>b.name==='Generic Plant');
   if(lower.includes('aloe')) return BIOLOGICAL.find(b=>b.name==='Aloe Vera');
   if(lower.includes('cactus')||lower.includes('succulent')) return BIOLOGICAL.find(b=>b.name==='Cactus');
-  if(lower.includes('rose')) return BIOLOGICAL.find(b=>b.name==='Roses');
-  if(lower.includes('mint')) return BIOLOGICAL.find(b=>b.name==='Mint');
-  if(lower.includes('basil')) return BIOLOGICAL.find(b=>b.name==='Basil');
-  // Mushroom matches
+  if(lower.includes('rose')&&!lower.includes('rose gold')) return BIOLOGICAL.find(b=>b.name==='Roses');
+  // Mushroom
   if(lower.includes('mushroom')||lower.includes('fungi')||lower.includes('fungus')) return BIOLOGICAL.find(b=>b.name==='Generic Mushroom');
-  // Animal matches
+  // Animals (require animal-specific terms)
   if(lower.includes('dog')||lower.includes('canine')||lower.includes('puppy')) return BIOLOGICAL.find(b=>b.name==='Dog');
-  if(lower.includes('cat')||lower.includes('feline')||lower.includes('kitten')) return BIOLOGICAL.find(b=>b.name==='Cat');
+  if(lower.includes('cat')&&!lower.includes('catalog')&&!lower.includes('cattle')) return BIOLOGICAL.find(b=>b.name==='Cat');
   if(lower.includes('bird')) return BIOLOGICAL.find(b=>b.name==='Bird');
   if(lower.includes('fish')) return BIOLOGICAL.find(b=>b.name==='Fish');
   if(lower.includes('snake')||lower.includes('serpent')) return BIOLOGICAL.find(b=>b.name==='Snake');
   if(lower.includes('lizard')||lower.includes('gecko')) return BIOLOGICAL.find(b=>b.name==='Lizard');
-  // Insect matches
-  if(lower.includes('bee')&&!lower.includes('beetle')) return BIOLOGICAL.find(b=>b.name==='Honey Bee');
+  // Insects
+  if(lower.includes('honey bee')||(lower.includes('bee')&&lower.includes('insect'))) return BIOLOGICAL.find(b=>b.name==='Honey Bee');
   if(lower.includes('wasp')) return BIOLOGICAL.find(b=>b.name==='Wasp');
   if(lower.includes('hornet')) return BIOLOGICAL.find(b=>b.name==='Hornet');
   if(lower.includes('mosquito')) return BIOLOGICAL.find(b=>b.name==='Mosquito');
-  if(lower.includes('fly')&&!lower.includes('butterfly')) return BIOLOGICAL.find(b=>b.name==='House Fly');
   if(lower.includes('spider')) return BIOLOGICAL.find(b=>b.name==='Spider (Generic)');
   if(lower.includes('cockroach')||lower.includes('roach')) return BIOLOGICAL.find(b=>b.name==='Cockroach');
-  if(lower.includes('ant')&&!lower.includes('plant')) return BIOLOGICAL.find(b=>b.name==='Ant');
-  // Wood matches
-  if(lower.includes('oak')) return BIOLOGICAL.find(b=>b.name==='Oak');
-  if(lower.includes('pine')) return BIOLOGICAL.find(b=>b.name==='Pine');
+  // Wood (only obvious wood products)
+  if(lower.includes('oak')&&(lower.includes('wood')||lower.includes('tree'))) return BIOLOGICAL.find(b=>b.name==='Oak');
+  if(lower.includes('pine')&&(lower.includes('wood')||lower.includes('tree'))) return BIOLOGICAL.find(b=>b.name==='Pine');
   if(lower.includes('mahogany')) return BIOLOGICAL.find(b=>b.name==='Mahogany');
-  if(lower.includes('walnut')) return BIOLOGICAL.find(b=>b.name==='Walnut');
+  if(lower.includes('walnut')&&!lower.includes('walnut shell')) return BIOLOGICAL.find(b=>b.name==='Walnut');
   if(lower.includes('maple')) return BIOLOGICAL.find(b=>b.name==='Maple');
   if(lower.includes('cedar')) return BIOLOGICAL.find(b=>b.name==='Cedar');
   if(lower.includes('bamboo')) return BIOLOGICAL.find(b=>b.name==='Bamboo');
   if(lower.includes('teak')) return BIOLOGICAL.find(b=>b.name==='Teak');
-  // Fiber matches
-  if(lower.includes('cotton')) return BIOLOGICAL.find(b=>b.name==='Cotton');
-  if(lower.includes('wool')) return BIOLOGICAL.find(b=>b.name==='Wool');
-  if(lower.includes('silk')) return BIOLOGICAL.find(b=>b.name==='Silk');
-  if(lower.includes('linen')) return BIOLOGICAL.find(b=>b.name==='Linen');
-  if(lower.includes('polyester')) return BIOLOGICAL.find(b=>b.name==='Polyester');
-  if(lower.includes('nylon')) return BIOLOGICAL.find(b=>b.name==='Nylon');
+  // Fibers (require fabric/clothing context)
+  const fabricContext=lower.includes('fabric')||lower.includes('textile')||lower.includes('cloth')||lower.includes('fiber')||lower.includes('clothing')||lower.includes('shirt')||lower.includes('garment');
+  if(fabricContext){
+    if(lower.includes('cotton')) return BIOLOGICAL.find(b=>b.name==='Cotton');
+    if(lower.includes('wool')) return BIOLOGICAL.find(b=>b.name==='Wool');
+    if(lower.includes('silk')) return BIOLOGICAL.find(b=>b.name==='Silk');
+    if(lower.includes('linen')) return BIOLOGICAL.find(b=>b.name==='Linen');
+    if(lower.includes('polyester')) return BIOLOGICAL.find(b=>b.name==='Polyester');
+    if(lower.includes('nylon')) return BIOLOGICAL.find(b=>b.name==='Nylon');
+  }
   if(lower.includes('leather')) return BIOLOGICAL.find(b=>b.name==='Leather');
   if(lower.includes('suede')) return BIOLOGICAL.find(b=>b.name==='Suede');
   return null;
@@ -804,18 +828,36 @@ function drawTargetCircles(){
   if(!lastDetections.length) return;
   for(const det of lastDetections){
     if(!det.color) continue;
-    const t=Date.now()/600;
-    const pulseR=det.radius+Math.sin(t)*4;
+    const t=Date.now()/500;
+    const pulseR=det.radius+Math.sin(t)*8;
     ctx.save();
-    ctx.shadowColor=det.color;ctx.shadowBlur=20;
+    // Outer glow
+    ctx.shadowColor=det.color;ctx.shadowBlur=30;
+    // Main circle
     ctx.beginPath();ctx.arc(det.x,det.y,pulseR,0,Math.PI*2);
-    ctx.strokeStyle=det.color;ctx.lineWidth=3;ctx.stroke();
+    ctx.strokeStyle=det.color;ctx.lineWidth=5;ctx.stroke();
+    // Inner ring
+    ctx.beginPath();ctx.arc(det.x,det.y,pulseR-10,0,Math.PI*2);
+    ctx.lineWidth=2;ctx.stroke();
+    // Crosshair arcs
     [0,Math.PI/2,Math.PI,3*Math.PI/2].forEach(a=>{
-      ctx.beginPath();ctx.arc(det.x,det.y,pulseR+8,a,a+Math.PI/6);ctx.lineWidth=4;ctx.stroke();
+      ctx.beginPath();ctx.arc(det.x,det.y,pulseR+15,a,a+Math.PI/8);ctx.lineWidth=6;ctx.stroke();
     });
+    // Center dot
     ctx.shadowBlur=0;
-    ctx.font='600 13px "Share Tech Mono"';ctx.fillStyle=det.color;ctx.textAlign='center';
-    ctx.fillText(det.label,det.x,det.y-pulseR-12);
+    ctx.beginPath();ctx.arc(det.x,det.y,4,0,Math.PI*2);
+    ctx.fillStyle=det.color;ctx.fill();
+    // Label background
+    const labelY=det.y-pulseR-30;
+    ctx.font='700 16px "Share Tech Mono"';
+    const labelW=ctx.measureText(det.label).width+20;
+    ctx.fillStyle='rgba(0,0,0,0.85)';
+    ctx.fillRect(det.x-labelW/2,labelY-12,labelW,22);
+    ctx.strokeStyle=det.color;ctx.lineWidth=2;
+    ctx.strokeRect(det.x-labelW/2,labelY-12,labelW,22);
+    // Label text
+    ctx.fillStyle=det.color;ctx.textAlign='center';
+    ctx.fillText('🎯 '+det.label,det.x,labelY+5);
     ctx.restore();
   }
 }
@@ -1207,7 +1249,7 @@ function renderMaterialResult(allItems,googleData){
     if(priorityMatch.item.boundingPoly){
       updateDetectionCircles(priorityMatch.item.boundingPoly,detColor,matToShow.name);
     } else {
-      let roi={x:canvas.width/2,y:canvas.height/2,radius:60,color:detColor,label:matToShow.name};
+      let roi={x:canvas.width/2,y:canvas.height/2,radius:120,color:detColor,label:matToShow.name};
       if(algoSettings.stabilize) roi=algoStabilize(roi);
       lastDetections=[roi];
     }
@@ -1261,7 +1303,7 @@ function renderMineralResult(allItems){
     if(priorityMatch.item.boundingPoly){
       updateDetectionCircles(priorityMatch.item.boundingPoly,detColor,matToShow.name);
     } else {
-      let roi={x:canvas.width/2,y:canvas.height/2,radius:60,color:detColor,label:matToShow.name};
+      let roi={x:canvas.width/2,y:canvas.height/2,radius:120,color:detColor,label:matToShow.name};
       if(algoSettings.stabilize) roi=algoStabilize(roi);
       lastDetections=[roi];
     }
@@ -1412,7 +1454,13 @@ function buildCompositionDropdown(mat){
 
 function updateDetectionCircles(boundingPoly,color,label){
   const verts=boundingPoly.normalizedVertices;
-  if(!verts||verts.length<2){lastDetections=[];return;}
+  if(!verts||verts.length<2){
+    // fallback to center with bigger radius
+    let roi={x:canvas.width/2,y:canvas.height/2,radius:120,color,label};
+    if(algoSettings.stabilize) roi=algoStabilize(roi);
+    lastDetections=[roi];
+    return;
+  }
   let minX=1,minY=1,maxX=0,maxY=0;
   for(const v of verts){
     if(v.x!==undefined){minX=Math.min(minX,v.x);maxX=Math.max(maxX,v.x);}
@@ -1422,7 +1470,7 @@ function updateDetectionCircles(boundingPoly,color,label){
   const cy=(minY+maxY)/2*canvas.height;
   const w=(maxX-minX)*canvas.width;
   const h=(maxY-minY)*canvas.height;
-  const radius=Math.max(40,Math.min(w,h)/2);
+  const radius=Math.max(80,Math.min(w,h)/2);
   let roi={x:cx,y:cy,radius,color,label};
   if(algoSettings.stabilize) roi=algoStabilize(roi);
   lastDetections=[roi];
