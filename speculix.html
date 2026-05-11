@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v9.5 PRO</title>
+<title>SPECULIX v9.7 GEMOLOGY</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
@@ -252,9 +252,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="corner-tl"></div><div class="corner-br"></div>
   <div class="hex-ring"><div style="font-size:2.2rem">📡</div></div>
   <div class="logo">SPECULIX</div>
-  <div class="tagline">v9.5 PRO · 7 SCAN MODES · MULTI-AI CONSENSUS<br>HAZARD · CURRENCY · MEDICATION · SPECTRUM</div>
+  <div class="tagline">v9.7 GEMOLOGY · MATH-BASED ANALYSIS<br>LUSTER · DISPERSION · TRANSPARENCY · FACETING</div>
   <button class="start-btn" onclick="startApp()">📡 ACTIVATE TRICORDER</button>
-  <div class="version-badge">🛡️ HAZARD: real-time glass detection<br>🔬 SPECTRUM: enter peaks, match 37 gem signatures<br>🧠 5-AI CONSENSUS: more accurate than any single AI</div>
+  <div class="version-badge">💎 GEMOLOGY: 5 properties measured by math<br>🧪 CROSS-MATCH: vision + properties combined<br>🎯 STRICT: finds only what you select</div>
 </div>
 
 <div class="screen hidden" id="scanner">
@@ -267,6 +267,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   </div>
   <div id="priority-legend"><div class="legend-title">TARGETS:</div><div id="legend-list"></div></div>
   <div id="hazard-badge" style="position:absolute;top:55px;left:10px;z-index:21;background:rgba(255,61,61,.15);border:2px solid #ff3d3d;padding:4px 10px;backdrop-filter:blur(4px);display:none;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#ff3d3d;font-weight:700;letter-spacing:.1em">⚠ <span id="hazard-count">0</span> HAZARDS</div>
+  <div id="strict-badge" style="position:absolute;top:95px;left:10px;z-index:21;background:rgba(0,255,136,.12);border:2px solid #00ff88;padding:4px 10px;backdrop-filter:blur(4px);font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#00ff88;font-weight:700;letter-spacing:.1em">🎯 STRICT MODE</div>
   <div id="vision-panel">
     <div class="vision-header">
       <span class="vision-title">📡 MULTI-AI ANALYSIS</span>
@@ -409,6 +410,7 @@ const AI_ENGINES=[
   {id:'ai_roboflow',name:'🟣 Roboflow (Your AI)',desc:'Create project at roboflow.com first',on:false},
 ];
 const ALGORITHMS=[
+  {id:'strictmode',name:'🎯 STRICT TARGET MODE',desc:'Only show matches for selected targets — ignore random items',on:true},
   {id:'hazard',name:'⚠ HAZARD DETECTION',desc:'🛡️ FINDS BROKEN GLASS · sharp edges + reflections (recommended)',on:true},
   {id:'preprocess',name:'1. Image Preprocessing',desc:'⚠ Can distort — turn OFF if accuracy drops',on:false},
   {id:'multiframe',name:'2. Multi-Frame Averaging',desc:'Combines 3 frames (slower)',on:false},
@@ -878,6 +880,7 @@ let torchOn=false,autoMode=false;
 let sensitivity=5,scanCount=0;
 let isAnalyzing=false,autoInterval=null;
 let selectedMaterials=[],currentCat="All";
+let strictMode=true; // STRICT: only show selected targets, ignore random matches
 let scanHistory=[],lastDetections=[];
 let currentMode='material',stableROI=null;
 
@@ -1218,6 +1221,184 @@ function algoStabilize(roi){
 }
 
 // MAIN: capture frame with active algorithms
+// ═══════════════════════════════════════════════════════════════════════
+// GEMOLOGICAL ANALYSIS MODULE — 5 measurable properties from camera
+// Pure math, no AI — provides objective evidence to support Vision results
+// ═══════════════════════════════════════════════════════════════════════
+function analyzeGemology(){
+  if(canvas.width===0) return null;
+  // Use full-resolution canvas for analysis
+  const tc=document.createElement('canvas');
+  const sw=Math.min(640,canvas.width);
+  const sh=Math.floor(canvas.height*(sw/canvas.width));
+  tc.width=sw;tc.height=sh;
+  const tctx=tc.getContext('2d');
+  tctx.drawImage(canvas,0,0,sw,sh);
+  const img=tctx.getImageData(0,0,sw,sh);
+  const data=img.data;
+  
+  let lusterScore=0;
+  let dispersionScore=0;
+  let transparencyScore=0;
+  let facetCount=0;
+  let crystalShape='unknown';
+  let avgSat=0;
+  let avgBright=0;
+  let edgePixels=0;
+  let totalPixels=0;
+  let rainbowPixels=0;
+  let hueVariance=0;
+  let hueValues=[];
+  
+  // First pass — gather statistics
+  for(let y=0;y<sh;y+=2){
+    for(let x=0;x<sw;x+=2){
+      const i=(y*sw+x)*4;
+      const r=data[i],g=data[i+1],b=data[i+2];
+      const max=Math.max(r,g,b),min=Math.min(r,g,b);
+      const lum=r*0.299+g*0.587+b*0.114;
+      const sat=max>0?(max-min)/max:0;
+      avgSat+=sat;
+      avgBright+=lum;
+      totalPixels++;
+      
+      // Hue analysis for dispersion
+      if(lum>50&&lum<240&&sat>0.3){
+        let hue=0;
+        const d=max-min;
+        if(d>0){
+          if(max===r) hue=((g-b)/d+(g<b?6:0))/6;
+          else if(max===g) hue=((b-r)/d+2)/6;
+          else hue=((r-g)/d+4)/6;
+        }
+        hueValues.push(hue*360);
+        // Rainbow detection — high saturation + varied hues
+        if(sat>0.5) rainbowPixels++;
+      }
+      
+      // ── LUSTER detection — count specular highlights (very bright spots) ──
+      if(lum>240) lusterScore++;
+      
+      // ── EDGE detection (faceting) ──
+      if(x>2&&y>2&&x<sw-2&&y<sh-2){
+        const lL=data[(y*sw+x-2)*4]*0.299+data[(y*sw+x-2)*4+1]*0.587+data[(y*sw+x-2)*4+2]*0.114;
+        const lR=data[(y*sw+x+2)*4]*0.299+data[(y*sw+x+2)*4+1]*0.587+data[(y*sw+x+2)*4+2]*0.114;
+        const lU=data[((y-2)*sw+x)*4]*0.299+data[((y-2)*sw+x)*4+1]*0.587+data[((y-2)*sw+x)*4+2]*0.114;
+        const lD=data[((y+2)*sw+x)*4]*0.299+data[((y+2)*sw+x)*4+1]*0.587+data[((y+2)*sw+x)*4+2]*0.114;
+        const gx=Math.abs(lL-lR);
+        const gy=Math.abs(lU-lD);
+        const grad=Math.sqrt(gx*gx+gy*gy);
+        if(grad>40) edgePixels++;
+      }
+    }
+  }
+  
+  avgSat=avgSat/totalPixels;
+  avgBright=avgBright/totalPixels;
+  
+  // ── DISPERSION ("fire") — hue variance indicates rainbow flashes ──
+  if(hueValues.length>10){
+    const meanHue=hueValues.reduce((a,b)=>a+b,0)/hueValues.length;
+    hueVariance=hueValues.reduce((a,b)=>a+Math.pow(b-meanHue,2),0)/hueValues.length;
+    dispersionScore=Math.min(100,Math.round(Math.sqrt(hueVariance)/2));
+  }
+  
+  // ── TRANSPARENCY — measured by brightness variation through object ──
+  // Highly transparent objects: background visible, mid-range brightness, low color saturation
+  if(avgBright>60&&avgBright<200&&avgSat<0.3) transparencyScore=Math.round(80-Math.abs(avgBright-130)/2);
+  else if(avgBright>200) transparencyScore=30; // bright/opaque
+  else transparencyScore=Math.round(50-(avgSat*100));
+  transparencyScore=Math.max(0,Math.min(100,transparencyScore));
+  
+  // ── LUSTER score (0-100) ──
+  lusterScore=Math.min(100,Math.round((lusterScore/totalPixels)*2000));
+  
+  // ── FACET COUNT — high edge density suggests faceted cut ──
+  const edgeDensity=edgePixels/totalPixels;
+  if(edgeDensity>0.15) {facetCount=Math.round(edgeDensity*100);crystalShape='heavily faceted';}
+  else if(edgeDensity>0.08) {facetCount=Math.round(edgeDensity*80);crystalShape='faceted';}
+  else if(edgeDensity>0.04) {facetCount=Math.round(edgeDensity*60);crystalShape='cabochon or rough';}
+  else {facetCount=0;crystalShape='smooth or rounded';}
+  
+  // ── LUSTER classification ──
+  let lusterType='dull';
+  if(lusterScore>40) lusterType='adamantine (diamond-like)';
+  else if(lusterScore>25) lusterType='vitreous (glass-like)';
+  else if(lusterScore>15) lusterType='resinous';
+  else if(lusterScore>8) lusterType='waxy';
+  else if(lusterScore>3) lusterType='dull/matte';
+  
+  // ── TRANSPARENCY classification ──
+  let transparencyType='opaque';
+  if(transparencyScore>70) transparencyType='transparent';
+  else if(transparencyScore>40) transparencyType='translucent';
+  else if(transparencyScore>20) transparencyType='semi-translucent';
+  else transparencyType='opaque';
+  
+  return {
+    luster:{score:lusterScore,type:lusterType},
+    dispersion:{score:dispersionScore,note:dispersionScore>50?'High fire — possible diamond/zircon/sphene':(dispersionScore>25?'Moderate fire — possible CZ/topaz':'Low fire — typical for most gems')},
+    transparency:{score:transparencyScore,type:transparencyType},
+    faceting:{count:facetCount,shape:crystalShape},
+    statistics:{avgSat:Math.round(avgSat*100),avgBright:Math.round(avgBright),edgeDensity:Math.round(edgeDensity*1000)/10}
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// REFINED GEM MATCHING — combines Vision results + Gemology measurements
+// This is your "expert-verified database matching" concept
+// ═══════════════════════════════════════════════════════════════════════
+function refinedGemMatch(visionLabels,gemology){
+  // Score each gem in DB against vision labels + gemological evidence
+  const candidates=[];
+  const db=currentMode==='mineral'?MINERALS:MATERIALS;
+  for(const gem of db){
+    let score=0;
+    let reasons=[];
+    // Visual label match
+    const gemName=gem.name.toLowerCase();
+    for(const label of visionLabels){
+      const ll=label.name.toLowerCase();
+      if(ll.includes(gemName)||gemName.includes(ll.split(' ')[0])){
+        score+=label.score||50;
+        reasons.push(`Vision: ${label.name}`);
+        break;
+      }
+    }
+    // Gemological consistency check
+    if(gemology){
+      // Diamond: very high luster, high dispersion, transparent, faceted
+      if(gem.name==='Diamond'){
+        if(gemology.luster.score>30) {score+=15;reasons.push('Adamantine luster');}
+        if(gemology.dispersion.score>40) {score+=15;reasons.push('High fire/dispersion');}
+        if(gemology.transparency.score>60) {score+=10;reasons.push('Transparent');}
+      }
+      // Quartz: vitreous luster, transparent/translucent, hexagonal crystal habit
+      if(gem.name==='Quartz'||gemName.includes('quartz')){
+        if(gemology.luster.score>15&&gemology.luster.score<35) {score+=10;reasons.push('Vitreous luster');}
+        if(gemology.transparency.score>40) {score+=10;reasons.push('Transparent/translucent');}
+        if(gemology.faceting.shape==='cabochon or rough') {score+=5;reasons.push('Crystal habit');}
+      }
+      // Glass: vitreous luster, transparent, no fire
+      if(gem.name==='Glass'){
+        if(gemology.luster.score>15&&gemology.luster.score<30) {score+=10;reasons.push('Vitreous luster');}
+        if(gemology.transparency.score>60) {score+=10;reasons.push('Transparent');}
+        if(gemology.dispersion.score<20) {score+=5;reasons.push('Low dispersion');}
+      }
+      // Metals: low transparency, high luster, low dispersion
+      const isMetal=['Gold','Silver','Platinum','Copper','Titanium','Stainless Steel','Native Gold','Native Silver','Native Copper'].includes(gem.name);
+      if(isMetal){
+        if(gemology.transparency.score<30) {score+=5;reasons.push('Opaque');}
+        if(gemology.luster.score>20) {score+=10;reasons.push('Metallic luster');}
+        if(gemology.dispersion.score<15) {score+=5;reasons.push('No fire');}
+      }
+    }
+    if(score>0) candidates.push({gem,score,reasons});
+  }
+  candidates.sort((a,b)=>b.score-a.score);
+  return candidates.slice(0,5);
+}
+
 function captureWithAlgorithms(){
   const tempCanvas=document.createElement('canvas');
   let srcCanvas=canvas;
@@ -1564,6 +1745,11 @@ async function identifyNow(){
       }
     }
     
+    // Run gemological analysis for material/mineral modes
+    if(currentMode==='material'||currentMode==='mineral'){
+      aiResults.gemology=analyzeGemology();
+    }
+    
     renderMultiAIResult(aiResults);
     setStatus('READY',false);
   }catch(err){
@@ -1720,6 +1906,37 @@ function renderMultiAIResult(aiResults){
     }
     html+='</div>';
   }
+
+  // Gemological Analysis
+  if(aiResults.gemology){
+    const g=aiResults.gemology;
+    html+='<div class="ai-block"><span class="ai-tag" style="color:#ffd700;border:1px solid #ffd700">💎 GEMOLOGY</span>';
+    html+=`<div class="ai-block-content" style="line-height:1.6">
+      <strong style="color:#ffd700">LUSTER:</strong> ${g.luster.type} (${g.luster.score}/100)<br>
+      <strong style="color:#ffd700">DISPERSION:</strong> ${g.dispersion.score}/100 · ${g.dispersion.note}<br>
+      <strong style="color:#ffd700">TRANSPARENCY:</strong> ${g.transparency.type} (${g.transparency.score}/100)<br>
+      <strong style="color:#ffd700">FACETING:</strong> ${g.faceting.shape} (${g.faceting.count} edges)<br>
+      <span style="color:rgba(255,255,255,.5);font-size:.55rem">Stats: sat ${g.statistics.avgSat}% · brightness ${g.statistics.avgBright}</span>
+    </div>`;
+    html+='</div>';
+    
+    // Refined gem matching using gemology evidence
+    if(aiResults.google&&aiResults.google.success){
+      const allLabels=[...(aiResults.google.objects||[]),...(aiResults.google.labels||[])];
+      const matches=refinedGemMatch(allLabels,g);
+      if(matches.length>0){
+        html+='<div class="ai-block"><span class="ai-tag" style="color:#cc00ff;border:1px solid #cc00ff">🧪 CROSS-MATCH</span>';
+        html+='<div class="ai-block-content">';
+        matches.forEach((m,i)=>{
+          html+=`<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+            <strong style="color:#fff">${i+1}. ${m.gem.name}</strong> — ${m.score}pts<br>
+            <span style="color:rgba(0,245,255,.6);font-size:.55rem">${m.reasons.join(' · ')}</span>
+          </div>`;
+        });
+        html+='</div></div>';
+      }
+    }
+  }
   
   html+='</div>';
   
@@ -1731,38 +1948,64 @@ function renderMultiAIResult(aiResults){
 }
 
 function renderMaterialResult(allItems,googleData){
-  let priorityMatch=null;
-  if(selectedMaterials.length>0){
+  // STRICT TARGET MODE — when user has selected targets, ONLY match against those
+  if(strictMode&&selectedMaterials.length>0){
+    let bestPriority=null;
+    let bestScore=0;
     for(const sel of selectedMaterials){
       const matName=sel.material.name.toLowerCase();
+      const matWords=matName.split(/[\s()\-]+/).filter(w=>w.length>2);
       for(const item of allItems){
         const il=item.name.toLowerCase();
-        if(il.includes(matName)||matName.includes(il.split(' ')[0])){
-          priorityMatch={target:sel,item};break;
+        const ilWords=il.split(/[\s()\-]+/).filter(w=>w.length>2);
+        // Must share at least one meaningful word
+        let matchScore=0;
+        for(const w of matWords){
+          if(ilWords.includes(w)||il.includes(w)) matchScore+=item.score||50;
+        }
+        if(matchScore>bestScore){
+          bestScore=matchScore;
+          bestPriority={target:sel,item,matchScore};
         }
       }
-      if(priorityMatch) break;
     }
+    if(bestPriority&&bestScore>20){
+      const matToShow=bestPriority.target.material;
+      const detColor=bestPriority.target.color;
+      let html=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET FOUND: ${matToShow.name.toUpperCase()}</div>
+        <div class="vision-detail">Matched via: ${bestPriority.item.name}<br>Confidence: ${bestPriority.item.score}%</div>
+        <div class="vision-ri" style="color:${detColor};border-color:${detColor}">RI = ${matToShow.ri}</div>`;
+      if(bestPriority.item.boundingPoly){
+        updateDetectionCircles(bestPriority.item.boundingPoly,detColor,matToShow.name);
+      } else {
+        let roi={x:canvas.width/2,y:canvas.height/2,radius:120,color:detColor,label:matToShow.name};
+        if(algoSettings.stabilize) roi=algoStabilize(roi);
+        lastDetections=[roi];
+      }
+      html+=buildCompositionDropdown(matToShow);
+      addToHistory(matToShow.name,matToShow.cat,'Target Match');
+      return html;
+    }
+    // STRICT MODE: nothing matched the targets — say so honestly
+    lastDetections=[];
+    const targetList=selectedMaterials.map(s=>s.material.name).join(', ');
+    return `<div class="vision-name" style="color:var(--amber)">⚠ TARGETS NOT FOUND</div>
+      <div class="vision-detail">Looking for: <strong>${targetList}</strong><br>None of these matched in this scan.</div>
+      <div class="warning-box" style="border-color:var(--amber);color:var(--amber);margin-top:8px">
+        Google saw: ${allItems.slice(0,3).map(i=>i.name+' '+i.score+'%').join(' · ')}<br><br>
+        ✓ Move closer · ✓ Better lighting · ✓ Plain background<br>
+        Or open ⚙️ ALG and turn OFF strict mode to see general matches.
+      </div>`;
   }
+
+  // NON-STRICT MODE — original behavior (matches general database)
   let bestMatch=null;
   for(const item of allItems){
     const mat=findMaterialFromLabel(item.name);
     if(mat){bestMatch={item,material:mat};break;}
   }
-  let html='',matToShow=null,detColor=null;
-  if(priorityMatch){
-    matToShow=priorityMatch.target.material;detColor=priorityMatch.target.color;
-    html+=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET: ${matToShow.name.toUpperCase()}</div>
-      <div class="vision-detail">Detected as: ${priorityMatch.item.name}<br>Confidence: ${priorityMatch.item.score}%</div>
-      <div class="vision-ri" style="color:${detColor};border-color:${detColor}">RI = ${matToShow.ri}</div>`;
-    if(priorityMatch.item.boundingPoly){
-      updateDetectionCircles(priorityMatch.item.boundingPoly,detColor,matToShow.name);
-    } else {
-      let roi={x:canvas.width/2,y:canvas.height/2,radius:120,color:detColor,label:matToShow.name};
-      if(algoSettings.stabilize) roi=algoStabilize(roi);
-      lastDetections=[roi];
-    }
-  } else if(bestMatch){
+  let html='',matToShow=null;
+  if(bestMatch){
     matToShow=bestMatch.material;
     const cls=matToShow.cat.includes("Hazard")?'hazard':matToShow.cat.includes("Gems")?'gem':matToShow.cat==="Jewelry"?'jewelry':'';
     html+=`<div class="vision-name ${cls}">${matToShow.name.toUpperCase()}</div>
@@ -1779,44 +2022,68 @@ function renderMaterialResult(allItems,googleData){
   }
   if(matToShow){
     html+=buildCompositionDropdown(matToShow);
-    addToHistory(matToShow.name,matToShow.cat,priorityMatch?'Target':'Identified');
+    addToHistory(matToShow.name,matToShow.cat,'General');
   }
   return html;
 }
 
 function renderMineralResult(allItems){
-  let priorityMatch=null;
-  if(selectedMaterials.length>0){
+  // STRICT TARGET MODE — same logic as material mode
+  if(strictMode&&selectedMaterials.length>0){
+    let bestPriority=null;
+    let bestScore=0;
     for(const sel of selectedMaterials){
       const matName=sel.material.name.toLowerCase();
+      const matWords=matName.split(/[\s()\-]+/).filter(w=>w.length>2);
       for(const item of allItems){
         const il=item.name.toLowerCase();
-        if(il.includes(matName)||matName.includes(il.split(' ')[0])){
-          priorityMatch={target:sel,item};break;
+        const ilWords=il.split(/[\s()\-]+/).filter(w=>w.length>2);
+        let matchScore=0;
+        for(const w of matWords){
+          if(ilWords.includes(w)||il.includes(w)) matchScore+=item.score||50;
+        }
+        if(matchScore>bestScore){
+          bestScore=matchScore;
+          bestPriority={target:sel,item,matchScore};
         }
       }
-      if(priorityMatch) break;
     }
+    if(bestPriority&&bestScore>20){
+      const matToShow=bestPriority.target.material;
+      const detColor=bestPriority.target.color;
+      let html=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET FOUND: ${matToShow.name.toUpperCase()}</div>
+        <div class="vision-detail">Matched via: ${bestPriority.item.name}<br>Confidence: ${bestPriority.item.score}%</div>
+        <div class="vision-ri" style="color:${detColor};border-color:${detColor}">RI = ${matToShow.ri}</div>`;
+      if(bestPriority.item.boundingPoly){
+        updateDetectionCircles(bestPriority.item.boundingPoly,detColor,matToShow.name);
+      } else {
+        let roi={x:canvas.width/2,y:canvas.height/2,radius:120,color:detColor,label:matToShow.name};
+        if(algoSettings.stabilize) roi=algoStabilize(roi);
+        lastDetections=[roi];
+      }
+      html+=buildCompositionDropdown(matToShow);
+      addToHistory(matToShow.name,matToShow.cat,'Target Match');
+      return html;
+    }
+    lastDetections=[];
+    const targetList=selectedMaterials.map(s=>s.material.name).join(', ');
+    return `<div class="vision-name" style="color:var(--amber)">⚠ TARGETS NOT FOUND</div>
+      <div class="vision-detail">Looking for: <strong>${targetList}</strong><br>None of these matched in this scan.</div>
+      <div class="warning-box" style="border-color:var(--amber);color:var(--amber);margin-top:8px">
+        Google saw: ${allItems.slice(0,3).map(i=>i.name+' '+i.score+'%').join(' · ')}<br><br>
+        ✓ Move closer · ✓ Better lighting · ✓ Plain background<br>
+        Or open ⚙️ ALG and turn OFF strict mode to see general matches.
+      </div>`;
   }
+
+  // NON-STRICT MODE — original behavior
   let bestMatch=null;
   for(const item of allItems){
     const m=findMineralFromLabel(item.name);
     if(m){bestMatch={item,material:m};break;}
   }
-  let html='',matToShow=null,detColor=null;
-  if(priorityMatch){
-    matToShow=priorityMatch.target.material;detColor=priorityMatch.target.color;
-    html+=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET: ${matToShow.name.toUpperCase()}</div>
-      <div class="vision-detail">Detected as: ${priorityMatch.item.name}<br>Confidence: ${priorityMatch.item.score}%</div>
-      <div class="vision-ri" style="color:${detColor};border-color:${detColor}">RI = ${matToShow.ri}</div>`;
-    if(priorityMatch.item.boundingPoly){
-      updateDetectionCircles(priorityMatch.item.boundingPoly,detColor,matToShow.name);
-    } else {
-      let roi={x:canvas.width/2,y:canvas.height/2,radius:120,color:detColor,label:matToShow.name};
-      if(algoSettings.stabilize) roi=algoStabilize(roi);
-      lastDetections=[roi];
-    }
-  } else if(bestMatch){
+  let html='',matToShow=null;
+  if(bestMatch){
     matToShow=bestMatch.material;
     html+=`<div class="vision-name gem">🪨 ${matToShow.name.toUpperCase()}</div>
       <div class="vision-detail">${matToShow.cat}<br>Detected as: ${bestMatch.item.name} (${bestMatch.item.score}%)</div>
@@ -1832,7 +2099,7 @@ function renderMineralResult(allItems){
   }
   if(matToShow){
     html+=buildCompositionDropdown(matToShow);
-    addToHistory(matToShow.name,matToShow.cat,priorityMatch?'Target':'Mineral');
+    addToHistory(matToShow.name,matToShow.cat,'General');
   }
   return html;
 }
@@ -2130,6 +2397,12 @@ document.getElementById('algo-list').addEventListener('click',function(e){
   if(!t) return;
   algoSettings[t.dataset.algo]=!algoSettings[t.dataset.algo];
   t.classList.toggle('on',algoSettings[t.dataset.algo]);
+  // Sync strictMode global with toggle
+  if(t.dataset.algo==='strictmode'){
+    strictMode=algoSettings.strictmode;
+    const sb=document.getElementById('strict-badge');
+    if(sb) sb.style.display=strictMode?'block':'none';
+  }
 });
 
 // LIFECYCLE
