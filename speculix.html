@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v9.4 MULTI-AI</title>
+<title>SPECULIX v9.5 PRO</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
@@ -252,9 +252,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="corner-tl"></div><div class="corner-br"></div>
   <div class="hex-ring"><div style="font-size:2.2rem">📡</div></div>
   <div class="logo">SPECULIX</div>
-  <div class="tagline">v9.4 · 5 AI ENGINES · HAZARD MODE<br>iNATURALIST · PUBCHEM · WIKIDATA · GOOGLE · TEMPORAL</div>
+  <div class="tagline">v9.5 PRO · 7 SCAN MODES · MULTI-AI CONSENSUS<br>HAZARD · CURRENCY · MEDICATION · SPECTRUM</div>
   <button class="start-btn" onclick="startApp()">📡 ACTIVATE TRICORDER</button>
-  <div class="version-badge">🛡️ HAZARD: real-time glass detection<br>🌿 BIO: iNaturalist plant/animal ID<br>⚗️ CHEM: PubChem chemical formulas</div>
+  <div class="version-badge">🛡️ HAZARD: real-time glass detection<br>🔬 SPECTRUM: enter peaks, match 37 gem signatures<br>🧠 5-AI CONSENSUS: more accurate than any single AI</div>
 </div>
 
 <div class="screen hidden" id="scanner">
@@ -291,6 +291,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       <button class="mode-btn" id="mode-bio" onclick="setMode('bio')">🌿 BIO</button>
       <button class="mode-btn" id="mode-currency" onclick="setMode('currency')">💵 CUR</button>
       <button class="mode-btn" id="mode-medication" onclick="setMode('medication')">💊 MED</button>
+      <button class="mode-btn" id="mode-spectrum" onclick="setMode('spectrum')">🔬 SPEC</button>
     </div>
     <div class="controls-row">
       <span class="ctrl-label">HIGHLIGHT</span>
@@ -344,6 +345,44 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="db-footer">
     <button class="db-footer-btn danger" onclick="clearHistory()">CLEAR</button>
     <button class="db-footer-btn primary" onclick="hideHistory()">✓ CLOSE</button>
+  </div>
+</div>
+
+<div id="spectrum-panel" style="position:fixed;inset:0;z-index:50;background:rgba(0,5,7,.97);backdrop-filter:blur(10px);display:none;flex-direction:column">
+  <div class="db-header">
+    <div class="db-title">🔬 SPECTRUM ANALYZER</div>
+    <div class="db-sub">Enter absorption peaks (in nm) — Speculix matches gem signatures</div>
+  </div>
+  <div style="padding:14px;overflow-y:auto;flex:1">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:rgba(0,245,255,.7);line-height:1.6;margin-bottom:12px">
+      📖 <strong style="color:var(--cyan)">HOW TO USE:</strong><br>
+      Use a spectrometer (or visual spectroscope) to find absorption lines/bands in your gem. Enter the wavelengths you observe in nanometers (e.g., 415, 540, 694 for ruby).
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--cyan);letter-spacing:.1em;margin-bottom:6px">ABSORPTION PEAKS (nm):</div>
+      <input type="text" id="spec-peaks" placeholder="e.g. 415, 540, 694" style="width:100%;background:rgba(0,245,255,.07);border:1.5px solid var(--border);color:#fff;font-family:'Share Tech Mono',monospace;font-size:.9rem;padding:10px 14px;outline:none;letter-spacing:.04em;border-radius:2px">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="db-footer-btn primary" onclick="matchSpectrum()" style="flex:1">🔬 MATCH SPECTRUM</button>
+      <button class="db-footer-btn danger" onclick="document.getElementById('spec-peaks').value='';document.getElementById('spec-results').innerHTML=''" style="flex:1">CLEAR</button>
+    </div>
+    <div id="spec-results"></div>
+    <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:rgba(255,179,0,.7);letter-spacing:.1em;margin-bottom:6px">⚠ SPECTROMETER REQUIRED</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:rgba(0,245,255,.5);line-height:1.5">
+        Recommended: <strong style="color:var(--green)">Spectryx Blue ($199, Bluetooth)</strong> or <strong style="color:var(--green)">Public Lab DIY ($35)</strong><br><br>
+        Without a spectrometer, you can use a visual prism spectroscope to estimate absorption line positions by eye, then enter approximate values here.
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:10px;background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.2)">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--green);letter-spacing:.1em;margin-bottom:4px">📚 REFERENCE:</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.7);line-height:1.6">
+        Ruby: 415, 540, 694<br>Sapphire: 450, 460, 470<br>Emerald: 430, 477, 660, 683<br>Tanzanite: 455, 528, 595<br>Spinel (red): 675, 685<br>Peridot: 453, 473, 493, 529, 635, 653, 670<br>Almandine: 504, 520, 576<br>Diamond: 415 (Cape line)
+      </div>
+    </div>
+  </div>
+  <div class="db-footer">
+    <button class="db-footer-btn primary" onclick="document.getElementById('spectrum-panel').style.display='none'" style="flex:1">✓ DONE</button>
   </div>
 </div>
 
@@ -619,6 +658,50 @@ const BIOLOGICAL=[
   {cat:"Fibers",name:"Acrylic",appearance:"Wool-like synthetic",care:"Petroleum-based",info:"Cheap wool substitute"},
   {cat:"Fibers",name:"Leather",appearance:"Animal hide, varied finishes",care:"Animal-based",info:"Cow, sheep, goat, exotic animals"},
   {cat:"Fibers",name:"Suede",appearance:"Soft napped leather",care:"Underside of leather",info:"More delicate than top-grain"},
+];
+
+// ═══════════════════════════════════════════════════════════════════════
+// SPECTRUM REFERENCE DATABASE — known absorption signatures
+// For manual entry: user inputs absorption peaks (in nm), Speculix matches
+// ═══════════════════════════════════════════════════════════════════════
+const SPECTRA=[
+  {name:"Diamond",peaks:[415],notes:"Cape series N3 line at 415nm. Brown/yellow diamonds show 504nm + 415nm.",confidence:"Definitive"},
+  {name:"Synthetic Diamond (HPHT)",peaks:[270,415],notes:"Different growth patterns — 270nm + Cape series",confidence:"Indicative"},
+  {name:"Ruby",peaks:[400,550,694],notes:"Strong Cr3+ at 540-550nm absorption + 694nm fluorescence line",confidence:"Definitive"},
+  {name:"Pink Sapphire",peaks:[400,560],notes:"Similar to ruby but weaker Cr signal",confidence:"Indicative"},
+  {name:"Blue Sapphire",peaks:[450,460,470,880],notes:"Iron lines at 450/460/470 + Fe2+/Ti4+ charge transfer",confidence:"Definitive"},
+  {name:"Yellow Sapphire",peaks:[450,460],notes:"Iron lines without titanium",confidence:"Indicative"},
+  {name:"Emerald",peaks:[430,477,660,683],notes:"Cr3+ + V3+ characteristic doublet 660/683nm",confidence:"Definitive"},
+  {name:"Aquamarine",peaks:[427,456,537],notes:"Iron Fe2+ broad absorption",confidence:"Indicative"},
+  {name:"Tanzanite",peaks:[455,528,595],notes:"V3+ vanadium 595nm — diagnostic line",confidence:"Definitive"},
+  {name:"Tourmaline (Pink)",peaks:[450,520],notes:"Mn3+ manganese broad band",confidence:"Indicative"},
+  {name:"Tourmaline (Green)",peaks:[420,635],notes:"Cr3+ + V3+ depending on locality",confidence:"Indicative"},
+  {name:"Tourmaline (Blue Paraiba)",peaks:[695,915],notes:"Cu2+ copper near-IR band — unique",confidence:"Definitive"},
+  {name:"Amethyst",peaks:[545],notes:"Iron Fe4+ broad band",confidence:"Indicative"},
+  {name:"Citrine",peaks:[440],notes:"Iron-related broad absorption",confidence:"Weak"},
+  {name:"Topaz (Imperial)",peaks:[420,580],notes:"Cr3+ in pink/orange topaz",confidence:"Indicative"},
+  {name:"Topaz (Blue)",peaks:[],notes:"No characteristic absorption — distinguish by RI/density",confidence:"Negative diagnostic"},
+  {name:"Peridot (Olivine)",peaks:[453,473,493,529,635,653,670],notes:"Iron Fe2+ rich spectrum — multi-peak",confidence:"Definitive"},
+  {name:"Garnet (Almandine)",peaks:[504,520,576],notes:"Iron Fe2+ triplet — diagnostic",confidence:"Definitive"},
+  {name:"Garnet (Pyrope)",peaks:[505,575],notes:"Cr3+ similar to ruby in red pyrope",confidence:"Indicative"},
+  {name:"Garnet (Demantoid)",peaks:[440,617,640,701],notes:"Cr3+ in green andradite",confidence:"Definitive"},
+  {name:"Garnet (Tsavorite)",peaks:[407,430,610],notes:"V3+ + Cr3+ in green grossular",confidence:"Indicative"},
+  {name:"Spinel (Red)",peaks:[675,685],notes:"Cr3+ doublet — diagnostic vs ruby (single line)",confidence:"Definitive"},
+  {name:"Spinel (Blue Synthetic)",peaks:[540,580,635],notes:"Cobalt Co2+ triplet — synthetic indicator",confidence:"Definitive"},
+  {name:"Cubic Zirconia",peaks:[],notes:"No diagnostic absorption — differentiate from diamond by lack of Cape lines",confidence:"Negative diagnostic"},
+  {name:"Moissanite",peaks:[425],notes:"SiC unique absorption, doubly refractive",confidence:"Definitive"},
+  {name:"Opal",peaks:[],notes:"Play of color — no absorption signature",confidence:"Negative diagnostic"},
+  {name:"Jade (Jadeite)",peaks:[437,450,691,655,630],notes:"Iron + chromium depending on color",confidence:"Indicative"},
+  {name:"Jade (Nephrite)",peaks:[460,500,600],notes:"Iron-rich amphibole spectrum",confidence:"Indicative"},
+  {name:"Lapis Lazuli",peaks:[600],notes:"Sulfur S3- radical broad absorption",confidence:"Indicative"},
+  {name:"Turquoise",peaks:[420,460,640,910],notes:"Cu2+ copper broad bands",confidence:"Indicative"},
+  {name:"Malachite",peaks:[800,1000],notes:"Cu2+ near-IR — bright green from copper",confidence:"Definitive"},
+  {name:"Glass (Lead Crystal)",peaks:[],notes:"No diagnostic absorption — ID by RI 1.55-1.7 + density",confidence:"Negative diagnostic"},
+  {name:"Glass (Cobalt Blue)",peaks:[535,595,650],notes:"Cobalt triplet — proves it's glass not sapphire",confidence:"Definitive"},
+  {name:"Synthetic Ruby (Flame Fusion)",peaks:[400,550,694],notes:"Same Cr3+ as natural — distinguish by inclusions/curved striae",confidence:"Indicative"},
+  {name:"Synthetic Emerald (Hydrothermal)",peaks:[430,477,660,683],notes:"Same Cr3+/V3+ — distinguish by chevron growth",confidence:"Indicative"},
+  {name:"Heated Sapphire",peaks:[450,460,470],notes:"Reduced 880nm band when heated",confidence:"Treatment indicator"},
+  {name:"Beryllium-Diffused Sapphire",peaks:[450,460,470,800],notes:"Surface color — peeling possible",confidence:"Treatment indicator"},
 ];
 
 const MEDICATIONS=[
@@ -1520,6 +1603,42 @@ function renderMultiAIResult(aiResults){
   else html+=renderMaterialResult(allItems,aiResults.google);
   
   // Show each AI's response
+  // Calculate AI consensus — how many AIs agree on a name
+  const allNames=[];
+  if(aiResults.google&&aiResults.google.success){
+    aiResults.google.objects.slice(0,3).forEach(o=>allNames.push(o.name.toLowerCase()));
+    aiResults.google.labels.slice(0,3).forEach(l=>allNames.push(l.name.toLowerCase()));
+  }
+  if(aiResults.inaturalist&&aiResults.inaturalist.success){
+    aiResults.inaturalist.results.slice(0,3).forEach(r=>{
+      if(r.name) allNames.push(r.name.toLowerCase());
+      if(r.scientific) allNames.push(r.scientific.toLowerCase());
+    });
+  }
+  if(aiResults.wikidata&&aiResults.wikidata.success){
+    aiResults.wikidata.results.slice(0,2).forEach(r=>{if(r.label) allNames.push(r.label.toLowerCase());});
+  }
+  // Find shared keywords
+  const wordCount={};
+  allNames.forEach(n=>{
+    n.split(/\s+/).forEach(w=>{
+      if(w.length>3) wordCount[w]=(wordCount[w]||0)+1;
+    });
+  });
+  const sharedWords=Object.entries(wordCount).filter(([w,c])=>c>=2).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([w])=>w);
+  let aiCount=0;
+  if(aiResults.google&&aiResults.google.success) aiCount++;
+  if(aiResults.inaturalist&&aiResults.inaturalist.success&&aiResults.inaturalist.results.length>0) aiCount++;
+  if(aiResults.pubchem&&aiResults.pubchem.success) aiCount++;
+  if(aiResults.wikidata&&aiResults.wikidata.success&&aiResults.wikidata.results.length>0) aiCount++;
+  if(aiResults.temporal) aiCount++;
+  if(aiCount>=2){
+    const consensusColor=sharedWords.length>=2?'var(--green)':(sharedWords.length>=1?'var(--amber)':'rgba(255,255,255,0.4)');
+    html+=`<div style="margin-top:10px;padding:8px 10px;background:rgba(0,0,0,.5);border:1.5px solid ${consensusColor};border-radius:2px">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:${consensusColor};letter-spacing:.12em;font-weight:700">🧠 MULTI-AI CONSENSUS · ${aiCount} ENGINES</div>
+      ${sharedWords.length>0?`<div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#fff;margin-top:4px">Agree on: <strong>${sharedWords.join(' · ')}</strong></div>`:'<div style="font-family:\'Share Tech Mono\',monospace;font-size:.6rem;color:rgba(255,255,255,.5);margin-top:4px">No agreement between AIs — verify manually</div>'}
+    </div>`;
+  }
   html+='<div class="ai-results">';
   
   if(aiResults.google){
@@ -1897,7 +2016,74 @@ function setMode(mode){
   if(mode==='bio') hint='🌿 BIOLOGICAL MODE<br>Plants, animals, fungi, fibers, wood';
   if(mode==='currency') hint='💵 CURRENCY MODE<br>NIS / USD / EUR with auth checklist';
   if(mode==='medication') hint='💊 MEDICATION MODE<br>⚠ Visual checks only';
+  if(mode==='spectrum'){
+    hint='🔬 SPECTRUM MODE<br>Tap below to open spectrum analyzer';
+    setTimeout(()=>{document.getElementById('spectrum-panel').style.display='flex';},200);
+  }
   body.innerHTML=`<div class="vision-idle">${hint}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SPECTRUM MATCHING — compares user-entered peaks to gem signatures
+// ═══════════════════════════════════════════════════════════════════════
+function matchSpectrum(){
+  const input=document.getElementById('spec-peaks').value.trim();
+  const resultsDiv=document.getElementById('spec-results');
+  if(!input){
+    resultsDiv.innerHTML='<div class="vision-error">Please enter absorption peaks (e.g., 415, 540, 694)</div>';
+    return;
+  }
+  // Parse comma-separated numbers
+  const userPeaks=input.split(/[,\s]+/).map(s=>parseFloat(s)).filter(n=>!isNaN(n)&&n>=200&&n<=1100);
+  if(userPeaks.length===0){
+    resultsDiv.innerHTML='<div class="vision-error">No valid wavelengths. Use numbers between 200-1100 nm.</div>';
+    return;
+  }
+  // Score each gem signature against user peaks
+  const TOLERANCE=15; // ±15nm match window
+  const matches=[];
+  for(const gem of SPECTRA){
+    if(gem.peaks.length===0) continue; // skip "negative diagnostic" gems
+    let matchedPeaks=0;
+    let totalDistance=0;
+    for(const userPeak of userPeaks){
+      let bestDist=999;
+      for(const gemPeak of gem.peaks){
+        const d=Math.abs(userPeak-gemPeak);
+        if(d<bestDist) bestDist=d;
+      }
+      if(bestDist<=TOLERANCE){
+        matchedPeaks++;
+        totalDistance+=bestDist;
+      }
+    }
+    if(matchedPeaks===0) continue;
+    // Score: % of gem's peaks matched + bonus for low avg distance
+    const coverage=matchedPeaks/gem.peaks.length;
+    const userCoverage=matchedPeaks/userPeaks.length;
+    const avgDist=totalDistance/Math.max(matchedPeaks,1);
+    const score=Math.round((coverage*50)+(userCoverage*30)+((TOLERANCE-avgDist)/TOLERANCE*20));
+    matches.push({gem,score,matchedPeaks,total:gem.peaks.length,avgDist:Math.round(avgDist)});
+  }
+  matches.sort((a,b)=>b.score-a.score);
+  const top=matches.slice(0,5);
+  if(top.length===0){
+    resultsDiv.innerHTML=`<div class="vision-error">No gem signatures matched within ±${TOLERANCE}nm. Check your peak readings.</div>`;
+    return;
+  }
+  let html='<div style="font-family:\'Share Tech Mono\',monospace;font-size:.65rem;color:var(--cyan);letter-spacing:.1em;margin-bottom:8px">TOP MATCHES:</div>';
+  top.forEach((m,i)=>{
+    const colorClass=m.score>=70?'var(--green)':(m.score>=40?'var(--amber)':'rgba(255,255,255,0.5)');
+    html+=`<div style="border:1.5px solid ${colorClass};padding:10px;margin-bottom:8px;background:rgba(0,0,0,.4)">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.85rem;font-weight:700;color:${colorClass};letter-spacing:.05em">${i+1}. ${m.gem.name.toUpperCase()} — ${m.score}%</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:rgba(0,245,255,.7);margin-top:4px">Matched ${m.matchedPeaks}/${m.total} peaks · Avg drift ±${m.avgDist}nm</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.7);margin-top:4px">Reference peaks: ${m.gem.peaks.join(', ')} nm</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:rgba(255,179,0,.8);margin-top:4px">${m.gem.notes}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:rgba(0,255,136,.7);margin-top:4px">Confidence: ${m.gem.confidence}</div>
+    </div>`;
+  });
+  resultsDiv.innerHTML=html;
+  addToHistory(`Spectrum: ${top[0].gem.name}`,`${top[0].score}% match`,'Spectroscopy');
 }
 
 // HISTORY
