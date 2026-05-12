@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v10.0 PRO</title>
+<title>SPECULIX v10.1</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
@@ -79,6 +79,9 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
 .vision-title{font-family:'Share Tech Mono',monospace;font-size:.65rem;
   color:var(--purple);letter-spacing:.14em}
 .vision-body{padding:8px 12px}
+#vision-panel.collapsed .vision-body{display:none}
+#vision-panel.collapsed #panel-arrow{transform:rotate(-90deg)}
+#vision-panel.collapsed{max-height:none}
 .vision-name{font-size:1.15rem;font-weight:700;color:#fff;letter-spacing:.05em;margin-bottom:2px}
 .vision-name.target{color:var(--purple)}
 .vision-name.hazard{color:var(--red)}
@@ -292,9 +295,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     </div>
   </div>
   <div id="vision-panel">
-    <div class="vision-header">
-      <span class="vision-title">📡 MULTI-AI ANALYSIS</span>
-      <span id="scan-count" style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:rgba(204,0,255,.5)">0 SCANS</span>
+    <div class="vision-header" onclick="togglePanel()" style="cursor:pointer">
+      <span class="vision-title">📡 <span id="vision-main-result">MULTI-AI ANALYSIS</span></span>
+      <span style="display:flex;align-items:center;gap:8px">
+        <span id="scan-count" style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:rgba(204,0,255,.5)">0 SCANS</span>
+        <span id="panel-arrow" style="color:var(--purple);font-size:.7rem;transition:transform .25s">▼</span>
+      </span>
     </div>
     <div class="vision-body" id="vision-body">
       <div class="vision-idle">
@@ -304,10 +310,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
         <strong style="color:var(--purple)">HUNT MODE</strong> (targets selected)<br>
         Ignores everything except your chosen items<br><br>
         <strong style="color:var(--amber)">📷 CAMERA CONTROLS:</strong><br>
-        • <strong>Tap once</strong> on object → focus there<br>
-        • <strong>Double-tap</strong> → identify<br>
-        • <strong>Pinch with 2 fingers</strong> → zoom in/out<br>
-        • <strong>Use +/− buttons</strong> (right side) to zoom<br><br>
+        • <strong>Tap header</strong> ▼ → collapse/expand panel<br>
+        • <strong>Double-tap camera</strong> → identify<br>
+        • <strong>Pinch with 2 fingers</strong> → zoom in/out<br><br>
         Tap <strong style="color:var(--cyan)">📊 DB</strong> for targets · <strong style="color:var(--purple)">🔬 IDENTIFY</strong> to scan
       </div>
     </div>
@@ -1454,6 +1459,21 @@ function captureWithAlgorithms(){
   return fc.toDataURL('image/jpeg',0.88).split(',')[1];
 }
 
+// Toggle vision panel collapsed/expanded
+function togglePanel(){
+  const p=document.getElementById('vision-panel');
+  if(p) p.classList.toggle('collapsed');
+}
+
+// Update the always-visible "main result" text in header
+function setMainResult(text,color){
+  const el=document.getElementById('vision-main-result');
+  if(el){
+    el.textContent=text;
+    if(color) el.style.color=color;
+  }
+}
+
 async function captureMultiFrame(){
   const frames=[];
   for(let i=0;i<3;i++){
@@ -2020,6 +2040,9 @@ function renderMultiAIResultFinal(html){
   const activeAlgos=ALGORITHMS.filter(a=>algoSettings[a.id]).map(a=>a.id.toUpperCase()).join(' · ');
   html+=`<div class="algo-status">⚙️ ALGOS: ${activeAlgos||'NONE'}</div>`;
   body.innerHTML=html;
+  // Auto-collapse so user can see the camera and find their target
+  const p=document.getElementById('vision-panel');
+  if(p&&!p.classList.contains('collapsed')) p.classList.add('collapsed');
 }
 
 function renderMaterialResult(allItems,googleData){
@@ -2029,23 +2052,25 @@ function renderMaterialResult(allItems,googleData){
     let bestScore=0;
     // Build a semantic synonym map so "crystal" can match "Quartz" etc
     const synonymMap={
-      'quartz':['crystal','rock crystal','clear crystal','prism','rough crystal','hexagonal','silicon dioxide'],
-      'diamond':['gem','gemstone','jewel','brilliant'],
-      'ruby':['red gem','red gemstone','corundum'],
-      'sapphire':['blue gem','blue gemstone','corundum'],
-      'emerald':['green gem','green gemstone','beryl'],
-      'amethyst':['purple crystal','violet crystal','purple quartz'],
-      'citrine':['yellow crystal','yellow quartz','golden crystal'],
-      'topaz':['yellow gem'],
-      'opal':['iridescent stone','play of color'],
-      'pearl':['bead','sphere','pearl-like'],
-      'jade':['green stone','jadeite','nephrite'],
-      'amber':['fossilized resin','yellow stone'],
-      'turquoise':['blue-green stone','sky blue stone'],
-      'tourmaline':['multicolor crystal'],
-      'garnet':['red crystal','dark red gem'],
+      'quartz':['crystal','rock crystal','clear crystal','prism','rough crystal','hexagonal','silicon dioxide','clear stone','transparent stone'],
+      'diamond':['gem','gemstone','jewel','brilliant','sparkle','engagement ring'],
+      'ruby':['red gem','red gemstone','corundum','red stone','red crystal'],
+      'sapphire':['blue gem','blue gemstone','corundum','blue stone'],
+      'emerald':['green gem','green gemstone','beryl','green stone'],
+      'amethyst':['purple crystal','violet crystal','purple quartz','purple stone'],
+      'citrine':['yellow crystal','yellow quartz','golden crystal','golden stone','honey crystal'],
+      'topaz':['yellow crystal','yellow gem','yellow stone','orange stone','amber stone','honey','honey color','honey colored','golden crystal','golden gem','imperial topaz','rough crystal','prismatic crystal','prism','transparent yellow','amber','brown stone','tan crystal','tan stone','rough gem','mineral','crystal','stone','rock','gem','natural crystal','natural gem'],
+      'opal':['iridescent stone','play of color','rainbow stone'],
+      'pearl':['bead','sphere','pearl-like','round white'],
+      'jade':['green stone','jadeite','nephrite','green mineral'],
+      'amber':['fossilized resin','yellow stone','honey stone','tan stone','organic gem','honey colored'],
+      'turquoise':['blue-green stone','sky blue stone','aqua stone'],
+      'tourmaline':['multicolor crystal','prismatic crystal','rough crystal'],
+      'garnet':['red crystal','dark red gem','red stone','wine colored'],
+      'aquamarine':['light blue gem','pale blue stone','aqua crystal'],
+      'peridot':['olive green','green crystal','lime green'],
       'glass':['shard','broken glass','bottle','transparent material','clear material'],
-      'gold':['yellow metal','metallic yellow','gold-colored'],
+      'gold':['yellow metal','metallic yellow','gold-colored','gold colored'],
       'silver':['metallic grey','silvery metal','grey metal'],
       'platinum':['white metal','grey metal'],
       'pyrite':['fool\'s gold','brassy crystal','golden cube','metallic cube'],
@@ -2085,9 +2110,10 @@ function renderMaterialResult(allItems,googleData){
         }
       }
     }
-    if(bestPriority&&bestScore>15){
+    if(bestPriority&&bestScore>8){
       const matToShow=bestPriority.target.material;
       const detColor=bestPriority.target.color;
+      setMainResult('⭐ '+matToShow.name.toUpperCase(),detColor);
       let html=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET FOUND: ${matToShow.name.toUpperCase()}</div>
         <div class="vision-detail">Matched via: ${bestPriority.item.name}<br>Confidence: ${bestPriority.item.score}%</div>
         <div class="vision-ri" style="color:${detColor};border-color:${detColor}">RI = ${matToShow.ri}</div>`;
@@ -2105,6 +2131,7 @@ function renderMaterialResult(allItems,googleData){
     // STRICT MODE: nothing matched — IGNORE everything else, just say target not in view
     lastDetections=[];
     const targetList=selectedMaterials.map(s=>s.material.name).join(', ');
+    setMainResult('🔍 Searching: '+selectedMaterials[0].material.name,selectedMaterials[0].color);
     return `<div class="vision-name" style="color:var(--cyan)">🔍 SEARCHING FOR TARGETS...</div>
       <div class="vision-detail">Looking for: <strong style="color:${selectedMaterials[0].color}">${targetList}</strong><br>Target not currently in view.</div>
       <div class="warning-box" style="border-color:rgba(0,245,255,.3);color:rgba(0,245,255,.7);margin-top:8px;background:rgba(0,245,255,.05)">
@@ -2169,7 +2196,7 @@ function renderMineralResult(allItems){
       'tektite':['glass meteorite','black glass'],
       'moldavite':['green tektite','green glass'],
       'tourmaline':['multicolor crystal','prismatic crystal'],
-      'topaz':['yellow crystal','prismatic gem'],
+      'topaz':['yellow crystal','yellow gem','yellow stone','orange stone','amber stone','honey','honey color','honey colored','golden crystal','golden gem','imperial topaz','rough crystal','prismatic crystal','prism','transparent yellow','amber','brown stone','tan crystal','tan stone','rough gem','mineral','crystal','stone','rock','gem','natural crystal','natural gem'],
       'olivine':['green crystal','peridot','olive green'],
       'garnet':['red crystal','dark red gem'],
       'beryl':['hexagonal crystal','emerald','aquamarine'],
@@ -2210,9 +2237,10 @@ function renderMineralResult(allItems){
         }
       }
     }
-    if(bestPriority&&bestScore>15){
+    if(bestPriority&&bestScore>8){
       const matToShow=bestPriority.target.material;
       const detColor=bestPriority.target.color;
+      setMainResult('⭐ '+matToShow.name.toUpperCase(),detColor);
       let html=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET FOUND: ${matToShow.name.toUpperCase()}</div>
         <div class="vision-detail">Matched via: ${bestPriority.item.name}<br>Confidence: ${bestPriority.item.score}%</div>
         <div class="vision-ri" style="color:${detColor};border-color:${detColor}">RI = ${matToShow.ri}</div>`;
@@ -2230,6 +2258,7 @@ function renderMineralResult(allItems){
     // STRICT MODE: ignore everything else, just say searching
     lastDetections=[];
     const targetList=selectedMaterials.map(s=>s.material.name).join(', ');
+    setMainResult('🔍 Searching: '+selectedMaterials[0].material.name,selectedMaterials[0].color);
     return `<div class="vision-name" style="color:var(--cyan)">🔍 SEARCHING FOR TARGETS...</div>
       <div class="vision-detail">Looking for: <strong style="color:${selectedMaterials[0].color}">${targetList}</strong><br>Target not currently in view.</div>
       <div class="warning-box" style="border-color:rgba(0,245,255,.3);color:rgba(0,245,255,.7);margin-top:8px;background:rgba(0,245,255,.05)">
