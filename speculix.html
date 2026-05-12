@@ -2238,33 +2238,6 @@ function renderMineralResult(allItems){
       </div>`;
   }
 
-  // NON-STRICT MODE
-      const matToShow=bestPriority.target.material;
-      const detColor=bestPriority.target.color;
-      let html=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET FOUND: ${matToShow.name.toUpperCase()}</div>
-        <div class="vision-detail">Matched via: ${bestPriority.item.name}<br>Confidence: ${bestPriority.item.score}%</div>
-        <div class="vision-ri" style="color:${detColor};border-color:${detColor}">RI = ${matToShow.ri}</div>`;
-      if(bestPriority.item.boundingPoly){
-        updateDetectionCircles(bestPriority.item.boundingPoly,detColor,matToShow.name);
-      } else {
-        let roi={x:canvas.width/2,y:canvas.height/2,radius:120,color:detColor,label:matToShow.name};
-        if(algoSettings.stabilize) roi=algoStabilize(roi);
-        lastDetections=[roi];
-      }
-      html+=buildCompositionDropdown(matToShow);
-      addToHistory(matToShow.name,matToShow.cat,'Target Match');
-      return html;
-    }
-    lastDetections=[];
-    const targetList=selectedMaterials.map(s=>s.material.name).join(', ');
-    return `<div class="vision-name" style="color:var(--cyan)">🔍 SEARCHING FOR TARGETS...</div>
-      <div class="vision-detail">Looking for: <strong style="color:${selectedMaterials[0].color}">${targetList}</strong><br>Target not currently in view.</div>
-      <div class="warning-box" style="border-color:rgba(0,245,255,.3);color:rgba(0,245,255,.7);margin-top:8px;background:rgba(0,245,255,.05)">
-        📷 Move camera to find target<br>
-        Other objects (hands, surfaces, background) are <strong>ignored</strong>.
-      </div>`;
-  }
-
   // NON-STRICT MODE — original behavior
   let bestMatch=null;
   for(const item of allItems){
