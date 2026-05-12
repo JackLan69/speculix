@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v9.7 GEMOLOGY</title>
+<title>SPECULIX v10.0 PRO</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
@@ -29,6 +29,7 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
   animation:spinHex 8s linear infinite;margin-bottom:1.5rem}
 @keyframes spinHex{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+@keyframes focusPulse{0%{transform:scale(1.5);opacity:0}30%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:0}}
 .start-btn{margin-top:2rem;padding:.9rem 2.5rem;border:2px solid var(--cyan);
   background:var(--glass);color:var(--cyan);font-family:'Rajdhani',sans-serif;
   font-size:1.15rem;font-weight:700;letter-spacing:.2em;cursor:pointer;
@@ -252,9 +253,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="corner-tl"></div><div class="corner-br"></div>
   <div class="hex-ring"><div style="font-size:2.2rem">📡</div></div>
   <div class="logo">SPECULIX</div>
-  <div class="tagline">v9.7 GEMOLOGY · MATH-BASED ANALYSIS<br>LUSTER · DISPERSION · TRANSPARENCY · FACETING</div>
+  <div class="tagline">v10.0 PRO · MULTI-CAMERA · AUTO-ZOOM<br>STABILITY · CAMERA SWITCHING · LENS ZOOM</div>
   <button class="start-btn" onclick="startApp()">📡 ACTIVATE TRICORDER</button>
-  <div class="version-badge">💎 GEMOLOGY: 5 properties measured by math<br>🧪 CROSS-MATCH: vision + properties combined<br>🎯 STRICT: finds only what you select</div>
+  <div class="version-badge">🔭 Switch between MAIN / TELE / WIDE / MACRO<br>📷 Real lens zoom (if supported)<br>🎯 AUTO mode: auto-zoom searches for target</div>
 </div>
 
 <div class="screen hidden" id="scanner">
@@ -268,6 +269,28 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div id="priority-legend"><div class="legend-title">TARGETS:</div><div id="legend-list"></div></div>
   <div id="hazard-badge" style="position:absolute;top:55px;left:10px;z-index:21;background:rgba(255,61,61,.15);border:2px solid #ff3d3d;padding:4px 10px;backdrop-filter:blur(4px);display:none;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#ff3d3d;font-weight:700;letter-spacing:.1em">⚠ <span id="hazard-count">0</span> HAZARDS</div>
   <div id="strict-badge" style="position:absolute;top:95px;left:10px;z-index:21;background:rgba(0,255,136,.12);border:2px solid #00ff88;padding:4px 10px;backdrop-filter:blur(4px);font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#00ff88;font-weight:700;letter-spacing:.1em">🎯 STRICT MODE</div>
+  
+  <!-- CAMERA SELECTOR — top center, only shown when multiple cameras available -->
+  <div id="camera-selector" style="position:absolute;top:45px;left:50%;transform:translateX(-50%);z-index:22;display:none;gap:4px;background:rgba(0,0,0,.7);padding:6px 8px;border-radius:4px;backdrop-filter:blur(6px);border:1px solid rgba(0,245,255,.3)"></div>
+  
+  <!-- STABILITY INDICATOR — bottom left of camera view, real-time motion feedback -->
+  <div id="stability-indicator" style="position:absolute;bottom:200px;left:10px;z-index:21;display:none;font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 8px;border:1.5px solid;backdrop-filter:blur(4px);border-radius:2px;letter-spacing:.08em;font-weight:700">⚠ MOTION</div>
+  
+  <!-- ZOOM PANEL — right side -->
+  <div id="zoom-panel" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:22;display:none;flex-direction:column;align-items:center;gap:6px;background:rgba(0,0,0,.75);border:1.5px solid var(--cyan);padding:8px 6px;border-radius:6px;backdrop-filter:blur(6px)">
+    <button onclick="zoomIn()" style="width:36px;height:36px;border:1.5px solid var(--cyan);background:rgba(0,245,255,.1);color:var(--cyan);font-size:1.5rem;font-weight:700;border-radius:50%;cursor:pointer;padding:0;line-height:1">+</button>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--cyan);font-weight:700;text-align:center;line-height:1.3">
+      <span id="zoom-display">1.0x</span><br>
+      <span style="font-size:.5rem;color:rgba(0,245,255,.5)">max <span id="zoom-max">3x</span></span>
+    </div>
+    <input type="range" id="zoom-slider" min="1" max="3" step="0.1" value="1" oninput="setZoom(parseFloat(this.value))" style="writing-mode:vertical-lr;direction:rtl;width:6px;height:100px;-webkit-appearance:slider-vertical;appearance:slider-vertical">
+    <button onclick="zoomOut()" style="width:36px;height:36px;border:1.5px solid var(--cyan);background:rgba(0,245,255,.1);color:var(--cyan);font-size:1.5rem;font-weight:700;border-radius:50%;cursor:pointer;padding:0;line-height:1">−</button>
+    <div style="display:flex;flex-direction:column;gap:3px;margin-top:4px;width:100%">
+      <button onclick="zoomPreset(1)" style="border:1px solid rgba(0,245,255,.4);background:transparent;color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:.55rem;cursor:pointer;padding:3px;letter-spacing:.05em;border-radius:1px">1x</button>
+      <button onclick="zoomPreset(2)" style="border:1px solid rgba(0,245,255,.4);background:transparent;color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:.55rem;cursor:pointer;padding:3px;letter-spacing:.05em;border-radius:1px">2x</button>
+      <button onclick="zoomPreset('max')" style="border:1px solid var(--green);background:transparent;color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.55rem;cursor:pointer;padding:3px;letter-spacing:.05em;border-radius:1px;font-weight:700">MAX</button>
+    </div>
+  </div>
   <div id="vision-panel">
     <div class="vision-header">
       <span class="vision-title">📡 MULTI-AI ANALYSIS</span>
@@ -275,12 +298,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     </div>
     <div class="vision-body" id="vision-body">
       <div class="vision-idle">
-        <strong style="color:#ff3d3d">🛡️ HAZARD MODE ACTIVE</strong><br><br>
-        <strong>RED dashed circles</strong> mark potential broken glass<br>
-        <strong>Detection runs continuously</strong> — sweep phone slowly<br><br>
-        <strong style="color:var(--cyan)">For ID details:</strong><br>
-        Tap <strong style="color:var(--purple)">🔬 IDENTIFY</strong> · Use <strong>📊 DB</strong> for targets<br><br>
-        <strong style="color:var(--amber)">⚙️ ALG</strong> → toggle Hazard Detection
+        <strong style="color:var(--cyan)">🎯 TWO MODES:</strong><br><br>
+        <strong style="color:var(--cyan)">DISCOVERY MODE</strong> (no targets)<br>
+        Scans everything · identifies what it sees<br><br>
+        <strong style="color:var(--purple)">HUNT MODE</strong> (targets selected)<br>
+        Ignores everything except your chosen items<br><br>
+        <strong style="color:var(--amber)">📷 CAMERA CONTROLS:</strong><br>
+        • <strong>Tap once</strong> on object → focus there<br>
+        • <strong>Double-tap</strong> → identify<br>
+        • <strong>Pinch with 2 fingers</strong> → zoom in/out<br>
+        • <strong>Use +/− buttons</strong> (right side) to zoom<br><br>
+        Tap <strong style="color:var(--cyan)">📊 DB</strong> for targets · <strong style="color:var(--purple)">🔬 IDENTIFY</strong> to scan
       </div>
     </div>
   </div>
@@ -876,6 +904,11 @@ function findMedicationFromLabel(label){
 // STATE
 // ═══════════════════════════════════════════════════════════════════════
 let stream=null,track=null;
+let availableCameras=[];
+let currentCameraIndex=0;
+let autoModeEnabled=false;
+let autoIdentifyInterval=null;
+let autoFocusAttempts=0;
 let torchOn=false,autoMode=false;
 let sensitivity=5,scanCount=0;
 let isAnalyzing=false,autoInterval=null;
@@ -1559,10 +1592,38 @@ let temporalInterval=null;
 function startTemporalCapture(){
   temporalFrames=[];
   if(temporalInterval) clearInterval(temporalInterval);
-  temporalInterval=setInterval(captureTemporalFrame,200);
+  temporalInterval=setInterval(()=>{
+    captureTemporalFrame();
+    updateStabilityIndicator();
+  },200);
 }
 function stopTemporalCapture(){
   if(temporalInterval){clearInterval(temporalInterval);temporalInterval=null;}
+}
+
+// Update real-time stability indicator (warn if shaking)
+function updateStabilityIndicator(){
+  const ind=document.getElementById('stability-indicator');
+  if(!ind) return;
+  if(temporalFrames.length<3){ind.style.display='none';return;}
+  const result=analyzeTemporalStability();
+  ind.style.display='block';
+  if(result.score>80){
+    ind.style.borderColor='#00ff88';
+    ind.style.background='rgba(0,255,136,.15)';
+    ind.style.color='#00ff88';
+    ind.innerHTML='✓ STEADY '+result.score+'%';
+  } else if(result.score>50){
+    ind.style.borderColor='#ffb300';
+    ind.style.background='rgba(255,179,0,.15)';
+    ind.style.color='#ffb300';
+    ind.innerHTML='⚠ MOTION '+result.score+'%';
+  } else {
+    ind.style.borderColor='#ff3d3d';
+    ind.style.background='rgba(255,61,61,.2)';
+    ind.style.color='#ff3d3d';
+    ind.innerHTML='✗ SHAKING '+result.score+'%';
+  }
 }
 
 async function callGoogleVision(base64){
@@ -1789,6 +1850,12 @@ function renderMultiAIResult(aiResults){
   else html+=renderMaterialResult(allItems,aiResults.google);
   
   // Show each AI's response
+  // In STRICT MODE with no match — suppress all other AI panels to keep focus on target search
+  const isStrictSearching=strictMode&&selectedMaterials.length>0&&html.includes('SEARCHING FOR TARGETS');
+  if(isStrictSearching){
+    renderMultiAIResultFinal(html);return;
+  }
+  
   // Calculate AI consensus — how many AIs agree on a name
   const allNames=[];
   if(aiResults.google&&aiResults.google.success){
@@ -1947,21 +2014,70 @@ function renderMultiAIResult(aiResults){
   body.innerHTML=html;
 }
 
+function renderMultiAIResultFinal(html){
+  // Minimal render for strict mode searching state — no AI clutter
+  const body=document.getElementById('vision-body');
+  const activeAlgos=ALGORITHMS.filter(a=>algoSettings[a.id]).map(a=>a.id.toUpperCase()).join(' · ');
+  html+=`<div class="algo-status">⚙️ ALGOS: ${activeAlgos||'NONE'}</div>`;
+  body.innerHTML=html;
+}
+
 function renderMaterialResult(allItems,googleData){
   // STRICT TARGET MODE — when user has selected targets, ONLY match against those
   if(strictMode&&selectedMaterials.length>0){
     let bestPriority=null;
     let bestScore=0;
+    // Build a semantic synonym map so "crystal" can match "Quartz" etc
+    const synonymMap={
+      'quartz':['crystal','rock crystal','clear crystal','prism','rough crystal','hexagonal','silicon dioxide'],
+      'diamond':['gem','gemstone','jewel','brilliant'],
+      'ruby':['red gem','red gemstone','corundum'],
+      'sapphire':['blue gem','blue gemstone','corundum'],
+      'emerald':['green gem','green gemstone','beryl'],
+      'amethyst':['purple crystal','violet crystal','purple quartz'],
+      'citrine':['yellow crystal','yellow quartz','golden crystal'],
+      'topaz':['yellow gem'],
+      'opal':['iridescent stone','play of color'],
+      'pearl':['bead','sphere','pearl-like'],
+      'jade':['green stone','jadeite','nephrite'],
+      'amber':['fossilized resin','yellow stone'],
+      'turquoise':['blue-green stone','sky blue stone'],
+      'tourmaline':['multicolor crystal'],
+      'garnet':['red crystal','dark red gem'],
+      'glass':['shard','broken glass','bottle','transparent material','clear material'],
+      'gold':['yellow metal','metallic yellow','gold-colored'],
+      'silver':['metallic grey','silvery metal','grey metal'],
+      'platinum':['white metal','grey metal'],
+      'pyrite':['fool\'s gold','brassy crystal','golden cube','metallic cube'],
+      'calcite':['white crystal','clear crystal','rhombohedral'],
+      'fluorite':['purple cube','green cube','colored crystal'],
+      'malachite':['green banded stone','green mineral'],
+      'azurite':['deep blue mineral','blue crystal'],
+      'hematite':['black metallic','iron mineral','grey shiny'],
+      'magnetite':['black crystal','magnetic mineral'],
+      'obsidian':['volcanic glass','black glass'],
+      'meteorite':['space rock','iron rock'],
+    };
     for(const sel of selectedMaterials){
       const matName=sel.material.name.toLowerCase();
       const matWords=matName.split(/[\s()\-]+/).filter(w=>w.length>2);
+      // Get synonyms for this material
+      const synonyms=[];
+      for(const[key,vals]of Object.entries(synonymMap)){
+        if(matName.includes(key)) synonyms.push(...vals);
+      }
+      // Scan ALL labels (not just top one)
       for(const item of allItems){
         const il=item.name.toLowerCase();
         const ilWords=il.split(/[\s()\-]+/).filter(w=>w.length>2);
-        // Must share at least one meaningful word
         let matchScore=0;
+        // Direct word match
         for(const w of matWords){
           if(ilWords.includes(w)||il.includes(w)) matchScore+=item.score||50;
+        }
+        // Synonym match
+        for(const syn of synonyms){
+          if(il.includes(syn)) matchScore+=Math.round((item.score||50)*0.7);
         }
         if(matchScore>bestScore){
           bestScore=matchScore;
@@ -1969,7 +2085,7 @@ function renderMaterialResult(allItems,googleData){
         }
       }
     }
-    if(bestPriority&&bestScore>20){
+    if(bestPriority&&bestScore>15){
       const matToShow=bestPriority.target.material;
       const detColor=bestPriority.target.color;
       let html=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET FOUND: ${matToShow.name.toUpperCase()}</div>
@@ -1986,15 +2102,14 @@ function renderMaterialResult(allItems,googleData){
       addToHistory(matToShow.name,matToShow.cat,'Target Match');
       return html;
     }
-    // STRICT MODE: nothing matched the targets — say so honestly
+    // STRICT MODE: nothing matched — IGNORE everything else, just say target not in view
     lastDetections=[];
     const targetList=selectedMaterials.map(s=>s.material.name).join(', ');
-    return `<div class="vision-name" style="color:var(--amber)">⚠ TARGETS NOT FOUND</div>
-      <div class="vision-detail">Looking for: <strong>${targetList}</strong><br>None of these matched in this scan.</div>
-      <div class="warning-box" style="border-color:var(--amber);color:var(--amber);margin-top:8px">
-        Google saw: ${allItems.slice(0,3).map(i=>i.name+' '+i.score+'%').join(' · ')}<br><br>
-        ✓ Move closer · ✓ Better lighting · ✓ Plain background<br>
-        Or open ⚙️ ALG and turn OFF strict mode to see general matches.
+    return `<div class="vision-name" style="color:var(--cyan)">🔍 SEARCHING FOR TARGETS...</div>
+      <div class="vision-detail">Looking for: <strong style="color:${selectedMaterials[0].color}">${targetList}</strong><br>Target not currently in view.</div>
+      <div class="warning-box" style="border-color:rgba(0,245,255,.3);color:rgba(0,245,255,.7);margin-top:8px;background:rgba(0,245,255,.05)">
+        📷 Move camera or improve lighting to find target<br>
+        Other objects detected are <strong>ignored</strong> in strict mode.
       </div>`;
   }
 
@@ -2028,13 +2143,57 @@ function renderMaterialResult(allItems,googleData){
 }
 
 function renderMineralResult(allItems){
-  // STRICT TARGET MODE — same logic as material mode
+  // STRICT TARGET MODE — IGNORE everything except selected mineral targets
   if(strictMode&&selectedMaterials.length>0){
     let bestPriority=null;
     let bestScore=0;
+    // Mineral-specific synonyms — minerals often appear as generic terms in Vision
+    const synonymMap={
+      'quartz':['crystal','rock crystal','clear crystal','prism','rough crystal','hexagonal','silicon dioxide','rock'],
+      'pyrite':['fool\'s gold','brassy crystal','golden cube','metallic cube','iron sulfide'],
+      'calcite':['white crystal','clear crystal','rhombohedral'],
+      'fluorite':['purple cube','green cube','colored crystal','cube'],
+      'malachite':['green banded stone','green mineral'],
+      'azurite':['deep blue mineral','blue crystal','blue stone'],
+      'hematite':['black metallic','iron mineral','grey shiny','black mineral'],
+      'magnetite':['black crystal','magnetic mineral','iron oxide'],
+      'obsidian':['volcanic glass','black glass','volcanic rock'],
+      'galena':['lead mineral','silver metallic cube'],
+      'gypsum':['white crystal','selenite','translucent crystal'],
+      'mica':['shiny sheet','flake','laminated crystal'],
+      'amber':['fossilized resin','yellow stone','organic gem'],
+      'pearl':['bead','sphere','organic gem'],
+      'coral':['organic gem','red branched','sea organism'],
+      'sulfur':['yellow crystal','yellow mineral','yellow powder'],
+      'meteorite':['space rock','iron rock','dark heavy rock'],
+      'tektite':['glass meteorite','black glass'],
+      'moldavite':['green tektite','green glass'],
+      'tourmaline':['multicolor crystal','prismatic crystal'],
+      'topaz':['yellow crystal','prismatic gem'],
+      'olivine':['green crystal','peridot','olive green'],
+      'garnet':['red crystal','dark red gem'],
+      'beryl':['hexagonal crystal','emerald','aquamarine'],
+      'feldspar':['white crystal','grey crystal','rock-forming'],
+      'graphite':['black layered','pencil lead','dark grey'],
+      'talc':['white powder','soft mineral'],
+      'serpentine':['green mineral','green stone'],
+      'rhodochrosite':['pink crystal','pink banded'],
+      'siderite':['brown mineral','brown crystal'],
+      'apatite':['hexagonal crystal','blue green crystal'],
+      'turquoise':['blue-green stone','sky blue stone'],
+      'spinel':['octahedron','red crystal'],
+      'zircon':['brilliant crystal','small gem'],
+      'kyanite':['blue blade','blue bladed crystal'],
+      'andalusite':['brown crystal','prismatic crystal'],
+      'epidote':['pistachio green','green crystal'],
+    };
     for(const sel of selectedMaterials){
       const matName=sel.material.name.toLowerCase();
       const matWords=matName.split(/[\s()\-]+/).filter(w=>w.length>2);
+      const synonyms=[];
+      for(const[key,vals]of Object.entries(synonymMap)){
+        if(matName.includes(key)) synonyms.push(...vals);
+      }
       for(const item of allItems){
         const il=item.name.toLowerCase();
         const ilWords=il.split(/[\s()\-]+/).filter(w=>w.length>2);
@@ -2042,13 +2201,44 @@ function renderMineralResult(allItems){
         for(const w of matWords){
           if(ilWords.includes(w)||il.includes(w)) matchScore+=item.score||50;
         }
+        for(const syn of synonyms){
+          if(il.includes(syn)) matchScore+=Math.round((item.score||50)*0.7);
+        }
         if(matchScore>bestScore){
           bestScore=matchScore;
           bestPriority={target:sel,item,matchScore};
         }
       }
     }
-    if(bestPriority&&bestScore>20){
+    if(bestPriority&&bestScore>15){
+      const matToShow=bestPriority.target.material;
+      const detColor=bestPriority.target.color;
+      let html=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET FOUND: ${matToShow.name.toUpperCase()}</div>
+        <div class="vision-detail">Matched via: ${bestPriority.item.name}<br>Confidence: ${bestPriority.item.score}%</div>
+        <div class="vision-ri" style="color:${detColor};border-color:${detColor}">RI = ${matToShow.ri}</div>`;
+      if(bestPriority.item.boundingPoly){
+        updateDetectionCircles(bestPriority.item.boundingPoly,detColor,matToShow.name);
+      } else {
+        let roi={x:canvas.width/2,y:canvas.height/2,radius:120,color:detColor,label:matToShow.name};
+        if(algoSettings.stabilize) roi=algoStabilize(roi);
+        lastDetections=[roi];
+      }
+      html+=buildCompositionDropdown(matToShow);
+      addToHistory(matToShow.name,matToShow.cat,'Target Match');
+      return html;
+    }
+    // STRICT MODE: ignore everything else, just say searching
+    lastDetections=[];
+    const targetList=selectedMaterials.map(s=>s.material.name).join(', ');
+    return `<div class="vision-name" style="color:var(--cyan)">🔍 SEARCHING FOR TARGETS...</div>
+      <div class="vision-detail">Looking for: <strong style="color:${selectedMaterials[0].color}">${targetList}</strong><br>Target not currently in view.</div>
+      <div class="warning-box" style="border-color:rgba(0,245,255,.3);color:rgba(0,245,255,.7);margin-top:8px;background:rgba(0,245,255,.05)">
+        📷 Move camera to find target<br>
+        Other objects (hands, surfaces, background) are <strong>ignored</strong>.
+      </div>`;
+  }
+
+  // NON-STRICT MODE
       const matToShow=bestPriority.target.material;
       const detColor=bestPriority.target.color;
       let html=`<div class="vision-name target" style="color:${detColor}">⭐ TARGET FOUND: ${matToShow.name.toUpperCase()}</div>
@@ -2067,12 +2257,11 @@ function renderMineralResult(allItems){
     }
     lastDetections=[];
     const targetList=selectedMaterials.map(s=>s.material.name).join(', ');
-    return `<div class="vision-name" style="color:var(--amber)">⚠ TARGETS NOT FOUND</div>
-      <div class="vision-detail">Looking for: <strong>${targetList}</strong><br>None of these matched in this scan.</div>
-      <div class="warning-box" style="border-color:var(--amber);color:var(--amber);margin-top:8px">
-        Google saw: ${allItems.slice(0,3).map(i=>i.name+' '+i.score+'%').join(' · ')}<br><br>
-        ✓ Move closer · ✓ Better lighting · ✓ Plain background<br>
-        Or open ⚙️ ALG and turn OFF strict mode to see general matches.
+    return `<div class="vision-name" style="color:var(--cyan)">🔍 SEARCHING FOR TARGETS...</div>
+      <div class="vision-detail">Looking for: <strong style="color:${selectedMaterials[0].color}">${targetList}</strong><br>Target not currently in view.</div>
+      <div class="warning-box" style="border-color:rgba(0,245,255,.3);color:rgba(0,245,255,.7);margin-top:8px;background:rgba(0,245,255,.05)">
+        📷 Move camera to find target<br>
+        Other objects (hands, surfaces, background) are <strong>ignored</strong>.
       </div>`;
   }
 
@@ -2262,11 +2451,62 @@ function toggleAuto(){
   autoMode=!autoMode;
   document.getElementById('btn-auto').classList.toggle('active',autoMode);
   if(autoMode){
+    // AUTO MODE: auto-identify + try to lock focus + adjust zoom if hunting
     identifyNow();
-    autoInterval=setInterval(()=>{if(!isAnalyzing) identifyNow();},3500);
+    autoInterval=setInterval(()=>{
+      if(!isAnalyzing){
+        // Re-trigger autofocus before each scan for sharper images
+        triggerAutoFocus();
+        // Auto-adjust zoom in hunt mode: if no target found, try zooming in
+        if(strictMode&&selectedMaterials.length>0&&zoomCapable){
+          autoZoomSearch();
+        }
+        identifyNow();
+      }
+    },3500);
+    setStatus('AUTO SCAN',true);
   } else {
     if(autoInterval){clearInterval(autoInterval);autoInterval=null;}
+    autoFocusAttempts=0;
     setStatus('READY',false);
+  }
+}
+
+// Refresh autofocus by toggling continuous mode
+async function triggerAutoFocus(){
+  if(!track) return;
+  try{
+    const capabilities=track.getCapabilities?track.getCapabilities():{};
+    const focusModes=capabilities.focusMode||[];
+    if(focusModes.includes('single-shot')){
+      await track.applyConstraints({advanced:[{focusMode:'single-shot'}]});
+      setTimeout(async()=>{
+        try{
+          if(focusModes.includes('continuous')){
+            await track.applyConstraints({advanced:[{focusMode:'continuous'}]});
+          }
+        }catch(e){}
+      },800);
+    }
+  }catch(e){}
+}
+
+// Auto-zoom search: when target not found, gradually zoom in to look closer
+function autoZoomSearch(){
+  if(!zoomCapable) return;
+  // Check the last scan's vision-body for "SEARCHING FOR TARGETS"
+  const vb=document.getElementById('vision-body');
+  if(vb&&vb.innerHTML.includes('SEARCHING FOR TARGETS')){
+    // Target not found — try different zoom levels
+    autoFocusAttempts++;
+    const zoomLevels=[1,1.5,2,2.5,3];
+    const nextZoom=zoomLevels[autoFocusAttempts%zoomLevels.length];
+    if(nextZoom<=maxZoom){
+      setZoom(nextZoom);
+    }
+  } else if(vb&&vb.innerHTML.includes('TARGET FOUND')){
+    // Target found — keep this zoom level
+    autoFocusAttempts=0;
   }
 }
 
@@ -2406,21 +2646,235 @@ document.getElementById('algo-list').addEventListener('click',function(e){
 });
 
 // LIFECYCLE
+// Global zoom state
+let currentZoom=1;
+let maxZoom=1;
+let minZoom=1;
+let zoomStep=0.5;
+let autoFocusEnabled=true;
+let zoomCapable=false;
+
 async function startApp(){
   document.getElementById('splash').classList.add('hidden');
   document.getElementById('scanner').classList.remove('hidden');
   if(stream) return;
   try{
-    stream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}},audio:false});
-    video.srcObject=stream;track=stream.getVideoTracks()[0];
-    try{
-      await track.applyConstraints({advanced:[{torch:true}]});
-      torchOn=true;document.getElementById('btn-torch').classList.add('active');
-    }catch(e){}
-    video.addEventListener('loadedmetadata',()=>{resizeCanvas();requestAnimationFrame(highlightLoop);startTemporalCapture();});
-  }catch(err){setStatus('CAM ERROR',false);}
+    // FIRST: Get permission with any rear camera
+    const initialStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment'},audio:false
+    });
+    initialStream.getTracks().forEach(t=>t.stop());
+    
+    // NOW enumerate all available cameras
+    const devices=await navigator.mediaDevices.enumerateDevices();
+    availableCameras=devices.filter(d=>d.kind==='videoinput');
+    
+    // Identify rear-facing cameras (not selfie)
+    const rearCameras=availableCameras.filter(c=>{
+      const label=c.label.toLowerCase();
+      return !label.includes('front')&&!label.includes('user')&&!label.includes('selfie');
+    });
+    
+    console.log(`Found ${availableCameras.length} cameras total, ${rearCameras.length} rear:`);
+    rearCameras.forEach((c,i)=>console.log(`  ${i}: ${c.label}`));
+    
+    // Use rear cameras if found, otherwise all
+    if(rearCameras.length>0) availableCameras=rearCameras;
+    
+    // Try to detect which is telephoto, ultrawide, main
+    const cameraInfo=availableCameras.map(c=>{
+      const label=c.label.toLowerCase();
+      let type='main',priority=2;
+      if(label.includes('tele')||label.includes('zoom')||label.includes('3x')||label.includes('5x')||label.includes('2x')||label.includes('telephoto')){
+        type='telephoto';priority=3;
+      } else if(label.includes('wide')||label.includes('ultra')||label.includes('0.5')||label.includes('0.6')){
+        type='ultrawide';priority=1;
+      } else if(label.includes('macro')){
+        type='macro';priority=4;
+      } else if(label.includes('back')||label.includes('rear')){
+        type='main';priority=2;
+      }
+      return {device:c,type,priority,label:c.label};
+    });
+    // Sort: main first, then telephoto, then ultrawide, then macro
+    cameraInfo.sort((a,b)=>a.priority-b.priority);
+    availableCameras=cameraInfo.map(ci=>ci.device);
+    
+    // Show camera selector panel
+    if(availableCameras.length>1){
+      buildCameraSelector(cameraInfo);
+      document.getElementById('camera-selector').style.display='flex';
+    }
+    
+    // Start with the main camera (lowest priority that's not ultrawide)
+    const mainIdx=cameraInfo.findIndex(c=>c.type==='main');
+    currentCameraIndex=mainIdx>=0?mainIdx:0;
+    
+    await switchToCamera(currentCameraIndex);
+    
+  }catch(err){
+    setStatus('CAM ERROR',false);
+    console.error('Camera error:',err);
+    alert('Camera permission denied or no camera found. Speculix needs camera access.');
+  }
 }
+
+function buildCameraSelector(cameraInfo){
+  const sel=document.getElementById('camera-selector');
+  if(!sel) return;
+  let html='';
+  cameraInfo.forEach((c,i)=>{
+    const icon=c.type==='telephoto'?'🔭':c.type==='ultrawide'?'🌐':c.type==='macro'?'🔬':'📷';
+    const label=c.type==='telephoto'?'TELE':c.type==='ultrawide'?'WIDE':c.type==='macro'?'MACRO':'MAIN';
+    html+=`<button data-cam="${i}" class="cam-btn" onclick="switchToCamera(${i})" style="padding:5px 8px;border:1.5px solid var(--cyan);background:rgba(0,245,255,.08);color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:.6rem;cursor:pointer;border-radius:2px;letter-spacing:.05em;margin:0 2px">${icon} ${label}</button>`;
+  });
+  sel.innerHTML=html;
+  highlightActiveCamera();
+}
+
+function highlightActiveCamera(){
+  document.querySelectorAll('.cam-btn').forEach((b,i)=>{
+    if(i===currentCameraIndex){
+      b.style.background='rgba(0,245,255,.3)';
+      b.style.borderColor='var(--green)';
+      b.style.color='var(--green)';
+    } else {
+      b.style.background='rgba(0,245,255,.08)';
+      b.style.borderColor='var(--cyan)';
+      b.style.color='var(--cyan)';
+    }
+  });
+}
+
+async function switchToCamera(index){
+  if(index<0||index>=availableCameras.length) return;
+  // Stop current stream
+  if(stream){stream.getTracks().forEach(t=>t.stop());}
+  currentCameraIndex=index;
+  highlightActiveCamera();
+  
+  try{
+    const cam=availableCameras[index];
+    stream=await navigator.mediaDevices.getUserMedia({
+      video:{
+        deviceId:{exact:cam.deviceId},
+        width:{ideal:1920},
+        height:{ideal:1080},
+        advanced:[
+          {focusMode:'continuous'},
+          {focusMode:'continuous-video'}
+        ]
+      },
+      audio:false
+    });
+    video.srcObject=stream;
+    track=stream.getVideoTracks()[0];
+    
+    const capabilities=track.getCapabilities?track.getCapabilities():{};
+    console.log('Active camera:',cam.label);
+    console.log('Capabilities:',capabilities);
+    
+    // ZOOM setup
+    if(capabilities.zoom){
+      zoomCapable=true;
+      minZoom=capabilities.zoom.min||1;
+      maxZoom=capabilities.zoom.max||3;
+      zoomStep=capabilities.zoom.step||0.1;
+      currentZoom=minZoom;
+      const zoomPanel=document.getElementById('zoom-panel');
+      if(zoomPanel) zoomPanel.style.display='flex';
+      const zs=document.getElementById('zoom-slider');
+      if(zs){
+        zs.min=minZoom;
+        zs.max=maxZoom;
+        zs.step=zoomStep;
+        zs.value=currentZoom;
+      }
+      // Show zoom range
+      const zmax=document.getElementById('zoom-max');
+      if(zmax) zmax.textContent=maxZoom.toFixed(1)+'x';
+    } else {
+      zoomCapable=false;
+      const zoomPanel=document.getElementById('zoom-panel');
+      if(zoomPanel) zoomPanel.style.display='none';
+    }
+    
+    // Apply continuous autofocus
+    try{
+      const focusModes=capabilities.focusMode||[];
+      if(focusModes.includes('continuous')){
+        await track.applyConstraints({advanced:[{focusMode:'continuous'}]});
+      } else if(focusModes.includes('continuous-video')){
+        await track.applyConstraints({advanced:[{focusMode:'continuous-video'}]});
+      }
+    }catch(e){}
+    
+    // Auto-enable torch
+    try{
+      await track.applyConstraints({advanced:[{torch:torchOn}]});
+      if(torchOn) document.getElementById('btn-torch').classList.add('active');
+    }catch(e){}
+    
+    if(!video.onloadedmetadata){
+      video.addEventListener('loadedmetadata',()=>{
+        resizeCanvas();
+        requestAnimationFrame(highlightLoop);
+        startTemporalCapture();
+      });
+    }
+  }catch(err){
+    console.error('Camera switch failed:',err);
+    setStatus('CAM SWITCH FAIL',false);
+  }
+}
+
+// Zoom controls
+async function setZoom(newZoom){
+  if(!zoomCapable||!track) return;
+  newZoom=Math.max(minZoom,Math.min(maxZoom,newZoom));
+  currentZoom=newZoom;
+  try{
+    await track.applyConstraints({advanced:[{zoom:newZoom}]});
+    const zd=document.getElementById('zoom-display');
+    if(zd) zd.textContent=newZoom.toFixed(1)+'x';
+    const zs=document.getElementById('zoom-slider');
+    if(zs) zs.value=newZoom;
+  }catch(e){console.log('Zoom error:',e);}
+}
+
+function zoomIn(){setZoom(currentZoom+zoomStep*2);}
+function zoomOut(){setZoom(currentZoom-zoomStep*2);}
+function zoomReset(){setZoom(minZoom);}
+function zoomPreset(level){
+  if(level==='max') setZoom(maxZoom);
+  else setZoom(level);
+}
+
+// Tap-to-focus — when user taps screen, focus on that point
+async function focusAtPoint(x,y){
+  if(!track) return;
+  const capabilities=track.getCapabilities?track.getCapabilities():{};
+  try{
+    // Try single-shot focus first (more accurate)
+    if(capabilities.focusMode&&capabilities.focusMode.includes('single-shot')){
+      await track.applyConstraints({advanced:[{focusMode:'single-shot'}]});
+      setTimeout(async()=>{
+        try{await track.applyConstraints({advanced:[{focusMode:'continuous'}]});}catch(e){}
+      },1500);
+    }
+    // Show focus indicator visually
+    showFocusIndicator(x,y);
+  }catch(e){console.log('Focus point error:',e);}
+}
+
+function showFocusIndicator(x,y){
+  // Visual feedback — yellow square that pulses then fades
+  const ind=document.createElement('div');
+  ind.style.cssText=`position:fixed;left:${x-40}px;top:${y-40}px;width:80px;height:80px;border:2px solid #ffd700;pointer-events:none;z-index:30;animation:focusPulse 1s ease-out forwards;box-shadow:0 0 20px #ffd700`;
+  document.body.appendChild(ind);
+  setTimeout(()=>ind.remove(),1000);
+}
+
 async function toggleTorch(){
   if(!track) return;
   torchOn=!torchOn;
@@ -2434,8 +2888,50 @@ function updateSensitivity(el){
   document.getElementById('sens-val').textContent=sensitivity;
   el.style.setProperty('--pct',((sensitivity-1)/9*100).toFixed(1)+'%');
 }
-canvas.addEventListener('click',identifyNow);
-hCanvas.addEventListener('click',identifyNow);
+canvas.addEventListener('click',e=>{
+  // Tap focuses on that point — double tap to identify
+  const now=Date.now();
+  if(window._lastTap&&now-window._lastTap<300){
+    identifyNow();
+  } else {
+    const rect=canvas.getBoundingClientRect();
+    const x=e.clientX-rect.left;
+    const y=e.clientY-rect.top;
+    focusAtPoint(e.clientX,e.clientY);
+  }
+  window._lastTap=now;
+});
+hCanvas.addEventListener('click',e=>{
+  const now=Date.now();
+  if(window._lastTap&&now-window._lastTap<300){
+    identifyNow();
+  } else {
+    focusAtPoint(e.clientX,e.clientY);
+  }
+  window._lastTap=now;
+});
+
+// Pinch-to-zoom for touch devices
+let pinchInitialDist=0;
+let pinchInitialZoom=1;
+canvas.addEventListener('touchstart',e=>{
+  if(e.touches.length===2){
+    const dx=e.touches[0].clientX-e.touches[1].clientX;
+    const dy=e.touches[0].clientY-e.touches[1].clientY;
+    pinchInitialDist=Math.sqrt(dx*dx+dy*dy);
+    pinchInitialZoom=currentZoom;
+  }
+});
+canvas.addEventListener('touchmove',e=>{
+  if(e.touches.length===2&&zoomCapable){
+    e.preventDefault();
+    const dx=e.touches[0].clientX-e.touches[1].clientX;
+    const dy=e.touches[0].clientY-e.touches[1].clientY;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const scale=dist/pinchInitialDist;
+    setZoom(pinchInitialZoom*scale);
+  }
+});
 
 // DB PANEL
 function showDB(){document.getElementById('db-panel').classList.add('show');buildCats();renderDB();updateLegend();}
