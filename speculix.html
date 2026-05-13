@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v10.2 LITE</title>
+<title>SPECULIX v10.3</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
@@ -279,13 +279,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <!-- STABILITY INDICATOR — bottom left of camera view, real-time motion feedback -->
   <div id="stability-indicator" style="position:absolute;bottom:200px;left:10px;z-index:21;display:none;font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 8px;border:1.5px solid;backdrop-filter:blur(4px);border-radius:2px;letter-spacing:.08em;font-weight:700">⚠ MOTION</div>
   
-  <!-- COMPACT ZOOM CONTROL — small floating button bottom-right -->
-  <div id="zoom-panel" style="position:absolute;right:8px;bottom:200px;z-index:22;display:none;flex-direction:row;align-items:center;gap:4px;background:rgba(0,0,0,.75);border:1.5px solid var(--cyan);padding:4px 8px;border-radius:18px;backdrop-filter:blur(6px)">
-    <button onclick="zoomOut()" style="width:28px;height:28px;border:1px solid var(--cyan);background:rgba(0,245,255,.1);color:var(--cyan);font-size:1.1rem;font-weight:700;border-radius:50%;cursor:pointer;padding:0;line-height:1">−</button>
-    <span id="zoom-display" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--cyan);font-weight:700;min-width:38px;text-align:center">1.0x</span>
-    <button onclick="zoomIn()" style="width:28px;height:28px;border:1px solid var(--cyan);background:rgba(0,245,255,.1);color:var(--cyan);font-size:1.1rem;font-weight:700;border-radius:50%;cursor:pointer;padding:0;line-height:1">+</button>
-    <button onclick="zoomReset()" style="width:28px;height:24px;border:1px solid rgba(0,245,255,.4);background:transparent;color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:.55rem;cursor:pointer;padding:0;letter-spacing:.05em;border-radius:2px;margin-left:2px">1x</button>
-  </div>
+  <!-- Zoom UI removed — will be added in future native app -->
+  <span id="zoom-panel" style="display:none"></span>
+  <span id="zoom-display" style="display:none"></span>
   <span id="zoom-slider" style="display:none"></span>
   <span id="zoom-max" style="display:none"></span>
   <div id="vision-panel">
@@ -305,8 +301,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
         Ignores everything except your chosen items<br><br>
         <strong style="color:var(--amber)">📷 CAMERA CONTROLS:</strong><br>
         • <strong>Tap header</strong> ▼ → collapse/expand panel<br>
-        • <strong>Double-tap camera</strong> → identify<br>
-        • <strong>Pinch with 2 fingers</strong> → zoom in/out<br><br>
+        • <strong>Double-tap camera</strong> → identify<br><br>
         Tap <strong style="color:var(--cyan)">📊 DB</strong> for targets · <strong style="color:var(--purple)">🔬 IDENTIFY</strong> to scan
       </div>
     </div>
@@ -2729,29 +2724,8 @@ async function switchToCamera(index){
     console.log('Capabilities:',capabilities);
     
     // ZOOM setup
-    if(capabilities.zoom){
-      zoomCapable=true;
-      minZoom=capabilities.zoom.min||1;
-      maxZoom=capabilities.zoom.max||3;
-      zoomStep=capabilities.zoom.step||0.1;
-      currentZoom=minZoom;
-      const zoomPanel=document.getElementById('zoom-panel');
-      if(zoomPanel) zoomPanel.style.display='flex';
-      const zs=document.getElementById('zoom-slider');
-      if(zs){
-        zs.min=minZoom;
-        zs.max=maxZoom;
-        zs.step=zoomStep;
-        zs.value=currentZoom;
-      }
-      // Show zoom range
-      const zmax=document.getElementById('zoom-max');
-      if(zmax) zmax.textContent=maxZoom.toFixed(1)+'x';
-    } else {
-      zoomCapable=false;
-      const zoomPanel=document.getElementById('zoom-panel');
-      if(zoomPanel) zoomPanel.style.display='none';
-    }
+    // Zoom intentionally disabled — will be re-added in native app version
+    zoomCapable=false;
     
     // Apply continuous autofocus
     try{
@@ -2782,27 +2756,12 @@ async function switchToCamera(index){
   }
 }
 
-// Zoom controls
-async function setZoom(newZoom){
-  if(!zoomCapable||!track) return;
-  newZoom=Math.max(minZoom,Math.min(maxZoom,newZoom));
-  currentZoom=newZoom;
-  try{
-    await track.applyConstraints({advanced:[{zoom:newZoom}]});
-    const zd=document.getElementById('zoom-display');
-    if(zd) zd.textContent=newZoom.toFixed(1)+'x';
-    const zs=document.getElementById('zoom-slider');
-    if(zs) zs.value=newZoom;
-  }catch(e){console.log('Zoom error:',e);}
-}
-
-function zoomIn(){setZoom(currentZoom+zoomStep*2);}
-function zoomOut(){setZoom(currentZoom-zoomStep*2);}
-function zoomReset(){setZoom(minZoom);}
-function zoomPreset(level){
-  if(level==='max') setZoom(maxZoom);
-  else setZoom(level);
-}
+// Zoom controls — DISABLED in web version, will be in native app
+async function setZoom(){return;}
+function zoomIn(){return;}
+function zoomOut(){return;}
+function zoomReset(){return;}
+function zoomPreset(){return;}
 
 // Tap-to-focus — when user taps screen, focus on that point
 async function focusAtPoint(x,y){
@@ -2865,27 +2824,7 @@ hCanvas.addEventListener('click',e=>{
   window._lastTap=now;
 });
 
-// Pinch-to-zoom for touch devices
-let pinchInitialDist=0;
-let pinchInitialZoom=1;
-canvas.addEventListener('touchstart',e=>{
-  if(e.touches.length===2){
-    const dx=e.touches[0].clientX-e.touches[1].clientX;
-    const dy=e.touches[0].clientY-e.touches[1].clientY;
-    pinchInitialDist=Math.sqrt(dx*dx+dy*dy);
-    pinchInitialZoom=currentZoom;
-  }
-});
-canvas.addEventListener('touchmove',e=>{
-  if(e.touches.length===2&&zoomCapable){
-    e.preventDefault();
-    const dx=e.touches[0].clientX-e.touches[1].clientX;
-    const dy=e.touches[0].clientY-e.touches[1].clientY;
-    const dist=Math.sqrt(dx*dx+dy*dy);
-    const scale=dist/pinchInitialDist;
-    setZoom(pinchInitialZoom*scale);
-  }
-});
+// Pinch-to-zoom removed — will be in native app
 
 // DB PANEL
 function showDB(){document.getElementById('db-panel').classList.add('show');buildCats();renderDB();updateLegend();}
