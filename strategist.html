@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPECULIX STRATEGIST</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
+:root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
+  --purple:#cc00ff;--gold:#ffd700;--orange:#ff6b00;
+  --glass:rgba(0,245,255,0.08);--border:rgba(0,245,255,0.25);--bg:#000507}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
+  height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+.header{padding:env(safe-area-inset-top,10px) 14px 10px;border-bottom:1.5px solid var(--purple);
+  background:linear-gradient(135deg,rgba(204,0,255,.1),transparent);flex-shrink:0}
+.title{font-size:1.4rem;font-weight:700;letter-spacing:.25em;
+  background:linear-gradient(90deg,var(--cyan),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{font-family:'Share Tech Mono',monospace;font-size:.62rem;
+  color:rgba(0,245,255,.5);letter-spacing:.1em;margin-top:2px}
+.status-bar{display:flex;justify-content:space-between;align-items:center;
+  font-family:'Share Tech Mono',monospace;font-size:.6rem;
+  color:rgba(0,255,136,.7);margin-top:5px;letter-spacing:.08em}
+#chat{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+#chat::-webkit-scrollbar{width:3px}
+#chat::-webkit-scrollbar-thumb{background:var(--border)}
+.msg{padding:10px 13px;max-width:90%;font-size:.85rem;line-height:1.5;
+  border:1.5px solid;border-radius:2px;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)}
+.msg.bot{align-self:flex-start;color:#fff;border-color:var(--purple);
+  background:rgba(204,0,255,.05)}
+.msg.bot::before{content:'🤖 STRATEGIST';display:block;font-family:'Share Tech Mono',monospace;
+  font-size:.55rem;color:var(--purple);letter-spacing:.15em;margin-bottom:5px;font-weight:700}
+.msg.user{align-self:flex-end;color:#fff;border-color:var(--cyan);
+  background:rgba(0,245,255,.05);text-align:left}
+.msg.user::before{content:'YOU';display:block;font-family:'Share Tech Mono',monospace;
+  font-size:.55rem;color:var(--cyan);letter-spacing:.15em;margin-bottom:5px;font-weight:700}
+.msg.system{align-self:center;color:var(--amber);border-color:var(--amber);
+  background:rgba(255,179,0,.05);font-family:'Share Tech Mono',monospace;font-size:.7rem;text-align:center}
+.msg strong{color:var(--gold)}
+.msg em{color:var(--green);font-style:normal}
+.quick-replies{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.quick-btn{padding:6px 10px;border:1.5px solid var(--cyan);background:rgba(0,245,255,.08);
+  color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:.65rem;
+  cursor:pointer;border-radius:2px;letter-spacing:.05em;font-weight:600;text-align:left;
+  clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);transition:all .15s}
+.quick-btn:active{background:rgba(0,245,255,.2);transform:scale(.97)}
+.thinking{display:flex;gap:5px;padding:8px;align-self:flex-start}
+.thinking div{width:6px;height:6px;background:var(--purple);border-radius:50%;
+  animation:thinkPulse 1s infinite;opacity:0.6}
+.thinking div:nth-child(2){animation-delay:.2s}
+.thinking div:nth-child(3){animation-delay:.4s}
+@keyframes thinkPulse{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1.2)}}
+.input-area{padding:10px 14px env(safe-area-inset-bottom,12px);border-top:1.5px solid var(--border);
+  background:rgba(0,0,0,.5);flex-shrink:0;display:flex;gap:8px}
+#input{flex:1;background:rgba(0,245,255,.05);border:1.5px solid var(--border);color:#fff;
+  font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:10px 14px;outline:none;
+  border-radius:2px;letter-spacing:.02em}
+#input::placeholder{color:rgba(0,245,255,.3)}
+#send-btn{padding:10px 20px;border:1.5px solid var(--purple);background:rgba(204,0,255,.1);
+  color:var(--purple);font-family:'Rajdhani',sans-serif;font-size:.95rem;font-weight:700;
+  cursor:pointer;letter-spacing:.1em;border-radius:2px;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)}
+#send-btn:active{background:rgba(204,0,255,.3)}
+#send-btn:disabled{opacity:.4;cursor:not-allowed}
+.tool-bar{display:flex;gap:5px;padding:5px 14px;background:rgba(0,5,7,.7);
+  border-bottom:1px solid rgba(0,245,255,.1);overflow-x:auto}
+.tool-bar::-webkit-scrollbar{display:none}
+.tool-btn{padding:4px 10px;border:1px solid var(--border);background:transparent;
+  color:rgba(0,245,255,.6);font-family:'Share Tech Mono',monospace;font-size:.55rem;
+  cursor:pointer;letter-spacing:.08em;border-radius:1px;white-space:nowrap;flex-shrink:0}
+.tool-btn:active{background:rgba(0,245,255,.1)}
+.context-display{display:none;padding:10px 14px;background:rgba(0,5,7,.95);
+  border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;
+  font-size:.6rem;color:rgba(0,245,255,.7);line-height:1.6;max-height:40vh;overflow-y:auto}
+.context-display.show{display:block}
+.context-display h3{color:var(--purple);font-size:.7rem;letter-spacing:.15em;margin-bottom:6px}
+.context-display ul{padding-left:14px;margin:3px 0}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="title">SPECULIX STRATEGIST</div>
+  <div class="subtitle">Your AI Thinking Partner · Phase 1 Focus</div>
+  <div class="status-bar">
+    <span id="status">● ONLINE · v1.0</span>
+    <span id="message-count">0 messages</span>
+  </div>
+</div>
+
+<div class="tool-bar">
+  <button class="tool-btn" onclick="showContext()">📋 STATUS</button>
+  <button class="tool-btn" onclick="askQuestion('What should I work on next?')">🎯 NEXT MOVE</button>
+  <button class="tool-btn" onclick="askQuestion('I am stuck — help me think')">🤔 STUCK</button>
+  <button class="tool-btn" onclick="askQuestion('Review my progress honestly')">📊 REVIEW</button>
+  <button class="tool-btn" onclick="askQuestion('Be brutally honest with me about Speculix')">⚠️ REALITY</button>
+  <button class="tool-btn" onclick="resetChat()">🔄 RESET</button>
+</div>
+
+<div class="context-display" id="context-display"></div>
+
+<div id="chat"></div>
+
+<div class="input-area">
+  <input type="file" id="image-upload" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+  <button id="upload-btn" onclick="document.getElementById('image-upload').click()" style="padding:10px 12px;border:1.5px solid var(--green);background:rgba(0,255,136,.1);color:var(--green);font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;cursor:pointer;border-radius:2px;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)" title="Upload screenshot">📷</button>
+  <input type="text" id="input" placeholder="Type or upload screenshot..." autocomplete="off">
+  <button id="send-btn" onclick="sendMessage()">SEND</button>
+</div>
+
+<!-- Image preview before send -->
+<div id="image-preview-bar" style="display:none;padding:6px 14px;background:rgba(0,255,136,.08);border-top:1px solid var(--green);font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green)">
+  <span>📷 Screenshot attached</span>
+  <button onclick="clearImage()" style="float:right;background:transparent;border:1px solid var(--red);color:var(--red);font-family:'Share Tech Mono',monospace;font-size:.55rem;padding:2px 6px;cursor:pointer;border-radius:1px">✕ REMOVE</button>
+  <img id="preview-thumb" style="display:block;max-width:120px;max-height:90px;margin-top:4px;border:1px solid var(--green)">
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// SPECULIX STRATEGIST — Pre-loaded with Jack's full Speculix context
+// ═══════════════════════════════════════════════════════════════════════
+
+const CLAUDE_API_KEY='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'; // Placeholder — replace with Claude API key
+const CLAUDE_API_URL='https://api.anthropic.com/v1/messages';
+const CLAUDE_MODEL='claude-opus-4-7'; // Most powerful model for strategy
+
+// ═══════════════════════════════════════════════════════════════════════
+// FULL PROJECT CONTEXT — the Strategist knows EVERYTHING
+// ═══════════════════════════════════════════════════════════════════════
+const PROJECT_CONTEXT=`
+You are the SPECULIX STRATEGIST — Jack Lan's AI thinking partner for his invention project.
+
+## ABOUT JACK
+- Location: Israel
+- Background: Jewelry designer (genuine competitive advantage in wearable tech)
+- Phone: Xiaomi 15T Pro (Dimensity 9400+, 50MP main, 50MP telephoto, 12MP ultrawide, Color Spectrum Sensor)
+- Currently a beginner inventor — needs structure, not options overload
+- Has commercial instincts — prefers proving demand before investing
+- Likes iterative growth, profit-reinvestment, lean approach
+- Prefers being asked clarifying questions over assumptions
+- Owns: INVENTAI (his platform for inventing) + Speculix (this product)
+
+## SPECULIX — WHAT IT IS
+A smartphone-based universal material/object identification web app.
+Origin: Find broken glass shards (parent safety) + lost gemstones (jewelry recovery)
+Vision: A real-world Star Trek tricorder
+Current form: HTML+CSS+JavaScript single file
+Live URL: https://jacklan69.github.io/speculix/speculix.html
+GitHub: github.com/JackLan69/speculix
+Current version: v10.3
+
+## WHAT WORKS NOW (v10.3)
+✓ 7 scan modes: Materials, Minerals, Chemicals, Biology, Currency, Medication, Spectrum
+✓ Hunt Mode (strict target matching with synonyms)
+✓ Discovery Mode (general scanning)
+✓ Real-time hazard detection (red circles on broken glass — pure math, no AI)
+✓ Multi-camera switching (MAIN/TELE/WIDE if phone exposes them)
+✓ Multi-AI consensus: Google Vision + iNaturalist + PubChem + Wikidata + Temporal
+✓ Gemology analysis: luster, dispersion, transparency, faceting
+✓ Spectrum mode: manual peak entry, 37 gem signatures
+✓ Continuous autofocus + tap-to-focus
+✓ Stability indicator (warns of motion)
+✓ Collapsible result panel
+✓ 195+ items in databases
+✓ Currency authentication checklists (NIS/USD/EUR)
+✓ Medication counterfeit warnings (incl. fentanyl alerts)
+
+## WHAT'S BROKEN OR LIMITED
+✗ DINO-X API integration (HTTP 400 — needs server-side proxy, currently disabled)
+✗ Roboflow integration (HTTP 403 — Jack hasn't created the project yet)
+✗ Rough crystal identification (Google Vision returns generic terms like "amber", "stone")
+✗ Long-range detection (works ~10cm-50cm only)
+✗ Refractive index measurement (impossible without refractometer hardware)
+✗ Manual zoom/pinch (caused lag, removed in v10.3)
+✗ Real-time auto-zoom (couldn't keep up with movement, removed)
+✗ Cannot use Xiaomi's Color Spectrum Sensor (browser limitation)
+✗ Cannot use the AI chip / NPU (browser limitation)
+
+## CURRENT PHASE (LOCKED)
+Phase 1 — Close-range scanner (10cm to 50cm)
+DO NOT let Jack drift into Phase 2/3 features without finishing Phase 1.
+
+## PHASE 1 GOAL
+Make Speculix automatically find Jack's selected target without him fighting with the camera for 10+ minutes.
+Current pain point: User selects target, points camera, gets "searching for target" forever.
+
+## NEXT PHASES (DO NOT BUILD YET)
+- Phase 2 ($5-15K): Native Android app, multi-camera orchestration, NPU access
+- Phase 3 ($50-500K): Hardware tricorder with optical zoom, LiDAR, spectrometer
+
+## VERSION HISTORY (BRIEF)
+- v6: Materials database with full data
+- v7: Currency + medication modes
+- v8: 9 algorithms added (pre/post-processing)
+- v8.5: Multi-AI (Google + DINO-X + Roboflow)
+- v9.0: Mineral mode (70 minerals)
+- v9.1: Optimized for accuracy, algos OFF by default
+- v9.2: Stricter matching (no more "silver" false matches)
+- v9.3: HAZARD DETECTION (real-time glass finder — patent worthy)
+- v9.4: iNaturalist + PubChem + Wikidata added
+- v9.5: Spectrum mode (manual peak entry)
+- v9.6: Strict Target Mode (only finds what user selects)
+- v9.7: Gemology analysis (luster, dispersion, transparency, faceting)
+- v9.8: Hunt Mode with semantic synonyms
+- v9.9: Zoom + tap-to-focus (had bugs)
+- v10.0: Multi-camera + auto-zoom (laggy, caused blur)
+- v10.1: Topaz synonyms expanded, threshold lowered
+- v10.2: Removed lag, simplified
+- v10.3 (CURRENT): All zoom removed, pure simplicity
+
+## PATENT POSITION
+Closest patents: WO2014036460A2, US20230228690, US6239867B1, US6950024B2, US11176383B2
+Speculix's unique angle: Smartphone + LED torch + multi-AI orchestration + RI database + real-time hazard detection
+Multi-AI consensus + hazard detection = NO competitor has this combination
+Recommended: File provisional patent (~$320 USPTO self-filed) NOW based on what works
+
+## COMPETITORS RESEARCHED
+- GoyaLab GoSpectro: €500, smartphone spectroscope, closest competitor
+- Ahura FirstDefender: $5K-15K, professional Raman
+- Rock Identifier app: $30/yr, visual AI only (same limitations as Speculix)
+- Gemstone Identifier: visual only, no spectroscopy
+Speculix gap: Free + multi-mode + multi-AI + hazard detection — NO ONE has this combo
+
+## SUGGESTED ACTIONS PENDING
+1. Create Roboflow project named 'speculix' (FREE, 10 min) — activates HTTP 403 fix
+2. File provisional patent at USPTO (~$320 self-filed)
+3. Document Speculix in INVENTAI with timestamped scan evidence
+4. Consider buying Spectryx Blue spectrometer ($199) when ready
+
+## STRATEGIST RULES (HOW YOU MUST BEHAVE)
+1. ALWAYS push Jack to test before building. Don't add features on broken foundations.
+2. ALWAYS ask questions before proposing solutions. Understanding > Speed.
+3. ALWAYS recommend ONE next action, not 5 options. Decision fatigue is real.
+4. LOCK Jack into Phase 1 (close-range scanner). Refuse to design for Phase 3 until Phase 1 works.
+5. Be BRUTALLY HONEST. If something won't work, say so. Don't sugarcoat.
+6. Remind Jack of his jewelry designer advantage when relevant.
+7. Don't overpromise — be honest about web browser limitations.
+8. Track decisions. Reference past choices to keep him consistent.
+9. If Jack tries to skip steps (e.g., building Phase 3 features), STOP him and force focus.
+10. Speak in clear Israeli-friendly English. Plain words. Direct truth.
+11. Use occasional emojis for warmth but stay professional.
+12. Be CONCISE — short responses unless deep thinking is needed.
+13. End most responses with ONE specific question or action item.
+14. NEVER recommend more than 3 things at once.
+15. CELEBRATE wins. When Jack ships something, acknowledge it.
+
+## YOUR JOB
+Be the voice Jack needs. The grounded reality check. The "wait, did you test that first?" friend.
+Be the senior engineer he never had. The product manager keeping scope tight.
+The honest mentor who says "this isn't ready yet" or "ship it now."
+`;
+
+let conversationHistory=[];
+let messageCount=0;
+let pendingImage=null; // Holds base64 image data ready to send
+
+// ═══════════════════════════════════════════════════════════════════════
+// IMAGE UPLOAD HANDLING
+// ═══════════════════════════════════════════════════════════════════════
+function handleImageUpload(event){
+  const file=event.target.files[0];
+  if(!file) return;
+  // Resize and convert to base64 to keep things fast
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      // Resize if too large (max 1500px on longest side)
+      const maxDim=1500;
+      let w=img.width,h=img.height;
+      if(w>maxDim||h>maxDim){
+        if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}
+        else{w=Math.round(w*maxDim/h);h=maxDim;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      const base64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];
+      pendingImage={
+        data:base64,
+        mediaType:'image/jpeg',
+        thumbnail:canvas.toDataURL('image/jpeg',0.5)
+      };
+      // Show preview
+      const bar=document.getElementById('image-preview-bar');
+      const thumb=document.getElementById('preview-thumb');
+      thumb.src=pendingImage.thumbnail;
+      bar.style.display='block';
+      // Auto-fill input if empty
+      const inp=document.getElementById('input');
+      if(!inp.value.trim()){
+        inp.value='What does this Speculix screenshot tell you? What should I do?';
+      }
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value=''; // reset so same file can be uploaded again
+}
+
+function clearImage(){
+  pendingImage=null;
+  document.getElementById('image-preview-bar').style.display='none';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// UI / CHAT MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════════
+function addMessage(role,content,isHTML=false){
+  const chat=document.getElementById('chat');
+  const msg=document.createElement('div');
+  msg.className='msg '+role;
+  if(isHTML) msg.innerHTML=content;
+  else msg.textContent=content;
+  chat.appendChild(msg);
+  chat.scrollTop=chat.scrollHeight;
+  
+  if(role!=='system'){
+    messageCount++;
+    document.getElementById('message-count').textContent=messageCount+' messages';
+  }
+}
+
+function addQuickReplies(replies){
+  const chat=document.getElementById('chat');
+  const container=document.createElement('div');
+  container.className='quick-replies';
+  container.style.alignSelf='flex-start';
+  container.style.maxWidth='90%';
+  replies.forEach(r=>{
+    const btn=document.createElement('button');
+    btn.className='quick-btn';
+    btn.textContent=r;
+    btn.onclick=()=>{
+      container.remove();
+      document.getElementById('input').value=r;
+      sendMessage();
+    };
+    container.appendChild(btn);
+  });
+  chat.appendChild(container);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function showThinking(){
+  const chat=document.getElementById('chat');
+  const t=document.createElement('div');
+  t.className='thinking';
+  t.id='thinking-indicator';
+  t.innerHTML='<div></div><div></div><div></div>';
+  chat.appendChild(t);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function hideThinking(){
+  const t=document.getElementById('thinking-indicator');
+  if(t) t.remove();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CLAUDE API CALL
+// ═══════════════════════════════════════════════════════════════════════
+async function callClaude(userMessage,imageData){
+  // Build content — text only, or text + image
+  let userContent;
+  if(imageData){
+    userContent=[
+      {type:'image',source:{type:'base64',media_type:imageData.mediaType,data:imageData.data}},
+      {type:'text',text:userMessage||'What do you see in this screenshot? What should I do next?'}
+    ];
+  } else {
+    userContent=userMessage;
+  }
+  
+  conversationHistory.push({role:'user',content:userContent});
+  showThinking();
+  
+  try{
+    const response=await fetch(CLAUDE_API_URL,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':CLAUDE_API_KEY,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:CLAUDE_MODEL,
+        max_tokens:800,
+        system:PROJECT_CONTEXT,
+        messages:conversationHistory
+      })
+    });
+    
+    hideThinking();
+    
+    if(!response.ok){
+      const errText=await response.text();
+      addMessage('system','⚠ API Error '+response.status+': '+errText.substring(0,200)+'\n\nFIX: Edit strategist.html and replace CLAUDE_API_KEY with your real Claude API key from console.anthropic.com');
+      return;
+    }
+    
+    const data=await response.json();
+    const reply=data.content[0].text;
+    conversationHistory.push({role:'assistant',content:reply});
+    addMessage('bot',reply);
+    
+    // Auto-extract suggested replies if Claude offers options
+    extractQuickReplies(reply);
+    
+  }catch(err){
+    hideThinking();
+    addMessage('system','⚠ Connection error: '+err.message+'\n\nMake sure your Claude API key is set in strategist.html');
+  }
+}
+
+function extractQuickReplies(text){
+  // Look for numbered options like "1. ..." or "A) ..." in Claude's response
+  const patterns=[
+    /^[A-D]\)\s*([^\n]{5,80})/gm,
+    /^[1-5]\.\s*([^\n]{5,80})/gm,
+    /^[1-5]\)\s*([^\n]{5,80})/gm
+  ];
+  const found=[];
+  for(const p of patterns){
+    let m;
+    while((m=p.exec(text))!==null&&found.length<4){
+      const r=m[1].trim().replace(/[*_`]/g,'');
+      if(r.length<80&&!found.includes(r)) found.push(r);
+    }
+    if(found.length>=2) break;
+  }
+  if(found.length>=2){
+    addQuickReplies(found);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MESSAGE SENDING
+// ═══════════════════════════════════════════════════════════════════════
+async function sendMessage(){
+  const input=document.getElementById('input');
+  const msg=input.value.trim();
+  if(!msg&&!pendingImage) return;
+  
+  input.value='';
+  
+  // Show user message in chat
+  if(pendingImage){
+    // Show image thumbnail + text
+    const html=`<img src="${pendingImage.thumbnail}" style="max-width:160px;max-height:120px;display:block;margin-bottom:6px;border:1px solid var(--cyan)"><div>${msg||'(image attached)'}</div>`;
+    addMessage('user',html,true);
+    const imgToSend=pendingImage;
+    clearImage();
+    await callClaude(msg,imgToSend);
+  } else {
+    addMessage('user',msg);
+    await callClaude(msg);
+  }
+}
+
+function askQuestion(q){
+  document.getElementById('input').value=q;
+  sendMessage();
+}
+
+document.getElementById('input').addEventListener('keypress',e=>{
+  if(e.key==='Enter') sendMessage();
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// CONTEXT VIEWER (shows what Strategist knows)
+// ═══════════════════════════════════════════════════════════════════════
+function showContext(){
+  const cd=document.getElementById('context-display');
+  if(cd.classList.contains('show')){
+    cd.classList.remove('show');
+    return;
+  }
+  cd.innerHTML=`
+<h3>📋 CURRENT SPECULIX STATUS</h3>
+<strong>Version:</strong> v10.3<br>
+<strong>Phase:</strong> 1 (Close-range scanner, 10cm-50cm)<br>
+<strong>Stack:</strong> HTML + CSS + JavaScript (single file)<br>
+<strong>Hosted:</strong> GitHub Pages<br><br>
+<strong>WORKING:</strong>
+<ul>
+<li>7 scan modes (MAT, MIN, CHEM, BIO, CUR, MED, SPEC)</li>
+<li>Hunt mode + Discovery mode</li>
+<li>Hazard detection (real-time glass)</li>
+<li>Multi-AI: Google + iNaturalist + PubChem + Wikidata + Temporal</li>
+<li>Gemology math analysis</li>
+<li>Spectrum mode (manual peak entry)</li>
+<li>Collapsible result panel</li>
+</ul>
+<strong>BROKEN/PENDING:</strong>
+<ul>
+<li>DINO-X (needs server proxy)</li>
+<li>Roboflow (need to create project)</li>
+<li>Rough crystal ID (Google limitation)</li>
+<li>Auto-target finding (your current pain point)</li>
+</ul>
+<strong>NEXT ACTIONS PENDING:</strong>
+<ul>
+<li>Create Roboflow 'speculix' project (FREE, 10 min)</li>
+<li>File provisional patent (~$320 USPTO)</li>
+<li>Document scans in INVENTAI</li>
+</ul>
+`;
+  cd.classList.add('show');
+}
+
+function resetChat(){
+  if(!confirm('Reset conversation? Your message history will be cleared.')) return;
+  conversationHistory=[];
+  messageCount=0;
+  document.getElementById('chat').innerHTML='';
+  document.getElementById('message-count').textContent='0 messages';
+  startConversation();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// INITIAL GREETING — proactive Strategist opening
+// ═══════════════════════════════════════════════════════════════════════
+function startConversation(){
+  addMessage('system','● STRATEGIST INITIALIZED · Phase 1 locked');
+  
+  const greeting=`Welcome back, Jack. 
+
+I have your full Speculix history loaded — v10.3, all 7 modes, what works and what doesn't.
+
+📷 **NEW**: Tap the green camera button to upload a Speculix screenshot. I'll analyze what's on screen and tell you what to do — no typing needed.
+
+**Your stated pain point right now:**
+You spend 10+ minutes fighting with the camera to get a good reading. Target detection at 10cm-50cm should be automatic — but it's not.
+
+Before I propose anything, let me understand the real problem:`;
+  
+  addMessage('bot',greeting);
+  
+  setTimeout(()=>{
+    addQuickReplies([
+      'The camera is blurry / wont focus',
+      'It finds the target but says wrong name',
+      'It says "searching" even when target is clearly in view',
+      'Help me think through this'
+    ]);
+  },500);
+}
+
+// Start when page loads
+startConversation();
+</script>
+</body>
+</html>
