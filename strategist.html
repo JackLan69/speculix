@@ -11,7 +11,7 @@
   --glass:rgba(0,245,255,0.08);--border:rgba(0,245,255,0.25);--bg:#000507}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
-  height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+  height:100dvh;overflow:hidden}
 .header{padding:env(safe-area-inset-top,10px) 14px 10px;border-bottom:1.5px solid var(--purple);
   background:linear-gradient(135deg,rgba(204,0,255,.1),transparent);flex-shrink:0}
 .title{font-size:1.4rem;font-weight:700;letter-spacing:.25em;
@@ -81,11 +81,40 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
 </head>
 <body>
 
+<!-- ═══ API KEY ENTRY SCREEN — shown first time, key saved in browser only ═══ -->
+<div id="key-screen" style="display:none;flex-direction:column;align-items:center;justify-content:center;height:100dvh;padding:24px;text-align:center">
+  <div style="font-size:1.6rem;font-weight:700;letter-spacing:.2em;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px">SPECULIX STRATEGIST</div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(0,245,255,.5);letter-spacing:.1em;margin-bottom:30px">SECURE SETUP · KEY STAYS ON YOUR DEVICE</div>
+  
+  <div style="max-width:420px;border:1.5px solid var(--purple);background:rgba(204,0,255,.05);padding:20px;border-radius:4px">
+    <div style="color:#fff;font-size:.95rem;line-height:1.6;margin-bottom:16px">
+      🔑 Enter your <strong style="color:var(--gold)">Claude API key</strong> to activate the Strategist.
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:rgba(0,255,136,.7);line-height:1.6;margin-bottom:18px;text-align:left;background:rgba(0,255,136,.05);padding:10px;border:1px solid rgba(0,255,136,.2);border-radius:2px">
+      ✓ Your key is saved ONLY in this browser<br>
+      ✓ It NEVER goes to GitHub or anyone else<br>
+      ✓ Get a key at: console.anthropic.com<br>
+      ✓ Key starts with "sk-ant-..."
+    </div>
+    <input type="password" id="key-input" placeholder="sk-ant-api03-..." autocomplete="off"
+      style="width:100%;background:rgba(0,245,255,.05);border:1.5px solid var(--border);color:#fff;font-family:'Share Tech Mono',monospace;font-size:.8rem;padding:12px;outline:none;border-radius:2px;margin-bottom:6px;box-sizing:border-box">
+    <div id="key-error" style="color:var(--red);font-size:.7rem;font-family:'Share Tech Mono',monospace;min-height:18px;margin-bottom:10px"></div>
+    <button onclick="saveApiKey()" 
+      style="width:100%;padding:13px;border:1.5px solid var(--purple);background:rgba(204,0,255,.15);color:var(--purple);font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;letter-spacing:.12em;border-radius:2px;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%)">🚀 ACTIVATE STRATEGIST</button>
+  </div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:rgba(0,245,255,.3);margin-top:20px;max-width:380px;line-height:1.5">
+    First time? Go to console.anthropic.com → API Keys → Create Key → paste it above. You have credits already loaded.
+  </div>
+</div>
+
+<!-- ═══ MAIN APP — shown after key entered ═══ -->
+<div id="main-app" style="display:none;flex-direction:column;height:100dvh;width:100%">
+
 <div class="header">
   <div class="title">SPECULIX STRATEGIST</div>
   <div class="subtitle">Your AI Thinking Partner · Phase 1 Focus</div>
   <div class="status-bar">
-    <span id="status">● ONLINE · v1.0</span>
+    <span id="status">● ONLINE · v1.2</span>
     <span id="message-count">0 messages</span>
   </div>
 </div>
@@ -97,6 +126,7 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
   <button class="tool-btn" onclick="askQuestion('Review my progress honestly')">📊 REVIEW</button>
   <button class="tool-btn" onclick="askQuestion('Be brutally honest with me about Speculix')">⚠️ REALITY</button>
   <button class="tool-btn" onclick="resetChat()">🔄 RESET</button>
+  <button class="tool-btn" onclick="changeApiKey()" style="border-color:rgba(255,61,61,.4);color:rgba(255,61,61,.7)">🔑 KEY</button>
 </div>
 
 <div class="context-display" id="context-display"></div>
@@ -117,14 +147,52 @@ body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--cyan);
   <img id="preview-thumb" style="display:block;max-width:120px;max-height:90px;margin-top:4px;border:1px solid var(--green)">
 </div>
 
+</div><!-- end main-app -->
+
 <script>
 // ═══════════════════════════════════════════════════════════════════════
 // SPECULIX STRATEGIST — Pre-loaded with Jack's full Speculix context
 // ═══════════════════════════════════════════════════════════════════════
 
-const CLAUDE_API_KEY='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'; // Placeholder — replace with Claude API key
+// API key is stored in YOUR browser only (localStorage) — never on GitHub
+let CLAUDE_API_KEY=localStorage.getItem('speculix_claude_key')||'';
 const CLAUDE_API_URL='https://api.anthropic.com/v1/messages';
 const CLAUDE_MODEL='claude-opus-4-7'; // Most powerful model for strategy
+
+// Save the key the user enters
+function saveApiKey(){
+  const input=document.getElementById('key-input');
+  const key=input.value.trim();
+  if(!key.startsWith('sk-ant-')){
+    document.getElementById('key-error').textContent='⚠ Key should start with "sk-ant-". Check and try again.';
+    return;
+  }
+  localStorage.setItem('speculix_claude_key',key);
+  CLAUDE_API_KEY=key;
+  document.getElementById('key-screen').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  startConversation();
+}
+
+// Let user change/clear their key
+function changeApiKey(){
+  if(!confirm('Clear your saved API key from this browser?')) return;
+  localStorage.removeItem('speculix_claude_key');
+  CLAUDE_API_KEY='';
+  location.reload();
+}
+
+// On load — show key entry if no key saved, else show app
+window.addEventListener('DOMContentLoaded',()=>{
+  if(CLAUDE_API_KEY){
+    document.getElementById('key-screen').style.display='none';
+    document.getElementById('main-app').style.display='flex';
+    startConversation();
+  } else {
+    document.getElementById('key-screen').style.display='flex';
+    document.getElementById('main-app').style.display='none';
+  }
+});
 
 // ═══════════════════════════════════════════════════════════════════════
 // FULL PROJECT CONTEXT — the Strategist knows EVERYTHING
@@ -551,8 +619,8 @@ Before I propose anything, let me understand the real problem:`;
   },500);
 }
 
-// Start when page loads
-startConversation();
+// Note: startConversation() is called by DOMContentLoaded handler / saveApiKey()
+// after the API key is confirmed — not here.
 </script>
 </body>
 </html>
