@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>SPECULIX v10.3</title>
+<title>SPECULIX v11.0 DEEP</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{--cyan:#00f5ff;--green:#00ff88;--amber:#ffb300;--red:#ff3d3d;
@@ -280,10 +280,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div id="stability-indicator" style="position:absolute;bottom:200px;left:10px;z-index:21;display:none;font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:4px 8px;border:1.5px solid;backdrop-filter:blur(4px);border-radius:2px;letter-spacing:.08em;font-weight:700">⚠ MOTION</div>
   
   <!-- Zoom UI removed — will be added in future native app -->
-  <span id="zoom-panel" style="display:none"></span>
-  <span id="zoom-display" style="display:none"></span>
-  <span id="zoom-slider" style="display:none"></span>
-  <span id="zoom-max" style="display:none"></span>
   <div id="vision-panel">
     <div class="vision-header" onclick="togglePanel()" style="cursor:pointer">
       <span class="vision-title">📡 <span id="vision-main-result">MULTI-AI ANALYSIS</span></span>
@@ -315,6 +311,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       <button class="mode-btn" id="mode-currency" onclick="setMode('currency')">💵 CUR</button>
       <button class="mode-btn" id="mode-medication" onclick="setMode('medication')">💊 MED</button>
       <button class="mode-btn" id="mode-spectrum" onclick="setMode('spectrum')">🔬 SPEC</button>
+      <button class="mode-btn" id="mode-deepscan" onclick="setMode('deepscan')" style="border-color:var(--gold);color:var(--gold)">🧠 DEEP</button>
     </div>
     <div class="controls-row">
       <span class="ctrl-label">HIGHLIGHT</span>
@@ -900,9 +897,6 @@ function findMedicationFromLabel(label){
 let stream=null,track=null;
 let availableCameras=[];
 let currentCameraIndex=0;
-let autoModeEnabled=false;
-let autoIdentifyInterval=null;
-let autoFocusAttempts=0;
 let torchOn=false,autoMode=false;
 let sensitivity=5,scanCount=0;
 let isAnalyzing=false,autoInterval=null;
@@ -1257,6 +1251,266 @@ function algoStabilize(roi){
 // GEMOLOGICAL ANALYSIS MODULE — 5 measurable properties from camera
 // Pure math, no AI — provides objective evidence to support Vision results
 // ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
+// MATERIAL ONTOLOGY ENGINE — "Deep Scan" mode
+// 4 layers: Visual Decoder → Property Translator → Ontology Query → Expert Correction
+// Rule-based reasoning, NOT statistics. Expert corrections override everything.
+// ═══════════════════════════════════════════════════════════════════════
+
+// ─── LAYER 3 DATA: Local materials property ontology ───
+// Each material defined by PROPERTIES, not images. Layer 2 rules match against these.
+const ONTOLOGY=[
+  // METALS
+  {name:'Gold',cat:'Metal',reflect:'metallic',texture:'smooth',light:'reflects',tone:'gold',transparency:'opaque',hardness:'2.5-3',density:'19.3',notes:'Native metal, malleable, does not tarnish'},
+  {name:'Silver',cat:'Metal',reflect:'metallic',texture:'smooth',light:'reflects',tone:'white',transparency:'opaque',hardness:'2.5-3',density:'10.5',notes:'Native metal, tarnishes to black'},
+  {name:'Platinum',cat:'Metal',reflect:'metallic',texture:'smooth',light:'reflects',tone:'white',transparency:'opaque',hardness:'4-4.5',density:'21.4',notes:'Dense precious metal, does not tarnish'},
+  {name:'Copper',cat:'Metal',reflect:'metallic',texture:'smooth',light:'reflects',tone:'orange',transparency:'opaque',hardness:'2.5-3',density:'8.96',notes:'Reddish native metal, patinas green'},
+  {name:'Pyrite',cat:'Mineral',reflect:'metallic',texture:'crystalline',light:'reflects',tone:'gold',transparency:'opaque',hardness:'6-6.5',density:'5.0',notes:'Fool\'s gold, brassy cubic crystals'},
+  // CRYSTALS / GEMS — transparent
+  {name:'Diamond',cat:'Gem',reflect:'adamantine',texture:'crystalline',light:'refracts',tone:'colorless',transparency:'transparent',hardness:'10',density:'3.52',notes:'Highest hardness, extreme dispersion (fire)'},
+  {name:'Quartz',cat:'Mineral',reflect:'vitreous',texture:'crystalline',light:'refracts',tone:'colorless',transparency:'transparent',hardness:'7',density:'2.65',notes:'Hexagonal crystal, very common'},
+  {name:'Amethyst',cat:'Gem',reflect:'vitreous',texture:'crystalline',light:'refracts',tone:'purple',transparency:'transparent',hardness:'7',density:'2.65',notes:'Purple variety of quartz'},
+  {name:'Citrine',cat:'Gem',reflect:'vitreous',texture:'crystalline',light:'refracts',tone:'yellow',transparency:'transparent',hardness:'7',density:'2.65',notes:'Yellow-orange quartz'},
+  {name:'Topaz',cat:'Gem',reflect:'vitreous',texture:'crystalline',light:'refracts',tone:'yellow',transparency:'transparent',hardness:'8',density:'3.5',notes:'Prismatic crystals, often yellow/orange/blue'},
+  {name:'Ruby',cat:'Gem',reflect:'vitreous',texture:'crystalline',light:'refracts',tone:'red',transparency:'transparent',hardness:'9',density:'4.0',notes:'Red corundum, often with silk inclusions'},
+  {name:'Sapphire',cat:'Gem',reflect:'vitreous',texture:'crystalline',light:'refracts',tone:'blue',transparency:'transparent',hardness:'9',density:'4.0',notes:'Corundum, blue most common, all colors exist'},
+  {name:'Emerald',cat:'Gem',reflect:'vitreous',texture:'crystalline',light:'refracts',tone:'green',transparency:'transparent',hardness:'7.5-8',density:'2.76',notes:'Green beryl, usually included (jardin)'},
+  {name:'Aquamarine',cat:'Gem',reflect:'vitreous',texture:'crystalline',light:'refracts',tone:'blue',transparency:'transparent',hardness:'7.5-8',density:'2.7',notes:'Light blue beryl, usually clean'},
+  {name:'Garnet',cat:'Gem',reflect:'vitreous',texture:'crystalline',light:'refracts',tone:'red',transparency:'transparent',hardness:'6.5-7.5',density:'3.9',notes:'Often deep red, dodecahedral crystals'},
+  {name:'Glass',cat:'Synthetic',reflect:'vitreous',texture:'smooth',light:'refracts',tone:'colorless',transparency:'transparent',hardness:'5.5',density:'2.5',notes:'Amorphous, often has gas bubbles, conchoidal fracture'},
+  {name:'Cubic Zirconia',cat:'Synthetic',reflect:'adamantine',texture:'crystalline',light:'refracts',tone:'colorless',transparency:'transparent',hardness:'8.5',density:'5.7',notes:'Diamond simulant, denser than diamond, more dispersion'},
+  // OPAQUE STONES / MINERALS
+  {name:'Jade',cat:'Gem',reflect:'waxy',texture:'granular',light:'scatters',tone:'green',transparency:'translucent',hardness:'6-7',density:'3.3',notes:'Tough, waxy luster, green most prized'},
+  {name:'Turquoise',cat:'Gem',reflect:'waxy',texture:'granular',light:'absorbs',tone:'blue',transparency:'opaque',hardness:'5-6',density:'2.8',notes:'Blue-green, often with matrix veining'},
+  {name:'Malachite',cat:'Mineral',reflect:'dull',texture:'granular',light:'absorbs',tone:'green',transparency:'opaque',hardness:'3.5-4',density:'4.0',notes:'Banded green copper mineral'},
+  {name:'Hematite',cat:'Mineral',reflect:'metallic',texture:'smooth',light:'reflects',tone:'black',transparency:'opaque',hardness:'5.5-6.5',density:'5.3',notes:'Iron oxide, metallic to dull, red streak'},
+  {name:'Obsidian',cat:'Mineral',reflect:'vitreous',texture:'smooth',light:'absorbs',tone:'black',transparency:'opaque',hardness:'5-5.5',density:'2.4',notes:'Volcanic glass, conchoidal fracture'},
+  {name:'Opal',cat:'Gem',reflect:'vitreous',texture:'smooth',light:'scatters',tone:'multi',transparency:'translucent',hardness:'5.5-6.5',density:'2.1',notes:'Play-of-color, amorphous silica'},
+  {name:'Pearl',cat:'Organic',reflect:'pearly',texture:'smooth',light:'scatters',tone:'white',transparency:'opaque',hardness:'2.5-4',density:'2.7',notes:'Organic, nacre layers, iridescent'},
+  {name:'Amber',cat:'Organic',reflect:'resinous',texture:'smooth',light:'refracts',tone:'yellow',transparency:'transparent',hardness:'2-2.5',density:'1.08',notes:'Fossil resin, very light, warm to touch'},
+  // ENGINEERING / EVERYDAY
+  {name:'Plastic',cat:'Synthetic',reflect:'waxy',texture:'smooth',light:'scatters',tone:'any',transparency:'translucent',hardness:'1-3',density:'1.2',notes:'Polymer, light, often molded seams'},
+  {name:'Ceramic',cat:'Synthetic',reflect:'matte',texture:'smooth',light:'absorbs',tone:'white',transparency:'opaque',hardness:'6-8',density:'2.4',notes:'Fired clay, glazed surface common'},
+  {name:'Wood',cat:'Organic',reflect:'matte',texture:'fibrous',light:'absorbs',tone:'brown',transparency:'opaque',hardness:'1-4',density:'0.7',notes:'Organic fiber, visible grain'},
+  {name:'Stainless Steel',cat:'Metal',reflect:'metallic',texture:'smooth',light:'reflects',tone:'white',transparency:'opaque',hardness:'5-6',density:'7.9',notes:'Iron alloy, corrosion resistant'},
+];
+
+// ─── LAYER 1: VISUAL DECODER ───
+// Extract objective visual signals from the camera image (pure measurement)
+function visualDecoder(){
+  const g=analyzeGemology(); // reuse existing luster/dispersion/transparency/faceting
+  if(!g) return null;
+  // Sample color tone from center region
+  const tc=document.createElement('canvas');
+  const sw=Math.min(320,canvas.width),sh=Math.floor(canvas.height*(sw/canvas.width));
+  tc.width=sw;tc.height=sh;
+  const tctx=tc.getContext('2d');
+  tctx.drawImage(canvas,0,0,sw,sh);
+  const cx=Math.floor(sw/2),cy=Math.floor(sh/2),r=Math.floor(Math.min(sw,sh)/4);
+  const d=tctx.getImageData(cx-r,cy-r,r*2,r*2).data;
+  let R=0,G=0,B=0,n=0;
+  for(let i=0;i<d.length;i+=4){R+=d[i];G+=d[i+1];B+=d[i+2];n++;}
+  R=Math.round(R/n);G=Math.round(G/n);B=Math.round(B/n);
+  // Tone classification
+  const max=Math.max(R,G,B),min=Math.min(R,G,B);
+  const sat=max>0?(max-min)/max:0;
+  let tone='colorless';
+  if(sat<0.12){
+    if(max>200) tone='white';
+    else if(max<60) tone='black';
+    else tone='colorless';
+  } else {
+    if(R>G&&R>B){tone=(G>B+30)?'orange':'red';}
+    else if(G>R&&G>B) tone='green';
+    else if(B>R&&B>G) tone='blue';
+    if(R>180&&G>140&&B<120) tone='gold';
+    if(R>150&&G>110&&B<90&&max<200) tone='yellow';
+    if(R>120&&G<90&&B>120) tone='purple';
+    if(R>110&&G>70&&B<70&&max<170) tone='brown';
+  }
+  // Reflectivity from luster score
+  let reflect='matte';
+  const ls=g.luster.score;
+  if(ls>40) reflect='adamantine';
+  else if(ls>25) reflect='metallic';
+  else if(ls>15) reflect='vitreous';
+  else if(ls>8) reflect='waxy';
+  else reflect='matte';
+  // Texture from faceting/edge density
+  let texture='smooth';
+  if(g.faceting.count>30) texture='crystalline';
+  else if(g.faceting.shape.includes('rough')) texture='granular';
+  else if(g.statistics.edgeDensity>8) texture='crystalline';
+  else texture='smooth';
+  // Light interaction
+  let light='absorbs';
+  if(g.transparency.score>60) light='refracts';
+  else if(g.transparency.score>35) light='scatters';
+  else if(reflect==='metallic'||reflect==='adamantine') light='reflects';
+  else light='absorbs';
+  // Transparency label
+  let transparency='opaque';
+  if(g.transparency.score>70) transparency='transparent';
+  else if(g.transparency.score>40) transparency='translucent';
+  else transparency='opaque';
+  return {tone,reflect,texture,light,transparency,rgb:{R,G,B},
+    dispersion:g.dispersion.score,luster:ls,raw:g};
+}
+
+// ─── LAYER 2: PROPERTY TRANSLATOR ───
+// Hard rules only. Convert signals into candidate property profiles. NO voting.
+function propertyTranslator(signals){
+  const flags=[];
+  if(signals.reflect==='metallic'&&['white','gold','orange','black'].includes(signals.tone)) flags.push('METALLIC_CANDIDATE');
+  if(signals.light==='refracts'&&signals.transparency==='transparent') flags.push('CRYSTAL_OR_GLASS_CANDIDATE');
+  if(signals.texture==='granular'&&['brown','green','blue'].includes(signals.tone)) flags.push('MINERAL_OR_STONE_CANDIDATE');
+  if(signals.reflect==='adamantine'&&signals.dispersion>40) flags.push('HIGH_FIRE_CANDIDATE');
+  if(signals.reflect==='waxy'&&signals.transparency!=='transparent') flags.push('ORGANIC_OR_SOFT_CANDIDATE');
+  if(signals.texture==='crystalline'&&signals.transparency==='transparent') flags.push('FACETED_CRYSTAL_CANDIDATE');
+  if(signals.reflect==='matte'&&signals.texture==='fibrous') flags.push('ORGANIC_FIBER_CANDIDATE');
+  return flags;
+}
+
+// ─── LAYER 3: ONTOLOGY QUERY ENGINE ───
+// Match translated properties against the materials database. Facts only.
+function ontologyQuery(signals){
+  const results=[];
+  for(const mat of ONTOLOGY){
+    let score=0,matched=[];
+    // Property-by-property comparison (each worth points)
+    if(mat.reflect===signals.reflect){score+=25;matched.push('luster: '+mat.reflect);}
+    if(mat.transparency===signals.transparency){score+=25;matched.push('transparency: '+mat.transparency);}
+    if(mat.light===signals.light){score+=20;matched.push('light: '+mat.light);}
+    if(mat.texture===signals.texture){score+=15;matched.push('texture: '+mat.texture);}
+    if(mat.tone===signals.tone){score+=15;matched.push('color: '+mat.tone);}
+    else if(mat.tone==='any'||mat.tone==='multi'){score+=5;}
+    if(score>0) results.push({mat,score,matched});
+  }
+  results.sort((a,b)=>b.score-a.score);
+  return results.slice(0,3);
+}
+
+// ─── LAYER 4: EXPERT CORRECTION ENGINE ───
+// User corrections stored locally. Checked FIRST before ontology. Expert overrides stats.
+function getCaseLibrary(){
+  try{return JSON.parse(localStorage.getItem('speculix_cases')||'[]');}catch(e){return [];}
+}
+function saveCaseLibrary(cases){
+  try{localStorage.setItem('speculix_cases',JSON.stringify(cases));}catch(e){}
+}
+function checkCaseLibrary(signals){
+  const cases=getCaseLibrary();
+  let best=null,bestScore=0;
+  for(const c of cases){
+    let score=0;
+    if(c.signals.reflect===signals.reflect) score+=25;
+    if(c.signals.transparency===signals.transparency) score+=25;
+    if(c.signals.light===signals.light) score+=20;
+    if(c.signals.texture===signals.texture) score+=15;
+    if(c.signals.tone===signals.tone) score+=15;
+    if(score>bestScore){bestScore=score;best=c;}
+  }
+  // Strong match against an expert-corrected case
+  if(best&&bestScore>=70) return {correct:best.correct,score:bestScore,expert:true};
+  return null;
+}
+function recordCorrection(wrongAnswer,correctAnswer,signals){
+  const cases=getCaseLibrary();
+  cases.push({wrong:wrongAnswer,correct:correctAnswer,signals,date:new Date().toISOString()});
+  saveCaseLibrary(cases);
+}
+
+// ─── DEEP SCAN ORCHESTRATOR ───
+function runDeepScan(){
+  const signals=visualDecoder();
+  if(!signals){
+    document.getElementById('vision-body').innerHTML='<div class="vision-error">Point camera at a material and try again</div>';
+    return;
+  }
+  const flags=propertyTranslator(signals);
+  // LAYER 4 FIRST — expert case library overrides everything
+  const expertHit=checkCaseLibrary(signals);
+  let html='';
+  if(expertHit){
+    html+=`<div class="vision-name target" style="color:var(--gold)">⭐ ${expertHit.correct.toUpperCase()}</div>
+      <div class="vision-detail" style="color:var(--green)">✓ Matched YOUR expert correction (${expertHit.score}% property match)<br>This overrides database defaults.</div>`;
+    const matInfo=ONTOLOGY.find(m=>m.name.toLowerCase()===expertHit.correct.toLowerCase());
+    if(matInfo) html+=buildOntologyProfile(matInfo);
+    setMainResult('⭐ '+expertHit.correct,'#ffd700');
+  } else {
+    const matches=ontologyQuery(signals);
+    if(matches.length===0){
+      html+='<div class="vision-error">No property match found</div>';
+    } else {
+      const top=matches[0];
+      setMainResult('🧠 '+top.mat.name,'#ffd700');
+      html+=`<div class="vision-name" style="color:var(--gold)">🧠 ${top.mat.name.toUpperCase()}</div>
+        <div class="vision-detail">${top.mat.cat} · ${top.score}% property match</div>`;
+      // Show key matching properties
+      html+=`<div class="ai-block"><span class="ai-tag" style="color:var(--gold);border:1px solid var(--gold)">🔑 KEY PROPERTIES</span>
+        <div class="ai-block-content">${top.matched.join('<br>')}</div></div>`;
+      // Full profile
+      html+=buildOntologyProfile(top.mat);
+      // Other candidates
+      if(matches.length>1){
+        html+='<div class="ai-block"><span class="ai-tag" style="color:var(--cyan);border:1px solid var(--cyan)">⚖ OTHER CANDIDATES</span><div class="ai-block-content">';
+        matches.slice(1).forEach((m,i)=>{html+=`${i+2}. ${m.mat.name} — ${m.score}%<br>`;});
+        html+='</div></div>';
+      }
+    }
+  }
+  // Layer 1 signals display
+  html+=`<div class="ai-block"><span class="ai-tag" style="color:#00f5ff;border:1px solid #00f5ff">👁 VISUAL SIGNALS</span>
+    <div class="ai-block-content" style="font-size:.6rem;line-height:1.6">
+    Tone: ${signals.tone} · Luster: ${signals.reflect}<br>
+    Texture: ${signals.texture} · Light: ${signals.light}<br>
+    Transparency: ${signals.transparency} · Fire: ${signals.dispersion}/100<br>
+    Flags: ${flags.length?flags.join(', '):'none'}</div></div>`;
+  // Layer 4 correction button
+  html+=`<div style="margin-top:10px">
+    <button onclick="openCorrectionUI()" style="width:100%;padding:10px;border:1.5px solid var(--amber);background:rgba(255,179,0,.1);color:var(--amber);font-family:'Share Tech Mono',monospace;font-size:.7rem;cursor:pointer;border-radius:2px;letter-spacing:.05em;font-weight:700">✏️ WRONG? TEACH SPECULIX THE CORRECT ANSWER</button>
+  </div>`;
+  // Store last signals for correction
+  window._lastDeepSignals=signals;
+  window._lastDeepAnswer=expertHit?expertHit.correct:(ontologyQuery(signals)[0]?.mat.name||'Unknown');
+  document.getElementById('vision-body').innerHTML=html;
+  const caseCount=getCaseLibrary().length;
+  const algoStatus=document.createElement('div');
+  document.getElementById('vision-body').innerHTML+=`<div class="algo-status">🧠 DEEP SCAN · ${caseCount} expert corrections learned</div>`;
+}
+
+function buildOntologyProfile(mat){
+  return `<div class="ai-block"><span class="ai-tag" style="color:var(--purple);border:1px solid var(--purple)">📖 MATERIAL PROFILE</span>
+    <div class="ai-block-content" style="line-height:1.7">
+    <strong style="color:#fff">${mat.name}</strong> (${mat.cat})<br>
+    Hardness (Mohs): ${mat.hardness}<br>
+    Density: ${mat.density} g/cm³<br>
+    Luster: ${mat.reflect}<br>
+    Transparency: ${mat.transparency}<br>
+    <span style="color:rgba(255,255,255,.6)">${mat.notes}</span></div></div>`;
+}
+
+// Correction UI — Layer 4 expert teaching
+function openCorrectionUI(){
+  const allNames=ONTOLOGY.map(m=>m.name).sort();
+  const options=allNames.map(n=>`<option value="${n}">${n}</option>`).join('');
+  const html=`<div style="padding:12px;border:1.5px solid var(--amber);background:rgba(255,179,0,.05);border-radius:4px;margin-top:10px">
+    <div style="color:var(--amber);font-family:'Share Tech Mono',monospace;font-size:.7rem;margin-bottom:8px;font-weight:700">✏️ EXPERT CORRECTION</div>
+    <div style="color:#fff;font-size:.8rem;margin-bottom:8px">Speculix said: <strong>${window._lastDeepAnswer}</strong><br>What is the correct material?</div>
+    <select id="correction-select" style="width:100%;padding:8px;background:rgba(0,0,0,.5);color:#fff;border:1.5px solid var(--amber);font-family:'Share Tech Mono',monospace;font-size:.75rem;margin-bottom:8px;border-radius:2px">${options}</select>
+    <button onclick="submitCorrection()" style="width:100%;padding:9px;border:1.5px solid var(--green);background:rgba(0,255,136,.1);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.7rem;cursor:pointer;border-radius:2px;font-weight:700">💾 SAVE — SPECULIX LEARNS THIS</button>
+  </div>`;
+  document.getElementById('vision-body').innerHTML+=html;
+}
+function submitCorrection(){
+  const correct=document.getElementById('correction-select').value;
+  recordCorrection(window._lastDeepAnswer,correct,window._lastDeepSignals);
+  const count=getCaseLibrary().length;
+  document.getElementById('vision-body').innerHTML=`<div class="vision-name target" style="color:var(--green)">✓ LEARNED: ${correct.toUpperCase()}</div>
+    <div class="vision-detail">Speculix now remembers this visual signature.<br>Future scans check YOUR ${count} corrections first.<br><br>This is YOUR expert knowledge overriding statistics.</div>`;
+  setMainResult('✓ Learned: '+correct,'#00ff88');
+}
+
 function analyzeGemology(){
   if(canvas.width===0) return null;
   // Use full-resolution canvas for analysis
@@ -1765,6 +2019,24 @@ async function identifyNow(){
   scanCount++;
   document.getElementById('scan-count').textContent=`${scanCount} SCAN${scanCount!==1?'S':''}`;
   const body=document.getElementById('vision-body');
+  
+  // DEEP SCAN MODE — pure local Material Ontology Engine, no cloud AI
+  if(currentMode==='deepscan'){
+    body.innerHTML='<div class="vision-loading">🧠 RUNNING ONTOLOGY ENGINE...</div>';
+    try{
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      runDeepScan();
+      // Expand panel so user sees the full result
+      const p=document.getElementById('vision-panel');
+      if(p&&p.classList.contains('collapsed')) p.classList.remove('collapsed');
+    }catch(e){
+      body.innerHTML='<div class="vision-error">Deep scan error: '+e.message+'</div>';
+    }
+    isAnalyzing=false;
+    setStatus('READY',false);
+    return;
+  }
+  
   body.innerHTML='<div class="vision-loading">📡 ENGAGING AI ENGINES...</div>';
   
   try{
@@ -2476,6 +2748,10 @@ function setMode(mode){
     hint='🔬 SPECTRUM MODE<br>Tap below to open spectrum analyzer';
     setTimeout(()=>{document.getElementById('spectrum-panel').style.display='flex';},200);
   }
+  if(mode==='deepscan'){
+    const caseCount=getCaseLibrary().length;
+    hint=`🧠 DEEP SCAN MODE<br>Material Ontology Engine — rule-based reasoning<br><br>Reads visual properties (luster, transparency, texture, light, color) and matches against a materials database.<br><br>✏️ Correct wrong answers → Speculix learns permanently<br><br><strong style="color:var(--gold)">${caseCount} expert corrections learned</strong><br><br>Point at a material · tap 🔬 IDENTIFY`;
+  }
   body.innerHTML=`<div class="vision-idle">${hint}</div>`;
 }
 
@@ -2595,13 +2871,6 @@ document.getElementById('algo-list').addEventListener('click',function(e){
 });
 
 // LIFECYCLE
-// Global zoom state
-let currentZoom=1;
-let maxZoom=1;
-let minZoom=1;
-let zoomStep=0.5;
-let autoFocusEnabled=true;
-let zoomCapable=false;
 
 async function startApp(){
   document.getElementById('splash').classList.add('hidden');
@@ -2723,10 +2992,6 @@ async function switchToCamera(index){
     console.log('Active camera:',cam.label);
     console.log('Capabilities:',capabilities);
     
-    // ZOOM setup
-    // Zoom intentionally disabled — will be re-added in native app version
-    zoomCapable=false;
-    
     // Apply continuous autofocus
     try{
       const focusModes=capabilities.focusMode||[];
@@ -2755,13 +3020,6 @@ async function switchToCamera(index){
     setStatus('CAM SWITCH FAIL',false);
   }
 }
-
-// Zoom controls — DISABLED in web version, will be in native app
-async function setZoom(){return;}
-function zoomIn(){return;}
-function zoomOut(){return;}
-function zoomReset(){return;}
-function zoomPreset(){return;}
 
 // Tap-to-focus — when user taps screen, focus on that point
 async function focusAtPoint(x,y){
